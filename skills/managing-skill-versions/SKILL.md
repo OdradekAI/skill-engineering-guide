@@ -1,13 +1,13 @@
 ---
 name: managing-skill-versions
-description: "Use when version drift is detected across skill project manifests, bumping versions in a skill project, setting up version sync infrastructure, auditing for stale version strings, before releasing a skill project, or after adding a new platform manifest to a skill project"
+description: "Use when version drift is detected across skill-project manifests, bumping versions in a skill-project, setting up version sync infrastructure, auditing for stale version strings, before releasing a skill-project, or after adding a new platform manifest to a skill-project"
 ---
 
 # Managing Skill Versions
 
 ## Overview
 
-All platform manifests in a skill project contain version strings that must stay synchronized. A single version drift can cause install failures or stale caches. This skill manages the infrastructure that keeps versions in sync.
+All platform manifests in a skill-project contain version strings that must stay synchronized. A single version drift can cause install failures or stale caches. This skill manages the infrastructure that keeps versions in sync.
 
 **Core principle:** One source of truth, automated enforcement. Manual version bumping across 5+ files is error-prone — tooling prevents it.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive audit for skill projects.
+Comprehensive audit for skill-projects.
 
 Orchestrates scan-security.py and lint-skills.py, then runs additional
 structural, version-sync, hook, and documentation checks to produce a
@@ -303,7 +303,7 @@ def run_audit(project_root):
 
 def format_markdown(results, project_name):
     out = [
-        f"## Skill Project Audit: {project_name}\n",
+        f"## Skill-Project Audit: {project_name}\n",
         f"### Overall Score: {results['overall_score']}/10\n",
     ]
 
@@ -371,9 +371,9 @@ def _json_safe(obj):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Comprehensive audit for skill projects.")
+    parser = argparse.ArgumentParser(description="Comprehensive audit for skill-projects.")
     parser.add_argument("project_root", nargs="?", default=".",
-                        help="Skill project root (default: current directory)")
+                        help="Skill-Project root (default: current directory)")
     parser.add_argument("--json", action="store_true", help="Output JSON instead of markdown")
     args = parser.parse_args()
 

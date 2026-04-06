@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a skill project engineering toolkit (`seg`) supporting 6 platforms: Claude Code, Cursor, Codex, OpenCode, Copilot CLI, and Gemini CLI. It contains 10 skills covering the full lifecycle of skill project development.
+This is a skill-project engineering toolkit (`seg`) supporting 6 platforms: Claude Code, Cursor, Codex, OpenCode, Copilot CLI, and Gemini CLI. It contains 10 skills covering the full lifecycle of skill-project development.
 
 ## Development Workflow
 

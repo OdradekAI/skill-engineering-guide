@@ -1,13 +1,13 @@
 ---
 name: scaffolding-skill-projects
-description: "Use when generating the initial directory structure, manifests, hooks, scripts, and bootstrap skill for a new skill project, creating a skill project from scratch, or setting up project infrastructure — use after design is complete (invoke seg:designing-skill-projects first if no design exists)"
+description: "Use when generating the initial directory structure, manifests, hooks, scripts, and bootstrap skill for a new skill-project, creating a skill-project from scratch, or setting up project infrastructure — use after design is complete (invoke seg:designing-skill-projects first if no design exists)"
 ---
 
 # Scaffolding Skill Projects
 
 ## Overview
 
-Generate a complete skill project from a design blueprint. The scaffold includes platform manifests, session hooks, version infrastructure, and skill directories — everything needed for a working multi-platform skill project.
+Generate a complete skill-project from a design blueprint. The scaffold includes platform manifests, session hooks, version infrastructure, and skill directories — everything needed for a working multi-platform skill-project.
 
 **Core principle:** Generate only what's needed. Every platform, every file has a reason to exist.
 

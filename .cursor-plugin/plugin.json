@@ -2,7 +2,7 @@
   "name": "skill-engineering-guide",
   "abbreviation": "seg",
   "displayName": "Skill Engineering Guide",
-  "description": "Skill project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
+  "description": "Skill-Project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
   "version": "1.0.0",
   "author": {
     "name": "Luiz",

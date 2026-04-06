@@ -4,7 +4,7 @@
 
 ### Added
 
-- Initial release as a structured skill project
+- Initial release as a structured skill-project
 - Refactored from single-skill folder to full plugin architecture following superpowers conventions
 - Multi-platform support: Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI
 - Platform manifests for all 6 supported platforms

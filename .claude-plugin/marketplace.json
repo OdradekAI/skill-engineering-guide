@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "skill-engineering-guide",
-      "description": "Skill project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
+      "description": "Skill-Project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
       "version": "1.0.0",
       "source": "./",
       "author": {

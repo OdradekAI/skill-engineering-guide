@@ -1,13 +1,13 @@
 ---
 name: optimizing-skill-projects
-description: "Use when performing engineering optimization on an existing skill project — improving skill descriptions for better triggering, reducing token usage across skills, optimizing workflow chains between skills, fixing audit findings, enhancing progressive disclosure, adding multi-platform support, or auditing skill/agents/commands folder structure for quality"
+description: "Use when performing engineering optimization on an existing skill-project — improving skill descriptions for better triggering, reducing token usage across skills, optimizing workflow chains between skills, fixing audit findings, enhancing progressive disclosure, adding multi-platform support, or auditing skill/agents/commands folder structure for quality"
 ---
 
 # Optimizing Skill Projects
 
 ## Overview
 
-Targeted improvement of specific aspects of a skill project. Unlike a full audit, optimization focuses on goals: better triggering, lower token cost, tighter workflow chains.
+Targeted improvement of specific aspects of a skill-project. Unlike a full audit, optimization focuses on goals: better triggering, lower token cost, tighter workflow chains.
 
 **Core principle:** Optimize for the agent's experience. Every improvement should make skills easier to discover, faster to load, and clearer to follow.
 
@@ -43,7 +43,7 @@ The highest-impact optimization. Descriptions are the primary mechanism for skil
 description: Use for auditing - scans structure, checks manifests, scores categories, generates report
 
 # GOOD: Triggering conditions only — agent reads the full skill
-description: Use when reviewing a skill project for structural issues, version drift, or before release
+description: Use when reviewing a skill-project for structural issues, version drift, or before release
 ```
 
 **Testing approach:** Create 5+ realistic prompts that should trigger the skill. Verify triggering accuracy.

@@ -1,15 +1,15 @@
 ---
 name: scanning-skill-security
-description: "Use when reviewing a skill project for security risks, scanning third-party skills before installation, before publishing or releasing a skill project, after modifying hooks/plugins/scripts, when a user points to a skill folder/file or skill repository URL to review for safety, or when any executable code in a skill project needs safety verification — even code you wrote yourself, since accidental vulnerabilities are common"
+description: "Use when reviewing a skill-project for security risks, scanning third-party skills before installation, before publishing or releasing a skill-project, after modifying hooks/plugins/scripts, when a user points to a skill folder/file or skill repository URL to review for safety, or when any executable code in a skill-project needs safety verification — even code you wrote yourself, since accidental vulnerabilities are common"
 ---
 
 # Scanning Skill Security
 
 ## Overview
 
-Scan a skill project's attack surface — SKILL.md instructions, hook scripts, OpenCode plugins, agent prompts, and bundled scripts — for patterns that could exfiltrate data, destroy resources, install backdoors, or override safety controls.
+Scan a skill-project's attack surface — SKILL.md instructions, hook scripts, OpenCode plugins, agent prompts, and bundled scripts — for patterns that could exfiltrate data, destroy resources, install backdoors, or override safety controls.
 
-**Core principle:** Trust but verify. Every skill project that executes code or instructs agents deserves a security scan, whether you wrote it or someone else did.
+**Core principle:** Trust but verify. Every skill-project that executes code or instructs agents deserves a security scan, whether you wrote it or someone else did.
 
 **This is a rigid skill.** Follow the scan process completely — do not skip categories or rationalize away findings.
 
@@ -28,7 +28,7 @@ Exit codes: 0 = clean, 1 = warnings only, 2 = critical findings. The script cove
 
 ## When to Scan
 
-- **Before release** — every skill project, every time
+- **Before release** — every skill-project, every time
 - **Before installing third-party skills** — scan before trusting
 - **After audit flags security concerns** — deep dive on specific findings
 - **After modifying hooks or plugins** — any change to executable code
@@ -54,7 +54,7 @@ Scan every SKILL.md and markdown reference for instructions that direct agents t
 
 ### Target 2: Hook Scripts (session-start, run-hook.cmd)
 
-Hook scripts execute on every session start with the user's shell permissions. They are the highest-risk executable code in a skill project.
+Hook scripts execute on every session start with the user's shell permissions. They are the highest-risk executable code in a skill-project.
 
 **What to look for:** Network calls (`curl`, `wget`, `nc`), environment variable exfiltration, system config modification, package installation, obfuscated commands. The legitimate use case is narrow: read a SKILL.md, JSON-escape it, emit JSON.
 

@@ -1,6 +1,6 @@
 # Scaffold Templates
 
-Index of ready-to-use template files for generating a new skill project. All templates live in `assets/` — read each file directly when generating.
+Index of ready-to-use template files for generating a new skill-project. All templates live in `assets/` — read each file directly when generating.
 
 Replace all placeholders before writing to the target project.
 

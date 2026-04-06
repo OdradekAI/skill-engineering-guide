@@ -1,13 +1,13 @@
 ---
 name: adapting-skill-platforms
-description: "Use when adding Claude Code, Cursor, Codex, OpenCode, Copilot CLI, or Gemini CLI support to an existing skill project, when platform manifests need updating or fixing, when migrating a skill project to a new platform, or when platform-specific hooks or configuration need changes"
+description: "Use when adding Claude Code, Cursor, Codex, OpenCode, Copilot CLI, or Gemini CLI support to an existing skill-project, when platform manifests need updating or fixing, when migrating a skill-project to a new platform, or when platform-specific hooks or configuration need changes"
 ---
 
 # Adapting Skill Platforms
 
 ## Overview
 
-Add support for a new AI coding platform to an existing skill project. Each platform has its own manifest format, discovery mechanism, and hook wiring. This skill generates the correct adapter files and wires them into the project.
+Add support for a new AI coding platform to an existing skill-project. Each platform has its own manifest format, discovery mechanism, and hook wiring. This skill generates the correct adapter files and wires them into the project.
 
 **Core principle:** One project, many platforms. Platform adapters translate the same skills into each platform's native format.
 

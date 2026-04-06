@@ -2,7 +2,7 @@
 
 [中文](README.zh.md)
 
-A skill project engineering toolkit: scaffolding, platform adaptation, version management, auditing, and skill lifecycle management across all major AI coding platforms.
+A skill-project engineering toolkit: scaffolding, platform adaptation, version management, auditing, and skill lifecycle management across all major AI coding platforms.
 
 **Abbreviation:** `seg` — use `seg:<skill-name>` as shorthand for `skill-engineering-guide:<skill-name>` in cross-references.
 
@@ -51,19 +51,19 @@ gemini extensions install https://github.com/odradekai/skill-engineering-guide.g
 | Skill | Description |
 |-------|-------------|
 | `using-skill-engineering-guide` | Bootstrap meta-skill — establishes how to find and use all other skills |
-| `designing-skill-projects` | Plan a new skill project or decompose a complex skill through structured interview |
+| `designing-skill-projects` | Plan a new skill-project or decompose a complex skill through structured interview |
 | `scaffolding-skill-projects` | Generate project structure, manifests, hooks, and bootstrap skill |
 | `writing-skill-content` | Guide authoring of SKILL.md files — structure, descriptions, progressive disclosure |
 | `auditing-skill-projects` | Systematic quality assessment with 9-category scoring |
 | `optimizing-skill-projects` | Engineering optimization — descriptions, token efficiency, workflow chains |
 | `adapting-skill-platforms` | Add platform support (Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI) |
 | `managing-skill-versions` | Version sync infrastructure, drift detection, and auditing |
-| `scanning-skill-security` | Scan skill projects for security risks in hooks, plugins, agent prompts, and instructions |
+| `scanning-skill-security` | Scan skill-projects for security risks in hooks, plugins, agent prompts, and instructions |
 | `releasing-skill-projects` | Full release pipeline — audit, security scan, version bump, CHANGELOG, publish |
 
 ## Workflow
 
-The skills cover the full lifecycle of a skill project:
+The skills cover the full lifecycle of a skill-project:
 
 ```
 designing-skill-projects → scaffolding-skill-projects → writing-skill-content

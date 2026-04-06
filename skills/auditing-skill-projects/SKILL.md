@@ -1,13 +1,13 @@
 ---
 name: auditing-skill-projects
-description: "Use when reviewing a skill project for structural issues, version drift, manifest problems, or skill quality, before releasing a skill project, after significant changes to a skill project, when a user points to a specific skill folder or third-party skill to review, or as a periodic skill project health check — provides systematic 9-category quality assessment with scoring and actionable recommendations"
+description: "Use when reviewing a skill-project for structural issues, version drift, manifest problems, or skill quality, before releasing a skill-project, after significant changes to a skill-project, when a user points to a specific skill folder or third-party skill to review, or as a periodic skill-project health check — provides systematic 9-category quality assessment with scoring and actionable recommendations"
 ---
 
 # Auditing Skill Projects
 
 ## Overview
 
-Systematically evaluate a skill project across 9 quality categories, score each, and produce an actionable report. Think of this as a comprehensive health check — it catches everything from missing manifests to security risks.
+Systematically evaluate a skill-project across 9 quality categories, score each, and produce an actionable report. Think of this as a comprehensive health check — it catches everything from missing manifests to security risks.
 
 **Core principle:** Measure before you fix. A scored audit prevents both under-reaction and over-engineering.
 
@@ -70,7 +70,7 @@ Each category: 0-10 scale. Overall = weighted average.
 Present as:
 
 ```
-## Skill Project Audit: <project-name>
+## Skill-Project Audit: <project-name>
 
 ### Score: X/10
 

@@ -1,6 +1,6 @@
 ---
 name: designing-skill-projects
-description: "Use when planning a new skill project, splitting or decomposing a complex skill into a structured skill project, combining or composing multiple existing skills into a unified project, deciding which skills to include and how they chain together, mapping platform targets, choosing a bootstrap strategy, or when a user has a vague idea about packaging or organizing their skills — always use this before any scaffolding or code generation to avoid costly rework"
+description: "Use when planning a new skill-project, splitting or decomposing a complex skill into a structured skill-project, combining or composing multiple existing skills into a unified project, deciding which skills to include and how they chain together, mapping platform targets, choosing a bootstrap strategy, or when a user has a vague idea about packaging or organizing their skills — always use this before any scaffolding or code generation to avoid costly rework"
 ---
 
 # Designing Skill Projects
@@ -11,7 +11,7 @@ Turn a vague idea ("I want to package my skills") into a concrete project bluepr
 
 **Core principle:** Understand what you're building before generating anything. Five minutes of interview saves hours of rework.
 
-**Announce at start:** "I'm using the designing-skill-projects skill to plan your skill project."
+**Announce at start:** "I'm using the designing-skill-projects skill to plan your skill-project."
 
 ## Three Entry Points
 
@@ -25,7 +25,7 @@ If the user has an existing skill they want to break apart, start with Scenario 
 
 ## Scenario B: Decomposition Analysis
 
-When the user wants to split a complex skill into a skill project, analyze the existing skill before designing the new project.
+When the user wants to split a complex skill into a skill-project, analyze the existing skill before designing the new project.
 
 ### B1. Read the Existing Skill
 
@@ -57,12 +57,12 @@ Get user approval on the decomposition before proceeding to the Interview (Scena
 
 ## Scenario C: Composition Analysis
 
-When the user wants to combine multiple existing skills into a unified skill project, analyze compatibility and design the orchestration before scaffolding.
+When the user wants to combine multiple existing skills into a unified skill-project, analyze compatibility and design the orchestration before scaffolding.
 
 ### C1. Inventory Existing Skills
 
 Collect all candidate skills. For each one, record:
-- Source (local file, git repo, marketplace, another skill project)
+- Source (local file, git repo, marketplace, another skill-project)
 - Current structure (standalone SKILL.md, has references/, has scripts/)
 - Frontmatter quality (has name/description? follows conventions?)
 - Rigid or flexible type
@@ -151,7 +151,7 @@ Does the user want an always-loaded meta-skill (`using-<project>`) that teaches 
 - Multiple platforms targeted
 
 **Skip when:**
-- Single skill project
+- Single skill-project
 - Skills are fully independent utilities
 
 ## Design Document
@@ -159,7 +159,7 @@ Does the user want an always-loaded meta-skill (`using-<project>`) that teaches 
 After the interview, compile a design summary:
 
 ```markdown
-## Skill Project Design: <project-name>
+## Skill-Project Design: <project-name>
 
 **Platforms:** <list>
 **Bootstrap:** yes/no

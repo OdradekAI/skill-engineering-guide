@@ -1,6 +1,6 @@
 ---
 name: using-skill-engineering-guide
-description: "Use when starting any conversation involving skill projects — designing, scaffolding, auditing, optimizing, adapting platforms, managing versions, scanning security, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which seg: skill applies"
+description: "Use when starting any conversation involving skill-projects — designing, scaffolding, auditing, optimizing, adapting platforms, managing versions, scanning security, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which seg: skill applies"
 ---
 
 <SUBAGENT-STOP>
@@ -9,13 +9,13 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 
 ## Pre-flight Check
 
-Before invoking any skill-engineering-guide skill on a target directory, verify the target is a skill project:
+Before invoking any skill-engineering-guide skill on a target directory, verify the target is a skill-project:
 - Does it have a `skills/` directory?
 - Does it have a `package.json`?
 
-If neither exists, inform the user: "This directory doesn't appear to be a skill project. Skill-engineering-guide skills are designed for skill projects (repositories where skills are the primary content). Would you like to create a new skill project here, or did you mean to point to a different directory?"
+If neither exists, inform the user: "This directory doesn't appear to be a skill-project. Skill-engineering-guide skills are designed for skill-projects (repositories where skills are the primary content). Would you like to create a new skill-project here, or did you mean to point to a different directory?"
 
-Exception: `seg:scanning-skill-security` and `seg:auditing-skill-projects` can also operate on individual skill folders or files — they don't require a full skill project.
+Exception: `seg:scanning-skill-security` and `seg:auditing-skill-projects` can also operate on individual skill folders or files — they don't require a full skill-project.
 
 ## Instruction Priority
 
@@ -41,10 +41,10 @@ Skills use Claude Code tool names as the default. Non-Claude-Code platforms: see
 
 ## The Rule
 
-**Invoke relevant skills BEFORE any response or action** when working with skill projects. If there's even a small chance a skill applies, invoke it to check.
+**Invoke relevant skills BEFORE any response or action** when working with skill-projects. If there's even a small chance a skill applies, invoke it to check.
 
 ```
-User message about skill project
+User message about skill-project
   → Might any skill apply?
     → yes → Invoke Skill tool → Follow skill → Respond
     → no  → Respond directly
@@ -54,7 +54,7 @@ User message about skill project
 
 | Skill | When to Use |
 |-------|-------------|
-| `seg:designing-skill-projects` | Planning a new skill project, splitting a complex skill into a project |
+| `seg:designing-skill-projects` | Planning a new skill-project, splitting a complex skill into a project |
 | `seg:scaffolding-skill-projects` | Generating project structure, manifests, hooks, bootstrap skill |
 | `seg:writing-skill-content` | Writing or improving individual SKILL.md files and supporting resources |
 | `seg:auditing-skill-projects` | Reviewing a project or skill for quality issues, before release |

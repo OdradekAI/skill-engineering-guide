@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Security scanner for skill projects.
+Security scanner for skill-projects.
 
 Scans SKILL.md files, hook scripts, OpenCode plugins, agent prompts,
 and bundled scripts for patterns that could exfiltrate data, destroy
@@ -301,9 +301,9 @@ def format_markdown(results, project_name):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Scan a skill project for security risks.")
+    parser = argparse.ArgumentParser(description="Scan a skill-project for security risks.")
     parser.add_argument("project_root", nargs="?", default=".",
-                        help="Skill project root (default: current directory)")
+                        help="Skill-Project root (default: current directory)")
     parser.add_argument("--json", action="store_true", help="Output JSON instead of markdown")
     args = parser.parse_args()
 

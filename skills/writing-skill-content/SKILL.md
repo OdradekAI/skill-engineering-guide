@@ -1,17 +1,17 @@
 ---
 name: writing-skill-content
-description: "Use when writing or improving individual skill content within a skill project — covers SKILL.md structure, frontmatter conventions, description writing for reliable triggering, instruction style, progressive disclosure, and bundled resource organization. Also use when a user has scaffolded a skill project and needs guidance on filling in the actual skill content"
+description: "Use when writing or improving individual skill content within a skill-project — covers SKILL.md structure, frontmatter conventions, description writing for reliable triggering, instruction style, progressive disclosure, and bundled resource organization. Also use when a user has scaffolded a skill-project and needs guidance on filling in the actual skill content"
 ---
 
 # Writing Skill Content
 
 ## Overview
 
-Guide the authoring of effective SKILL.md files and supporting resources within a skill project. Good skill content is the difference between a skill that agents consistently find, follow, and produce quality results with — and one that gets ignored or misinterpreted.
+Guide the authoring of effective SKILL.md files and supporting resources within a skill-project. Good skill content is the difference between a skill that agents consistently find, follow, and produce quality results with — and one that gets ignored or misinterpreted.
 
 **Core principle:** Write for the agent's experience. Every instruction should be discoverable (good description), loadable (right size), and followable (clear, motivated instructions).
 
-This skill distills best practices from the [Anthropic skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) into actionable guidance for skill project authors.
+This skill distills best practices from the [Anthropic skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) into actionable guidance for skill-project authors.
 
 **Announce at start:** "I'm using the writing-skill-content skill to help author skill content."
 
@@ -48,7 +48,7 @@ The description is the **primary triggering mechanism** — it determines whethe
 - **Describe triggering conditions, not workflow** — testing shows that when descriptions summarize a skill's process, agents follow the description as a shortcut instead of reading the full SKILL.md. A description saying "scans structure, checks manifests, scores categories" caused agents to do exactly that sequence from the description alone, skipping the detailed instructions
 - **Be slightly pushy** — agents tend to under-trigger skills. Include related scenarios, edge cases, and alternative phrasings. If there's even a chance the skill applies, the description should hint at it
 - **Keep under 500 characters** — this is metadata that's always in context
-- **Scope appropriately** — if the skill is for skill projects specifically, say so. Don't let the description match unrelated contexts
+- **Scope appropriately** — if the skill is for skill-projects specifically, say so. Don't let the description match unrelated contexts
 
 ```yaml
 # BAD: Summarizes workflow — agent shortcuts to this
@@ -58,7 +58,7 @@ description: "Scans project structure, validates manifests, checks version sync,
 description: "Use when auditing any project for quality"
 
 # GOOD: Triggering conditions, properly scoped, pushy
-description: "Use when reviewing a skill project for structural issues, version drift, manifest problems, or skill quality, before releasing a skill project, or when a user points to a skill folder to review"
+description: "Use when reviewing a skill-project for structural issues, version drift, manifest problems, or skill quality, before releasing a skill-project, or when a user points to a skill folder to review"
 ```
 
 ## Writing the Body
@@ -177,7 +177,7 @@ Create an `assets/` file when:
 | No examples, only abstract rules | Add at least one concrete example per key instruction |
 | Writing for humans, not agents | Use imperative form, clear structure, explicit output formats |
 | Description too narrow | Be pushy — list related scenarios, edge cases, alternative phrasings |
-| Description too broad | Scope to the right context (e.g., "skill project" not just "any project") |
+| Description too broad | Scope to the right context (e.g., "skill-project" not just "any project") |
 
 ## Integration
 

@@ -1,13 +1,13 @@
 ---
 name: releasing-skill-projects
-description: "Use when preparing to release or publish a skill project, bumping to a new version, creating a release checklist, updating CHANGELOG, or publishing to platform marketplaces — orchestrates the full pre-release verification and publishing workflow for skill projects"
+description: "Use when preparing to release or publish a skill-project, bumping to a new version, creating a release checklist, updating CHANGELOG, or publishing to platform marketplaces — orchestrates the full pre-release verification and publishing workflow for skill-projects"
 ---
 
 # Releasing Skill Projects
 
 ## Overview
 
-Orchestrate the complete release workflow for a skill project: verify quality, scan for security risks, bump versions, update documentation, and publish to target platforms. Releasing without this process risks shipping broken manifests, version drift, or security vulnerabilities.
+Orchestrate the complete release workflow for a skill-project: verify quality, scan for security risks, bump versions, update documentation, and publish to target platforms. Releasing without this process risks shipping broken manifests, version drift, or security vulnerabilities.
 
 **Core principle:** Release is a checkpoint, not a formality. Every release deserves the full pipeline — even "minor" version bumps can introduce drift or break platform installs.
 
@@ -16,7 +16,7 @@ Orchestrate the complete release workflow for a skill project: verify quality, s
 ## Prerequisites
 
 Before starting the release process, confirm:
-- The project is a skill project (has `skills/` directory and `package.json`)
+- The project is a skill-project (has `skills/` directory and `package.json`)
 - All skill content changes are committed
 - The user knows the target version number (or wants help deciding)
 

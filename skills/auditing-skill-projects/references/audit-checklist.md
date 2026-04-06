@@ -1,6 +1,6 @@
 # Audit Checklist
 
-Structured criteria for evaluating a skill project. Each category has specific checks with severity levels. Use this when running an audit — work through each category, note findings, and compile the report.
+Structured criteria for evaluating a skill-project. Each category has specific checks with severity levels. Use this when running an audit — work through each category, note findings, and compile the report.
 
 ## Scoring
 
@@ -189,7 +189,7 @@ curl|wget|nc |eval\(|child_process|\.env|api_key|secret|ignore safety|override|b
 After running all checks, compile findings into this format:
 
 ```markdown
-## Skill Project Audit: <project-name>
+## Skill-Project Audit: <project-name>
 
 **Date:** <date>
 **Platforms:** <target platforms>

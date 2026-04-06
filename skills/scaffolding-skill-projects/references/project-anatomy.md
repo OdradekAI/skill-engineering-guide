@@ -1,12 +1,12 @@
-# Skill Project Anatomy
+# Skill-Project Anatomy
 
-Complete reference for every file and directory in a well-engineered skill project. Use this when scaffolding a new project or auditing an existing one.
+Complete reference for every file and directory in a well-engineered skill-project. Use this when scaffolding a new project or auditing an existing one.
 
 ## Root Files
 
 ### `package.json`
 
-Project identity. Minimal — no dependencies (skill projects are zero-dependency by design). The `main` field points to the OpenCode plugin entry if OpenCode is a target platform.
+Project identity. Minimal — no dependencies (skill-projects are zero-dependency by design). The `main` field points to the OpenCode plugin entry if OpenCode is a target platform.
 
 ```json
 {
