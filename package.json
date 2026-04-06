@@ -1,0 +1,7 @@
+{
+  "name": "skill-engineering-guide",
+  "abbreviation": "seg",
+  "version": "1.0.0",
+  "type": "module",
+  "main": ".opencode/plugins/skill-engineering-guide.js"
+}

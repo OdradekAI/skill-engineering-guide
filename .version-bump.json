@@ -1,0 +1,20 @@
+{
+  "files": [
+    { "path": "package.json", "field": "version" },
+    { "path": ".claude-plugin/plugin.json", "field": "version" },
+    { "path": ".claude-plugin/marketplace.json", "field": "plugins.0.version" },
+    { "path": ".cursor-plugin/plugin.json", "field": "version" },
+    { "path": "gemini-extension.json", "field": "version" }
+  ],
+  "audit": {
+    "exclude": [
+      "CHANGELOG.md",
+      "RELEASE-NOTES.md",
+      "node_modules",
+      ".git",
+      ".repos",
+      ".version-bump.json",
+      "scripts/bump-version.sh"
+    ]
+  }
+}

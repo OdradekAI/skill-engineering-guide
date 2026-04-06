@@ -1,0 +1,7 @@
+node_modules/
+.worktrees/
+worktrees/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp

@@ -1,0 +1,20 @@
+{
+  "name": "skill-engineering-guide-dev",
+  "description": "Development marketplace for SEG(skill-engineering-guide) core skills library",
+  "owner": {
+    "name": "Luiz",
+    "email": "odradekai@outlook.com"
+  },
+  "plugins": [
+    {
+      "name": "skill-engineering-guide",
+      "description": "Skill project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
+      "version": "1.0.0",
+      "source": "./",
+      "author": {
+        "name": "Luiz",
+        "email": "odradekai@outlook.com"
+      }
+    }
+  ]
+}

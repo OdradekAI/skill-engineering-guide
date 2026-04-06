@@ -1,0 +1,13 @@
+{
+  "name": "<project-name>",
+  "description": "<one-line description>",
+  "version": "1.0.0",
+  "author": {
+    "name": "<author-name>",
+    "email": "<author-email>"
+  },
+  "homepage": "<repo-url>",
+  "repository": "<repo-url>",
+  "license": "MIT",
+  "keywords": ["skills"]
+}
