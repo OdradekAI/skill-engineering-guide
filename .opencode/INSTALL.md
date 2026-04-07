@@ -1,4 +1,4 @@
-# Installing Skill Engineering Guide for OpenCode
+# Installing Skill Forge for OpenCode
 
 ## Installation
 
@@ -8,8 +8,8 @@ Add to your `opencode.json` under the `plugins` key:
 {
   "plugins": [
     {
-      "name": "skill-engineering-guide",
-      "url": "https://github.com/odradekai/skill-engineering-guide.git"
+      "name": "skill-forge",
+      "url": "https://github.com/odradekai/skill-forge.git"
     }
   ]
 }

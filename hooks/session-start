@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook for skill-engineering-guide plugin
+# SessionStart hook for skill-forge plugin
 
 set -euo pipefail
 
@@ -7,7 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Read the bootstrap meta-skill content
-bootstrap_content=$(cat "${PLUGIN_ROOT}/skills/using-skill-engineering-guide/SKILL.md" 2>/dev/null || echo "Error reading bootstrap skill")
+bootstrap_content=$(cat "${PLUGIN_ROOT}/skills/using-skill-forge/SKILL.md" 2>/dev/null || echo "Error reading bootstrap skill")
 
 # JSON-escape using bash parameter substitution (fast, no external deps)
 escape_for_json() {
@@ -21,7 +21,7 @@ escape_for_json() {
 }
 
 bootstrap_escaped=$(escape_for_json "$bootstrap_content")
-session_context="<EXTREMELY_IMPORTANT>\nYou have skill-engineering-guide skills loaded.\n\n**Below is the full content of your 'seg:using-skill-engineering-guide' skill. For all other skills, use the 'Skill' tool:**\n\n${bootstrap_escaped}\n</EXTREMELY_IMPORTANT>"
+session_context="<EXTREMELY_IMPORTANT>\nYou have skill-forge skills loaded.\n\n**Below is the full content of your 'skill-forge:using-skill-forge' skill. For all other skills, use the 'Skill' tool:**\n\n${bootstrap_escaped}\n</EXTREMELY_IMPORTANT>"
 
 # Emit platform-appropriate JSON using printf (avoids bash 5.3+ heredoc hang)
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then

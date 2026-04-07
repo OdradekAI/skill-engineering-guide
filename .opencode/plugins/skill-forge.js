@@ -1,5 +1,5 @@
 /**
- * Skill Engineering Guide plugin for OpenCode.ai
+ * Skill Forge plugin for OpenCode.ai
  *
  * Injects bootstrap context via system prompt transform.
  * Auto-registers skills directory via config hook.
@@ -31,7 +31,7 @@ export const Plugin = async ({ client, directory }) => {
   const skillsDir = path.resolve(__dirname, '../../skills');
 
   const getBootstrapContent = () => {
-    const skillPath = path.join(skillsDir, 'using-skill-engineering-guide', 'SKILL.md');
+    const skillPath = path.join(skillsDir, 'using-skill-forge', 'SKILL.md');
     if (!fs.existsSync(skillPath)) return null;
     const { content } = extractAndStripFrontmatter(fs.readFileSync(skillPath, 'utf8'));
 
@@ -43,7 +43,7 @@ When skills reference tools you don't have, substitute OpenCode equivalents:
 - \`Read\`, \`Write\`, \`Edit\`, \`Bash\` → Your native tools`;
 
     return `<EXTREMELY_IMPORTANT>
-You have skill-engineering-guide skills loaded.
+You have skill-forge skills loaded.
 
 ${content}
 

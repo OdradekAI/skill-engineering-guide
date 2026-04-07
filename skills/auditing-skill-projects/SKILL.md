@@ -93,7 +93,7 @@ Present as:
 ### Step 5: Fix or Optimize
 
 - **Critical issues:** Offer to fix immediately
-- **Warnings:** Offer to fix or suggest `seg:optimizing-skill-projects`
+- **Warnings:** Offer to fix or suggest `skill-forge:optimizing-skill-projects`
 - **Info:** Note for future consideration
 
 ## Severity Levels
@@ -114,11 +114,14 @@ Present as:
 ## Integration
 
 **Called by:**
-- **seg:scaffolding-skill-projects** — post-scaffold verification
+- **skill-forge:scaffolding-skill-projects** — post-scaffold verification
 
 **Calls:**
-- **seg:optimizing-skill-projects** — when findings need targeted fixes
-- **seg:scanning-skill-security** — Category 9: Security assessment
+- **skill-forge:optimizing-skill-projects** — when findings need targeted project-level fixes
+- **skill-forge:scanning-skill-security** — Category 9: Security assessment
+
+**Suggests:**
+- **skill-forge:iterating-skill-feedback** — when single-skill effectiveness issues warrant user-directed improvements (user must confirm before iteration begins)
 
 **Pairs with:**
-- **seg:managing-skill-versions** — version drift checks
+- **skill-forge:managing-skill-versions** — version drift checks

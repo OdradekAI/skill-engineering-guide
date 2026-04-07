@@ -25,8 +25,8 @@ Before starting the release process, confirm:
 ```
 1. Pre-flight checks
    ├── Version drift check (bump-version.sh --check)
-   ├── Full audit (audit-project.py or seg:auditing-skill-projects)
-   └── Security scan (scan-security.py or seg:scanning-skill-security)
+   ├── Full audit (audit-project.py or skill-forge:auditing-skill-projects)
+   └── Security scan (scan-security.py or skill-forge:scanning-skill-security)
          │
 2. Address findings
    ├── Fix critical issues (block release until resolved)
@@ -75,9 +75,9 @@ Present findings to the user grouped by severity:
 - **Info** — note for future, don't block release
 
 For fixes, invoke the appropriate skill:
-- Quality issues → `seg:optimizing-skill-projects`
-- Security issues → `seg:scanning-skill-security` for detailed analysis
-- Version drift → `seg:managing-skill-versions`
+- Quality issues → `skill-forge:optimizing-skill-projects`
+- Security issues → `skill-forge:scanning-skill-security` for detailed analysis
+- Version drift → `skill-forge:managing-skill-versions`
 
 ### Step 3: Version Bump
 
@@ -165,10 +165,10 @@ For urgent fixes between planned releases:
 ## Integration
 
 **Calls:**
-- **seg:auditing-skill-projects** — pre-release quality check
-- **seg:scanning-skill-security** — pre-release security scan
-- **seg:managing-skill-versions** — version bump and drift check
-- **seg:optimizing-skill-projects** — fix quality findings
+- **skill-forge:auditing-skill-projects** — pre-release quality check
+- **skill-forge:scanning-skill-security** — pre-release security scan
+- **skill-forge:managing-skill-versions** — version bump and drift check
+- **skill-forge:optimizing-skill-projects** — fix quality findings
 
 **Pairs with:**
-- **seg:adapting-skill-platforms** — new platform support often triggers a release
+- **skill-forge:adapting-skill-platforms** — new platform support often triggers a release

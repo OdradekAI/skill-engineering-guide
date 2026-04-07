@@ -1,6 +1,6 @@
 ---
 name: scaffolding-skill-projects
-description: "Use when generating the initial directory structure, manifests, hooks, scripts, and bootstrap skill for a new skill-project, creating a skill-project from scratch, or setting up project infrastructure — use after design is complete (invoke seg:designing-skill-projects first if no design exists)"
+description: "Use when generating the initial directory structure, manifests, hooks, scripts, and bootstrap skill for a new skill-project, creating a skill-project from scratch, or setting up project infrastructure — use after design is complete (invoke skill-forge:designing-skill-projects first if no design exists)"
 ---
 
 # Scaffolding Skill Projects
@@ -15,7 +15,7 @@ Generate a complete skill-project from a design blueprint. The scaffold includes
 
 ## Prerequisites
 
-A design document from `seg:designing-skill-projects` or equivalent information:
+A design document from `skill-forge:designing-skill-projects` or equivalent information:
 - Project name (kebab-case)
 - Target platforms
 - Skill inventory
@@ -74,7 +74,7 @@ After generating all files:
 2. **Verify version sync** — run `scripts/bump-version.sh --check`
 3. **Validate manifests** — each platform manifest references correct paths
 4. **Test bootstrap** — if created, verify it loads on at least one target platform
-5. **Security baseline** — run `seg:scanning-skill-security` on generated hooks and plugin code
+5. **Security baseline** — run `skill-forge:scanning-skill-security` on generated hooks and plugin code
 6. **Report** — show the user the generated structure and next steps
 
 Dispatch the `scaffold-reviewer` agent (`agents/scaffold-reviewer.md`) for automated validation if subagents are available.
@@ -104,12 +104,12 @@ Dispatch the `scaffold-reviewer` agent (`agents/scaffold-reviewer.md`) for autom
 ## Integration
 
 **Called by:**
-- **seg:designing-skill-projects** — after design approval
+- **skill-forge:designing-skill-projects** — after design approval
 
 **Calls:**
-- **seg:auditing-skill-projects** — post-scaffold verification
-- **seg:scanning-skill-security** — post-scaffold security baseline
+- **skill-forge:auditing-skill-projects** — post-scaffold verification
+- **skill-forge:scanning-skill-security** — post-scaffold security baseline
 
 **Pairs with:**
-- **seg:managing-skill-versions** — version infrastructure setup
-- **seg:adapting-skill-platforms** — adding platforms later
+- **skill-forge:managing-skill-versions** — version infrastructure setup
+- **skill-forge:adapting-skill-platforms** — adding platforms later

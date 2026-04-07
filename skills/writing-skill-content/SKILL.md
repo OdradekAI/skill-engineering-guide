@@ -182,8 +182,8 @@ Create an `assets/` file when:
 ## Integration
 
 **Called by:**
-- **seg:scaffolding-skill-projects** — after scaffold, point users here for content guidance
+- **skill-forge:scaffolding-skill-projects** — after scaffold, point users here for content guidance
 
 **Pairs with:**
-- **seg:optimizing-skill-projects** — for improving existing skill content
-- **seg:auditing-skill-projects** — audit identifies content quality issues this skill helps fix
+- **skill-forge:optimizing-skill-projects** — for improving existing skill content
+- **skill-forge:auditing-skill-projects** — audit identifies content quality issues this skill helps fix

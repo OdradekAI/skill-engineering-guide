@@ -55,7 +55,7 @@ Create all files for the target platform using the template files from `assets/<
 
 ### Step 4: Update Version Sync
 
-Add new manifest files to `.version-bump.json` if they contain version strings. Use `seg:managing-skill-versions` for version infrastructure.
+Add new manifest files to `.version-bump.json` if they contain version strings. Use `skill-forge:managing-skill-versions` for version infrastructure.
 
 ### Step 5: Update Hooks
 
@@ -91,10 +91,10 @@ If the platform uses session hooks (Claude Code, Cursor, Copilot CLI), ensure `s
 ## Integration
 
 **Called by:**
-- **seg:designing-skill-projects** — when adding platforms to a new project
+- **skill-forge:designing-skill-projects** — when adding platforms to a new project
 
 **Calls:**
-- **seg:auditing-skill-projects** — verify after adaptation
+- **skill-forge:auditing-skill-projects** — verify after adaptation
 
 **Pairs with:**
-- **seg:managing-skill-versions** — version sync for new manifests
+- **skill-forge:managing-skill-versions** — version sync for new manifests

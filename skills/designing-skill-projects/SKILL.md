@@ -7,7 +7,7 @@ description: "Use when planning a new skill-project, splitting or decomposing a 
 
 ## Overview
 
-Turn a vague idea ("I want to package my skills") into a concrete project blueprint through structured interview. The output is a design document that `seg:scaffolding-skill-projects` consumes to generate the actual project.
+Turn a vague idea ("I want to package my skills") into a concrete project blueprint through structured interview. The output is a design document that `skill-forge:scaffolding-skill-projects` consumes to generate the actual project.
 
 **Core principle:** Understand what you're building before generating anything. Five minutes of interview saves hours of rework.
 
@@ -119,7 +119,7 @@ Which platforms should the project support?
 | Copilot CLI | Shares Claude Code hooks | Env detection |
 | Gemini CLI | `gemini-extension.json` | Context file |
 
-Start with what the user actually uses. Others can be added later via `seg:adapting-skill-platforms`.
+Start with what the user actually uses. Others can be added later via `skill-forge:adapting-skill-platforms`.
 
 ### 3. Skill Inventory
 
@@ -184,7 +184,7 @@ After the user approves the design:
 
 **"Design approved. Invoking scaffolding-skill-projects to generate the project structure."**
 
-**REQUIRED:** Invoke `seg:scaffolding-skill-projects` with the approved design.
+**REQUIRED:** Invoke `skill-forge:scaffolding-skill-projects` with the approved design.
 
 ## Common Mistakes
 
@@ -199,7 +199,7 @@ After the user approves the design:
 ## Integration
 
 **Calls:**
-- **seg:scaffolding-skill-projects** — after design approval
+- **skill-forge:scaffolding-skill-projects** — after design approval
 
 **Pairs with:**
-- **seg:adapting-skill-platforms** — for adding platforms later
+- **skill-forge:adapting-skill-platforms** — for adding platforms later

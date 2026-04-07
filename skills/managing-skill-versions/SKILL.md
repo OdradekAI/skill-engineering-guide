@@ -109,6 +109,6 @@ When setting up version infrastructure for the first time:
 ## Integration
 
 **Pairs with:**
-- **seg:scaffolding-skill-projects** — initial infrastructure setup
-- **seg:auditing-skill-projects** — drift detection during audit
-- **seg:adapting-skill-platforms** — new manifest registration
+- **skill-forge:scaffolding-skill-projects** — initial infrastructure setup
+- **skill-forge:auditing-skill-projects** — drift detection during audit
+- **skill-forge:adapting-skill-platforms** — new manifest registration

@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.2.0] - 2026-04-07
+
+### Added
+
+- New skill: `iterating-skill-feedback` for receiving user feedback about skills, validating suggestions against core goals, forking external skills with identifiers, and automatic post-change auditing
+- Scope clarification between `optimizing-skill-projects` (project engineering) and `iterating-skill-feedback` (single-skill effectiveness)
+
+### Changed
+
+- Updated `auditing-skill-projects` integration: added Suggests relationship to `iterating-skill-feedback`
+- Updated `optimizing-skill-projects` integration: added Cross-refers relationship to `iterating-skill-feedback`
+- Updated `using-skill-forge` routing table, skill priority, and red flags to include the new skill
+- Updated workflow diagrams in README to show audit branching into both optimizing and iterating paths
+
+## [1.1.0] - 2026-04-07
+
+### Changed
+
+- Renamed project from `skill-engineering-guide` to `skill-forge`
+- Renamed bootstrap skill directory `using-skill-engineering-guide` → `using-skill-forge`
+- Renamed OpenCode plugin file to `skill-forge.js`
+- Updated all repository URLs to `odradekai/skill-forge`
+- Replaced all `seg:` cross-reference prefixes with `skill-forge:`
+- Renamed command `/use-seg` → `/use-skill-forge`
+
+### Removed
+
+- Removed project abbreviation `seg` — all references now use the full name `skill-forge`
+
 ## [1.0.0] - 2026-04-06
 
 ### Added

@@ -1,6 +1,6 @@
 ---
-name: using-skill-engineering-guide
-description: "Use when starting any conversation involving skill-projects — designing, scaffolding, auditing, optimizing, adapting platforms, managing versions, scanning security, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which seg: skill applies"
+name: using-skill-forge
+description: "Use when starting any conversation involving skill-projects — designing, scaffolding, auditing, optimizing, iterating on feedback, adapting platforms, managing versions, scanning security, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which skill-forge: skill applies"
 ---
 
 <SUBAGENT-STOP>
@@ -9,18 +9,18 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 
 ## Pre-flight Check
 
-Before invoking any skill-engineering-guide skill on a target directory, verify the target is a skill-project:
+Before invoking any skill-forge skill on a target directory, verify the target is a skill-project:
 - Does it have a `skills/` directory?
 - Does it have a `package.json`?
 
-If neither exists, inform the user: "This directory doesn't appear to be a skill-project. Skill-engineering-guide skills are designed for skill-projects (repositories where skills are the primary content). Would you like to create a new skill-project here, or did you mean to point to a different directory?"
+If neither exists, inform the user: "This directory doesn't appear to be a skill-project. Skill-forge skills are designed for skill-projects (repositories where skills are the primary content). Would you like to create a new skill-project here, or did you mean to point to a different directory?"
 
-Exception: `seg:scanning-skill-security` and `seg:auditing-skill-projects` can also operate on individual skill folders or files — they don't require a full skill-project.
+Exception: `skill-forge:scanning-skill-security`, `skill-forge:auditing-skill-projects`, and `skill-forge:iterating-skill-feedback` can also operate on individual skill folders or files — they don't require a full skill-project.
 
 ## Instruction Priority
 
 1. **User's explicit instructions** (CLAUDE.md, GEMINI.md, AGENTS.md, direct requests) — highest priority
-2. **Skill Engineering Guide skills** — override default system behavior where they conflict
+2. **Skill Forge skills** — override default system behavior where they conflict
 3. **Default system prompt** — lowest priority
 
 ## How to Access Skills
@@ -54,15 +54,16 @@ User message about skill-project
 
 | Skill | When to Use |
 |-------|-------------|
-| `seg:designing-skill-projects` | Planning a new skill-project, splitting a complex skill into a project |
-| `seg:scaffolding-skill-projects` | Generating project structure, manifests, hooks, bootstrap skill |
-| `seg:writing-skill-content` | Writing or improving individual SKILL.md files and supporting resources |
-| `seg:auditing-skill-projects` | Reviewing a project or skill for quality issues, before release |
-| `seg:optimizing-skill-projects` | Engineering optimization: descriptions, token efficiency, workflow chains |
-| `seg:adapting-skill-platforms` | Adding platform support (Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI) |
-| `seg:managing-skill-versions` | Version drift, bumping versions, sync infrastructure |
-| `seg:scanning-skill-security` | Scanning for security risks in hooks, plugins, agent prompts, skill content |
-| `seg:releasing-skill-projects` | Full release pipeline: audit, security scan, version bump, publish |
+| `skill-forge:designing-skill-projects` | Planning a new skill-project, splitting a complex skill into a project |
+| `skill-forge:scaffolding-skill-projects` | Generating project structure, manifests, hooks, bootstrap skill |
+| `skill-forge:writing-skill-content` | Writing or improving individual SKILL.md files and supporting resources |
+| `skill-forge:auditing-skill-projects` | Reviewing a project or skill for quality issues, before release |
+| `skill-forge:optimizing-skill-projects` | Engineering optimization: descriptions, token efficiency, workflow chains |
+| `skill-forge:adapting-skill-platforms` | Adding platform support (Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI) |
+| `skill-forge:managing-skill-versions` | Version drift, bumping versions, sync infrastructure |
+| `skill-forge:iterating-skill-feedback` | Receiving user feedback about a skill, validating suggestions, applying confirmed improvements |
+| `skill-forge:scanning-skill-security` | Scanning for security risks in hooks, plugins, agent prompts, skill content |
+| `skill-forge:releasing-skill-projects` | Full release pipeline: audit, security scan, version bump, publish |
 
 ## Skill Priority
 
@@ -72,21 +73,19 @@ When multiple skills could apply:
 2. **Write content after scaffold** — use `writing-skill-content` to fill in SKILL.md files
 3. **Audit before optimize** — understand the full picture before targeted fixes
 4. **Platform adapt after scaffold** — structure must exist before adding platforms
-5. **Security scan before release** — always scan before publishing or sharing skills
-6. **Release as the final step** — use `releasing-skill-projects` to orchestrate the full pipeline
-7. **Version management as needed** — supports scaffolding, auditing, and adaptation
+5. **Iterate on feedback after audit** — use `iterating-skill-feedback` when user has specific feedback about a skill's effectiveness
+6. **Security scan before release** — always scan before publishing or sharing skills
+7. **Release as the final step** — use `releasing-skill-projects` to orchestrate the full pipeline
+8. **Version management as needed** — supports scaffolding, auditing, and adaptation
 
 ## Naming Conventions
 
 - **Project name**: kebab-case, descriptive (`dev-workflows`, `data-tools`)
-- **Project abbreviation**: optional short alias declared in `package.json` as `"abbreviation"` (e.g. `"seg"` for `skill-engineering-guide`)
 - **Skill directories**: kebab-case matching the `name` frontmatter field
-- **Cross-references**: `<project>:<skill-name>` or `<abbreviation>:<skill-name>` — both are valid; abbreviation preferred for brevity
+- **Cross-references**: `<project>:<skill-name>`
 - **Bootstrap skill**: `using-<project>`
 - **Agent prompts**: `agents/<role>.md`
 - **Commands**: `commands/<action>.md`
-
-**This project** uses `seg` as its abbreviation. `seg:designing-skill-projects` and `skill-engineering-guide:designing-skill-projects` are interchangeable.
 
 ## Skill Types
 
@@ -107,3 +106,4 @@ These thoughts mean STOP — you're skipping a skill you should use:
 | "Version bump is simple" | Drift detection and audit catch what you'd miss. |
 | "This project is too small for all this" | Small projects grow. Set up right from the start. |
 | "This skill is from a trusted source" | Trust but verify. Always scan third-party skills. |
+| "I'll just apply the feedback directly" | Unvalidated changes may harm the skill. Use the iterating skill. |

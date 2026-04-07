@@ -1,6 +1,6 @@
 # Codex Tool Mapping
 
-When skill-engineering-guide skills reference Claude Code tools, substitute these Codex equivalents:
+When skill-forge skills reference Claude Code tools, substitute these Codex equivalents:
 
 | Claude Code Tool | Codex Equivalent |
 |-----------------|------------------|
@@ -12,4 +12,4 @@ When skill-engineering-guide skills reference Claude Code tools, substitute thes
 | `Edit` | `edit` |
 | `Bash` | `bash` |
 
-Skills are discovered automatically when symlinked into `~/.agents/skills/skill-engineering-guide/`.
+Skills are discovered automatically when symlinked into `~/.agents/skills/skill-forge/`.

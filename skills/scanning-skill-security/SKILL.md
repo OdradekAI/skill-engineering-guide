@@ -132,11 +132,11 @@ Never auto-install third-party skills without scanning first.
 ## Integration
 
 **Called by:**
-- **seg:auditing-skill-projects** — Category 9: Security
-- **seg:scaffolding-skill-projects** — post-scaffold security baseline
+- **skill-forge:auditing-skill-projects** — Category 9: Security
+- **skill-forge:scaffolding-skill-projects** — post-scaffold security baseline
 
 **Calls:**
-- **seg:optimizing-skill-projects** — when security fixes overlap with optimization
+- **skill-forge:optimizing-skill-projects** — when security fixes overlap with optimization
 
 **Pairs with:**
-- **seg:adapting-skill-platforms** — new platform adapters need security review
+- **skill-forge:adapting-skill-platforms** — new platform adapters need security review

@@ -1,6 +1,6 @@
 # Gemini CLI Tool Mapping
 
-When skill-engineering-guide skills reference Claude Code tools, substitute these Gemini CLI equivalents:
+When skill-forge skills reference Claude Code tools, substitute these Gemini CLI equivalents:
 
 | Claude Code Tool | Gemini CLI Equivalent |
 |-----------------|----------------------|

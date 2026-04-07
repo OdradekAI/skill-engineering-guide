@@ -1,14 +1,13 @@
 {
-  "name": "skill-engineering-guide",
-  "abbreviation": "seg",
+  "name": "skill-forge",
   "description": "Skill-Project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "author": {
     "name": "Luiz",
     "email": "odradekai@outlook.com"
   },
-  "homepage": "https://github.com/odradekai/skill-engineering-guide",
-  "repository": "https://github.com/odradekai/skill-engineering-guide",
+  "homepage": "https://github.com/odradekai/skill-forge",
+  "repository": "https://github.com/odradekai/skill-forge",
   "license": "MIT",
   "keywords": [
     "skills",

@@ -88,11 +88,11 @@ Map the complete chain. Verify every link works.
 
 ### 5. Platform Coverage
 
-Identify platforms the project doesn't yet support. For adding new platforms, invoke `seg:adapting-skill-platforms`.
+Identify platforms the project doesn't yet support. For adding new platforms, invoke `skill-forge:adapting-skill-platforms`.
 
 ### 6. Security Remediation
 
-Fix security findings from `seg:scanning-skill-security` or audit Category 9.
+Fix security findings from `skill-forge:scanning-skill-security` or audit Category 9.
 
 **Targets:**
 - Remove unnecessary system access from hook scripts (least privilege)
@@ -124,8 +124,11 @@ For description optimization specifically: create test prompts, verify triggerin
 ## Integration
 
 **Called by:**
-- **seg:auditing-skill-projects** — when audit finds optimization opportunities
+- **skill-forge:auditing-skill-projects** — when audit finds optimization opportunities
 
 **Pairs with:**
-- **seg:managing-skill-versions** — after optimization, versions may need sync
-- **seg:scanning-skill-security** — security findings feed into remediation
+- **skill-forge:managing-skill-versions** — after optimization, versions may need sync
+- **skill-forge:scanning-skill-security** — security findings feed into remediation
+
+**Cross-refers:**
+- **skill-forge:iterating-skill-feedback** — when effectiveness issues go beyond engineering norms into single-skill behavior and prompt quality
