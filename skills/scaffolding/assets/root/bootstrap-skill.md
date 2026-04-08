@@ -15,9 +15,7 @@ description: Use when starting any conversation - establishes how to find and us
 
 **In Claude Code:** Use the `Skill` tool.
 **In Cursor:** Use the `Skill` tool.
-**In Copilot CLI:** Use the `skill` tool.
 **In Gemini CLI:** Skills activate via the `activate_skill` tool.
-**In other environments:** Check your platform's documentation.
 
 ## Platform Adaptation
 

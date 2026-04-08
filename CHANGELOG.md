@@ -1,5 +1,40 @@
 # Changelog
 
+## [Unreleased]
+
+## [1.3.1] - 2026-04-08
+
+### Removed
+
+- **Copilot CLI platform support** — removed from all documentation, hooks, manifests, and SKILL.md files. Copilot CLI has no plugin/extension system; this was fictional. Platform count reduced from 6 to 5.
+- **`scanning-security` skill** — merged into `auditing` as Category 9 (Security Scan). Security checklist moved to `auditing/references/security-checklist.md`.
+- **`iterating-feedback` skill** — merged into `optimizing` as the Feedback Iteration sub-process.
+- **`managing-versions` skill** — merged into `releasing` as the Version Management Infrastructure section.
+- **`security-scanner` agent** — functionality absorbed by `project-auditor` agent.
+- **`package.json` `main` and `type` fields** — misleading for a multi-platform markdown-based project.
+- **`hooks.json` `matcher` field** — unnecessary for `SessionStart` hooks per Claude Code docs.
+
+### Changed
+
+- **Skill consolidation: 11 → 8 skills** — three skills absorbed into their natural parents, reducing cognitive load and improving agent routing accuracy.
+- **`auditing` skill** — now includes full 5-target security scanning inline, with termination rule (max one re-audit cycle).
+- **`optimizing` skill** — now includes feedback iteration workflow with 3-question validation framework.
+- **`releasing` skill** — now includes version management infrastructure (`.version-bump.json`, `bump-version.sh` usage).
+- **`hooks/session-start`** — simplified platform detection (removed `COPILOT_CLI` branch).
+- **`using-bundles-forge` routing table** — updated to 8 skills with revised descriptions and priority order.
+- Updated all cross-references: `bundles-forge:scanning-security` → `bundles-forge:auditing`, `bundles-forge:iterating-feedback` → `bundles-forge:optimizing`, `bundles-forge:managing-versions` → `bundles-forge:releasing`.
+- Updated README.md and README.zh.md — lifecycle diagram, skill tables, agent list, command mappings.
+- Updated `CLAUDE.md` — 5 platforms, 8 skills.
+- Updated `AGENTS.md` — expanded from one-line pointer to full quick reference with skill list.
+- Updated `project-auditor` agent — now references both quality and security checklists.
+- Updated `tests/test-skill-discovery.sh` — expects 8 skills.
+
+### Added
+
+- **"Why Bundles?" section** in both READMEs — concrete explanation of when and why to use the bundles pattern.
+- **Python test suite** (`tests/test_scripts.py`) — 12 cross-platform tests covering `lint-skills.py`, `scan-security.py`, `audit-project.py`, and cross-reference integrity.
+- **Cycle termination conditions** in `auditing` and `optimizing` to prevent infinite audit-optimize loops.
+
 ## [1.3.0] - 2026-04-08
 
 ### Changed

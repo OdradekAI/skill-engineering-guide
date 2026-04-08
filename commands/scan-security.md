@@ -1,7 +1,7 @@
 ---
-description: "Scan bundles for security risks — use the bundles-forge:scanning-security skill instead"
+description: "Scan bundles for security risks — use the bundles-forge:auditing skill instead"
 ---
 
-This command invokes the scanning-security skill. Use it to scan for security risks in hooks, plugins, agent prompts, and skill instructions.
+This command invokes the auditing skill with a focus on security scanning. Use it to scan for security risks in hooks, plugins, agent prompts, and skill instructions.
 
-Invoke the `bundles-forge:scanning-security` skill to begin.
+Invoke the `bundles-forge:auditing` skill to begin.

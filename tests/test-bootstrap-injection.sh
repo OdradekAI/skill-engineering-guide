@@ -88,12 +88,6 @@ else
   fail "missing Claude Code platform detection"
 fi
 
-if grep -q 'COPILOT_CLI' "$HOOK"; then
-  pass "detects Copilot CLI platform"
-else
-  fail "missing Copilot CLI platform detection"
-fi
-
 echo ""
 echo "=== Results: $PASS passed, $FAIL failed ==="
 exit $FAIL

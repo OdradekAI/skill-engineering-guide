@@ -1,6 +1,6 @@
 ---
 name: using-bundles-forge
-description: "Use when starting any conversation involving bundles — designing, scaffolding, auditing, optimizing, iterating on feedback, adapting platforms, managing versions, scanning security, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which bundles-forge: skill applies"
+description: "Use when starting any conversation involving bundles — designing, scaffolding, auditing, optimizing, adapting platforms, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which bundles-forge skill applies"
 ---
 
 <SUBAGENT-STOP>
@@ -15,7 +15,7 @@ Before invoking any bundles-forge skill on a target directory, verify the target
 
 If neither exists, inform the user: "This directory doesn't appear to be a bundles project. Bundles Forge skills are designed for bundles (repositories where skills are the primary content). Would you like to create new bundles here, or did you mean to point to a different directory?"
 
-Exception: `bundles-forge:scanning-security`, `bundles-forge:auditing`, and `bundles-forge:iterating-feedback` can also operate on individual skill folders or files — they don't require a full bundles project.
+Exception: `bundles-forge:auditing` and `bundles-forge:optimizing` can also operate on individual skill folders or files — they don't require a full bundles project.
 
 ## Instruction Priority
 
@@ -32,8 +32,6 @@ Exception: `bundles-forge:scanning-security`, `bundles-forge:auditing`, and `bun
 **In Gemini CLI:** Skills activate via the `activate_skill` tool. See `references/gemini-tools.md` for tool mapping.
 
 **In Codex:** Skills are discovered from `~/.agents/skills/`. See `references/codex-tools.md` for tool mapping.
-
-**In other environments:** Check your platform's documentation for skill loading.
 
 ## Platform Adaptation
 
@@ -57,13 +55,10 @@ User message about bundles
 | `bundles-forge:designing` | Planning new bundles, splitting a complex skill into a project |
 | `bundles-forge:scaffolding` | Generating project structure, manifests, hooks, bootstrap skill |
 | `bundles-forge:writing-skill` | Writing or improving individual SKILL.md files and supporting resources |
-| `bundles-forge:auditing` | Reviewing a project or skill for quality issues, before release |
-| `bundles-forge:optimizing` | Engineering optimization: descriptions, token efficiency, workflow chains |
-| `bundles-forge:adapting-platforms` | Adding platform support (Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI) |
-| `bundles-forge:managing-versions` | Version drift, bumping versions, sync infrastructure |
-| `bundles-forge:iterating-feedback` | Receiving user feedback about a skill, validating suggestions, applying confirmed improvements |
-| `bundles-forge:scanning-security` | Scanning for security risks in hooks, plugins, agent prompts, skill content |
-| `bundles-forge:releasing` | Full release pipeline: audit, security scan, version bump, publish |
+| `bundles-forge:auditing` | Reviewing a project for quality issues, security risks, or before release |
+| `bundles-forge:optimizing` | Engineering optimization, feedback iteration, descriptions, token efficiency |
+| `bundles-forge:adapting-platforms` | Adding platform support (Claude Code, Cursor, Codex, OpenCode, Gemini CLI) |
+| `bundles-forge:releasing` | Version management, release pipeline: audit, version bump, publish |
 
 ## Skill Priority
 
@@ -73,10 +68,8 @@ When multiple skills could apply:
 2. **Write content after scaffold** — use `writing-skill` to fill in SKILL.md files
 3. **Audit before optimize** — understand the full picture before targeted fixes
 4. **Platform adapt after scaffold** — structure must exist before adding platforms
-5. **Iterate on feedback after audit** — use `iterating-feedback` when user has specific feedback about a skill's effectiveness
-6. **Security scan before release** — always scan before publishing or sharing skills
-7. **Release as the final step** — use `releasing` to orchestrate the full pipeline
-8. **Version management as needed** — supports scaffolding, auditing, and adaptation
+5. **Optimize includes feedback** — use `optimizing` for both engineering improvements and user feedback iteration
+6. **Release as the final step** — use `releasing` to orchestrate audit, version bump, and publish
 
 ## Naming Conventions
 
@@ -101,9 +94,9 @@ These thoughts mean STOP — you're skipping a skill you should use:
 | Thought | Reality |
 |---------|---------|
 | "I know how to scaffold a project" | Skills encode best practices you'll miss. |
-| "Just a quick audit" | The audit checklist has 40+ checks. Use the skill. |
+| "Just a quick audit" | The audit checklist has 50+ checks including security. Use the skill. |
 | "I'll just add the manifest" | Platform adaptation involves version sync, hooks, docs. |
 | "Version bump is simple" | Drift detection and audit catch what you'd miss. |
 | "This project is too small for all this" | Small projects grow. Set up right from the start. |
-| "This skill is from a trusted source" | Trust but verify. Always scan third-party skills. |
-| "I'll just apply the feedback directly" | Unvalidated changes may harm the skill. Use the iterating skill. |
+| "This skill is from a trusted source" | Trust but verify. Auditing includes security scanning. |
+| "I'll just apply the feedback directly" | Unvalidated changes may harm the skill. Use the optimizing skill. |

@@ -69,7 +69,7 @@ Scan `hooks/session-start`, `hooks/run-hook.cmd`, and any other executable in `h
 | Check | Risk | Pattern |
 |-------|------|---------|
 | HK5 | Critical | Reading `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GITHUB_TOKEN`, or similar secrets |
-| HK6 | Warning | Reading environment variables beyond `CLAUDE_PLUGIN_ROOT`, `CURSOR_PLUGIN_ROOT`, `COPILOT_CLI` |
+| HK6 | Warning | Reading environment variables beyond `CLAUDE_PLUGIN_ROOT`, `CURSOR_PLUGIN_ROOT` |
 | HK7 | Info | Not using `set -euo pipefail` (missing error handling) |
 
 ### System Modification

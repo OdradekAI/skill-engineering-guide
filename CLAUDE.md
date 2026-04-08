@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a bundles engineering toolkit supporting 6 platforms: Claude Code, Cursor, Codex, OpenCode, Copilot CLI, and Gemini CLI. It contains 11 skills covering the full lifecycle of bundles development.
+This is a bundles engineering toolkit supporting 5 platforms: Claude Code, Cursor, Codex, OpenCode, and Gemini CLI. It contains 8 skills covering the full lifecycle of bundles development.
 
 ## Development Workflow
 
@@ -37,7 +37,6 @@ scripts/bump-version.sh --audit         # find undeclared version strings
 | Cursor | `.cursor-plugin/plugin.json` |
 | Codex | `.codex/INSTALL.md` |
 | OpenCode | `.opencode/plugins/bundles-forge.js` |
-| Copilot CLI | (shares Claude Code hooks) |
 | Gemini CLI | `gemini-extension.json` |
 
 ## Hooks
@@ -49,4 +48,4 @@ Session bootstrap hooks live in `hooks/`. The `session-start` script reads `skil
 - Never add network calls (`curl`, `wget`) to hook scripts
 - Never reference sensitive files (`.env`, `.ssh/`) in SKILL.md instructions
 - Never use `eval()` or `child_process` in plugin code
-- Run `bundles-forge:scanning-security` before releases
+- Run `bundles-forge:auditing` before releases

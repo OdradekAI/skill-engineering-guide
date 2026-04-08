@@ -21,12 +21,9 @@ EXPECTED_SKILLS=(
   adapting-platforms
   auditing
   designing
-  iterating-feedback
-  managing-versions
   optimizing
   releasing
   scaffolding
-  scanning-security
   using-bundles-forge
   writing-skill
 )

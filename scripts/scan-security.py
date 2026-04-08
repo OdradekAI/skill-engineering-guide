@@ -133,7 +133,7 @@ SCRIPT_RULES = _compile([
 # ---------------------------------------------------------------------------
 
 ALLOWED_HOOK_ENV_VARS = frozenset({
-    "CLAUDE_PLUGIN_ROOT", "CURSOR_PLUGIN_ROOT", "COPILOT_CLI",
+    "CLAUDE_PLUGIN_ROOT", "CURSOR_PLUGIN_ROOT",
     "SCRIPT_DIR", "PLUGIN_ROOT", "HOOK_NAME", "HOOK_PATH",
     "GIT_EXE", "GIT_DIR", "BASH_EXE",
 })

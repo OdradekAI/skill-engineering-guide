@@ -1,6 +1,6 @@
 ---
 name: adapting-platforms
-description: "Use when adding Claude Code, Cursor, Codex, OpenCode, Copilot CLI, or Gemini CLI support to an existing bundles repository, when platform manifests need updating or fixing, when migrating a bundles repository to a new platform, or when platform-specific hooks or configuration need changes"
+description: "Use when adding Claude Code, Cursor, Codex, OpenCode, or Gemini CLI support to an existing bundles repository, when platform manifests need updating or fixing, when migrating a bundles repository to a new platform, or when platform-specific hooks or configuration need changes"
 ---
 
 # Adapting Skill Platforms
@@ -55,17 +55,16 @@ Create all files for the target platform using the template files from `assets/<
 
 ### Step 4: Update Version Sync
 
-Add new manifest files to `.version-bump.json` if they contain version strings. Use `bundles-forge:managing-versions` for version infrastructure.
+Add new manifest files to `.version-bump.json` if they contain version strings. Use `bundles-forge:releasing` for version infrastructure.
 
 ### Step 5: Update Hooks
 
-If the platform uses session hooks (Claude Code, Cursor, Copilot CLI), ensure `session-start` handles the new platform's JSON format. Platform detection uses environment variables:
+If the platform uses session hooks (Claude Code, Cursor), ensure `session-start` handles the new platform's JSON format. Platform detection uses environment variables:
 
 | Variable | Platform |
 |----------|----------|
 | `CURSOR_PLUGIN_ROOT` | Cursor |
-| `CLAUDE_PLUGIN_ROOT` (without `COPILOT_CLI`) | Claude Code |
-| `COPILOT_CLI` | Copilot CLI |
+| `CLAUDE_PLUGIN_ROOT` | Claude Code |
 
 ### Step 6: Update Documentation
 
@@ -97,4 +96,4 @@ If the platform uses session hooks (Claude Code, Cursor, Copilot CLI), ensure `s
 - **bundles-forge:auditing** — verify after adaptation
 
 **Pairs with:**
-- **bundles-forge:managing-versions** — version sync for new manifests
+- **bundles-forge:releasing** — version sync for new manifests

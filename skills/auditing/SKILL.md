@@ -1,23 +1,58 @@
 ---
 name: auditing
-description: "Use when reviewing a bundles for structural issues, version drift, manifest problems, or skill quality, before releasing a bundles, after significant changes to a bundles, when a user points to a specific skill folder or third-party skill to review, or as a periodic bundles health check — provides systematic 9-category quality assessment with scoring and actionable recommendations"
+description: "Use when reviewing a bundles for structural issues, version drift, manifest problems, skill quality, or security risks, before releasing a bundles, after significant changes, when scanning third-party skills before installation, when a user points to a specific skill folder or file to review, or as a periodic bundles health check — auto-detects scope (full project vs single skill) and runs only applicable checks"
 ---
 
 # Auditing Bundles
 
 ## Overview
 
-Systematically evaluate a bundles across 9 quality categories, score each, and produce an actionable report. Think of this as a comprehensive health check — it catches everything from missing manifests to security risks.
+Systematically evaluate a bundles project or a single skill across applicable quality categories — including security scanning — score each, and produce an actionable report.
 
 **Core principle:** Measure before you fix. A scored audit prevents both under-reaction and over-engineering.
 
-**Announce at start:** "I'm using the auditing skill to audit this project."
+**This skill includes security scanning.** Category 9 performs a security scan of skill content, hook scripts, plugin code, agent prompts, and bundled scripts. No need to invoke a separate security skill.
 
-## The Process
+**Announce at start:** "I'm using the auditing skill to audit [this project / this skill]."
+
+## Step 1: Resolve Input & Detect Scope
+
+The target can be a local path, a GitHub URL, or a zip file. Normalize the input to a local directory before scope detection.
+
+### Input Normalization
+
+| Input | Action |
+|-------|--------|
+| Local directory path | Use directly |
+| Local SKILL.md file path | Use its parent directory |
+| GitHub repo URL (`https://github.com/user/repo`) | `git clone --depth 1 --no-checkout` to temp dir, then `git checkout` (avoids running hooks) |
+| GitHub subdirectory URL (`…/tree/main/skills/xxx`) | Clone repo (shallow), extract the subdirectory path |
+| Zip/tar.gz file path | Extract to temp directory |
+| GitHub release/archive URL (`.zip`/`.tar.gz`) | Download, then extract to temp directory |
+
+**Security rule for remote sources:** Always clone/download without executing hooks or scripts. Use `--no-checkout` + selective `git checkout`, or extract archives without running post-install scripts. The audit itself will scan for risks — don't trigger them before scanning.
+
+### Scope Detection
+
+After normalization, determine the audit scope from the resolved local path:
+
+| Target | How to Detect | Mode |
+|--------|--------------|------|
+| Project root | Has `skills/` directory and `package.json` | **Full audit** — all 9 categories |
+| Single skill directory | Contains `SKILL.md` but no `skills/` subdirectory | **Skill audit** — 4 applicable categories |
+| Single SKILL.md file | Path ends in `SKILL.md` | **Skill audit** — 4 applicable categories |
+
+**If the target is a single skill, skip to the Skill Audit section below.**
+
+---
+
+## Full Project Audit
+
+### The Process
 
 ```
 Scan project root
-  → Run 9-category checks
+  → Run 9-category checks (including security scan)
   → Score each category
   → Compile report
   → Present findings
@@ -25,25 +60,26 @@ Scan project root
   → Info only?        → Suggest optimization
 ```
 
-### Script Shortcut
-
-Run the automated audit for a quick project health check:
+### Script Shortcuts
 
 ```bash
-python scripts/audit-project.py <project-root>        # markdown report with scores
+python scripts/audit-project.py <project-root>        # full audit with scores
 python scripts/audit-project.py --json <project-root>  # machine-readable
+
+python scripts/scan-security.py <project-root>         # security-only scan
+python scripts/scan-security.py --json <project-root>  # security JSON output
 ```
 
-The script orchestrates `scan-security.py` (security) and `lint-skills.py` (skill quality), then adds structure, manifest, version-sync, hook, and documentation checks. Use the full manual process below for deeper analysis and scoring nuance.
+`audit-project.py` orchestrates `scan-security.py` (security) and `lint-skills.py` (skill quality), then adds structure, manifest, version-sync, hook, and documentation checks.
 
-### Step 1: Scan
+### Step 2: Scan
 
 Read the project root. Identify:
 - Which platforms are targeted (by manifest presence)
 - How many skills exist
 - Whether hooks, version sync, and bootstrap are present
 
-### Step 2: Check
+### Step 3: Check
 
 Run all 9 categories from `references/audit-checklist.md`. The checklist has 50+ individual checks with severity levels (Critical / Warning / Info).
 
@@ -59,13 +95,27 @@ Run all 9 categories from `references/audit-checklist.md`. The checklist has 50+
 | Hooks | Medium | Bootstrap injection, platform detection |
 | Testing | Low | Test directory, platform coverage |
 | Documentation | Low | README, install docs, CHANGELOG |
-| Security | High | Hook scripts, plugin code, agent prompts, instruction patterns |
+| Security | High | 5 attack surfaces — see Security Scan below |
 
-### Step 3: Score
+### Security Scan (Category 9)
+
+Scans 5 attack surfaces. See `references/security-checklist.md` for the full pattern list.
+
+| Target | Risk Level | What to Look For |
+|--------|-----------|------------------|
+| SKILL.md content | High | Data exfiltration instructions, destructive commands, safety overrides, encoding tricks |
+| Hook scripts | High | Network calls, env var exfiltration, system config modification |
+| OpenCode plugins | High | Dynamic code execution, network access, message manipulation |
+| Agent prompts | Medium | Privilege escalation, scope expansion, safety overrides |
+| Bundled scripts | Medium | Network calls, system modifications, unsanitized inputs |
+
+**Third-party skill scanning:** When scanning skills from external sources, clone/download without executing hooks, run the audit, and review critical findings with the user before installation. Never auto-install without scanning.
+
+### Step 4: Score
 
 Each category: 0-10 scale. Overall = weighted average.
 
-### Step 4: Report
+### Step 5: Report
 
 Present as:
 
@@ -90,26 +140,95 @@ Present as:
 | ...      | ...   | ...   |
 ```
 
-### Step 5: Fix or Optimize
+### Step 6: Fix or Optimize
 
 - **Critical issues:** Offer to fix immediately
 - **Warnings:** Offer to fix or suggest `bundles-forge:optimizing`
 - **Info:** Note for future consideration
 
+**Termination rule:** After fixing critical/warning issues, run one re-audit to verify. Do not loop more than once — if the re-audit still has issues, present them to the user for manual decision.
+
+---
+
+## Skill Audit (Lightweight Mode)
+
+When the target is a single skill directory or SKILL.md file, run only the 4 categories that apply at skill scope. This is auto-detected — no special flags needed.
+
+### Applicable Categories
+
+| Category | Checks Run | What It Catches |
+|----------|-----------|----------------|
+| Structure | S2, S3, S9 | Skill has own directory, contains SKILL.md, directory name matches frontmatter `name` |
+| Skill Quality | Q1–Q12 (all) | Frontmatter validity, description conventions, token efficiency, section structure |
+| Cross-References | X1, X2, X3 | Outgoing `project:skill-name` refs resolve, relative paths exist, Integration section present |
+| Security | SEC1, SEC5, SEC8, SEC9, SEC10 | Sensitive file access, safety overrides, encoding tricks, scope constraints, error handling |
+
+**Skipped categories:** Platform Manifests, Version Sync, Hooks, Testing, Documentation — these require project-level context.
+
+### Script Shortcuts
+
+```bash
+python scripts/lint-skills.py <skill-directory>         # skill quality only
+python scripts/scan-security.py <skill-directory>        # security scan on skill files
+```
+
+### Process
+
+```
+Read target skill
+  → Run 4-category checks (Structure, Quality, Cross-Refs, Security)
+  → Score each
+  → Compile lightweight report
+  → Present findings
+```
+
+### Report Format
+
+```
+## Skill Audit: <skill-name>
+
+### Score: X/10
+
+### Findings
+- [C/W/I] <category>.<check>: <description>
+
+### Category Breakdown
+| Category | Score | Notes |
+|----------|-------|-------|
+| Structure | X/10 | ... |
+| Skill Quality | X/10 | ... |
+| Cross-References | X/10 | ... |
+| Security | X/10 | ... |
+```
+
+### Third-Party Skill Scanning
+
+When auditing a skill from an external source (marketplace, git, shared file):
+
+1. Clone/download the skill **without executing** any hooks or scripts
+2. Run the skill audit on the downloaded content
+3. Pay special attention to Security checks — third-party skills are the primary threat vector
+4. Review all critical/warning findings with the user before installation
+5. Never auto-install a skill that has unresolved critical security findings
+
+---
+
 ## Severity Levels
 
-- **Critical** — project will not work correctly (missing manifests, broken hooks, version drift)
-- **Warning** — project works but has quality issues (description anti-patterns, missing .gitignore entries)
-- **Info** — improvement opportunities (could add platform, test coverage gaps)
+- **Critical** — skill/project will not work correctly, or contains active security threats
+- **Warning** — works but has quality issues or suspicious patterns needing review
+- **Info** — improvement opportunities
 
 ## Common Mistakes
 
 | Mistake | Fix |
 |---------|-----|
-| Skipping version sync check | Always run `bump-version.sh --check` |
+| Skipping version sync check | Always run `bump-version.sh --check` (full audit) |
 | Not checking description anti-patterns | Descriptions that summarize workflow cause agents to shortcut |
 | Ignoring cross-reference resolution | Broken `project:skill-name` refs = broken workflow chains |
-| Auditing only structure | All 9 categories matter — don't skip quality or security checks |
+| Running full 9-category audit on a single skill | Let scope auto-detection handle it — 5 categories don't apply |
+| Skipping security because "I wrote it myself" | Accidental vulnerabilities are common — always scan |
+| Only scanning SKILL.md, ignoring hooks | Hooks are the highest-risk executable code (full audit) |
 
 ## Integration
 
@@ -117,11 +236,7 @@ Present as:
 - **bundles-forge:scaffolding** — post-scaffold verification
 
 **Calls:**
-- **bundles-forge:optimizing** — when findings need targeted project-level fixes
-- **bundles-forge:scanning-security** — Category 9: Security assessment
-
-**Suggests:**
-- **bundles-forge:iterating-feedback** — when single-skill effectiveness issues warrant user-directed improvements (user must confirm before iteration begins)
+- **bundles-forge:optimizing** — when findings need targeted fixes or user feedback iteration
 
 **Pairs with:**
-- **bundles-forge:managing-versions** — version drift checks
+- **bundles-forge:releasing** — version drift checks, pre-release verification

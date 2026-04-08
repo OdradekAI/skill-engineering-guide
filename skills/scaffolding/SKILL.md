@@ -45,7 +45,6 @@ Generate only what's needed — layers activate based on the design:
 | Cursor | `.cursor-plugin/plugin.json`, `hooks/hooks-cursor.json` |
 | Codex | `.codex/INSTALL.md`, `AGENTS.md` |
 | OpenCode | `.opencode/plugins/<name>.js`, `.opencode/INSTALL.md` |
-| Copilot CLI | Shares Claude Code hooks (env detection in `session-start`) |
 | Gemini CLI | `gemini-extension.json`, `GEMINI.md` |
 
 ### If Bootstrap Skill Requested
@@ -74,7 +73,7 @@ After generating all files:
 2. **Verify version sync** — run `scripts/bump-version.sh --check`
 3. **Validate manifests** — each platform manifest references correct paths
 4. **Test bootstrap** — if created, verify it loads on at least one target platform
-5. **Security baseline** — run `bundles-forge:scanning-security` on generated hooks and plugin code
+5. **Security baseline** — run `bundles-forge:auditing` on generated hooks and plugin code
 6. **Report** — show the user the generated structure and next steps
 
 Dispatch the `scaffold-reviewer` agent (`agents/scaffold-reviewer.md`) for automated validation if subagents are available.
@@ -108,8 +107,6 @@ Dispatch the `scaffold-reviewer` agent (`agents/scaffold-reviewer.md`) for autom
 
 **Calls:**
 - **bundles-forge:auditing** — post-scaffold verification
-- **bundles-forge:scanning-security** — post-scaffold security baseline
-
 **Pairs with:**
-- **bundles-forge:managing-versions** — version infrastructure setup
+- **bundles-forge:releasing** — version infrastructure setup
 - **bundles-forge:adapting-platforms** — adding platforms later

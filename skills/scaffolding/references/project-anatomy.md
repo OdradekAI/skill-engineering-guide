@@ -204,13 +204,12 @@ The plugin uses OpenCode's hook API: `config` for path registration, `experiment
 
 ### `session-start`
 
-Bash script that injects the bootstrap skill content as session context. Platform-aware: detects `CURSOR_PLUGIN_ROOT`, `CLAUDE_PLUGIN_ROOT`, and `COPILOT_CLI` environment variables to emit the correct JSON shape.
+Bash script that injects the bootstrap skill content as session context. Platform-aware: detects `CURSOR_PLUGIN_ROOT` and `CLAUDE_PLUGIN_ROOT` environment variables to emit the correct JSON shape.
 
 | Platform | JSON Field |
 |----------|-----------|
 | Cursor | `additional_context` (snake_case) |
 | Claude Code | `hookSpecificOutput.additionalContext` (nested) |
-| Copilot CLI / SDK | `additionalContext` (top-level) |
 
 The script reads the bootstrap SKILL.md, JSON-escapes it, and wraps it in `<EXTREMELY_IMPORTANT>` tags. Uses `printf` instead of heredoc to avoid bash 5.3+ heredoc hang issues.
 
@@ -227,7 +226,6 @@ Claude Code hook descriptor:
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|clear|compact",
         "hooks": [
           {
             "type": "command",

@@ -68,26 +68,6 @@ Replace all `<project-name>` occurrences in the plugin template with the actual 
 
 ---
 
-## Copilot CLI
-
-Copilot CLI shares Claude Code's plugin infrastructure. **No additional template files needed** beyond what Claude Code generates.
-
-The `hooks/session-start` script detects `COPILOT_CLI` via environment variable and emits the SDK-standard JSON format:
-
-```bash
-if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
-  printf '{ "additional_context": "%s" }\n' "$session_context"
-elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
-  printf '{ "hookSpecificOutput": { "hookEventName": "SessionStart", "additionalContext": "%s" } }\n' "$session_context"
-else
-  printf '{ "additionalContext": "%s" }\n' "$session_context"
-fi
-```
-
-**Install method:** `copilot plugin marketplace add` or `copilot plugin install`.
-
----
-
 ## Gemini CLI
 
 **Template files:** `assets/gemini/extension.json`, `assets/gemini/GEMINI.md`
@@ -116,7 +96,7 @@ gemini extensions install <repo-url>
 
 ## Shared Hook: `session-start`
 
-The `session-start` script is shared across Claude Code, Cursor, and Copilot CLI. It:
+The `session-start` script is shared across Claude Code and Cursor. It:
 
 1. Determines the plugin root from its own location
 2. Reads the bootstrap SKILL.md
@@ -138,8 +118,6 @@ Template available at: `scaffolding/assets/hooks/run-hook.cmd`
 | Environment Variable | Platform |
 |---------------------|----------|
 | `CURSOR_PLUGIN_ROOT` | Cursor |
-| `CLAUDE_PLUGIN_ROOT` (without `COPILOT_CLI`) | Claude Code |
-| `COPILOT_CLI` | Copilot CLI |
-| Neither | Unknown / SDK standard |
+| `CLAUDE_PLUGIN_ROOT` | Claude Code |
 
 The `session-start` script checks these in order to determine which JSON format to emit.

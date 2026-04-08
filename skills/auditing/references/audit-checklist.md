@@ -162,7 +162,7 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python3 -m json.tool
 
 ## Category 9: Security (Weight: High)
 
-Run security checks on all executable code, agent instructions, and hook scripts. For a deep security assessment, invoke `bundles-forge:scanning-security` which provides the full security checklist.
+Run security checks on all executable code, agent instructions, and hook scripts. See `references/security-checklist.md` for the full pattern list.
 
 | Check | Severity | Criteria |
 |-------|----------|----------|

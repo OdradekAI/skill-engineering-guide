@@ -116,7 +116,6 @@ Which platforms should the project support?
 | Cursor | `.cursor-plugin/plugin.json` | Explicit paths |
 | Codex | `.codex/INSTALL.md` | Symlink to `~/.agents/skills/` |
 | OpenCode | `.opencode/plugins/<name>.js` | Plugin config |
-| Copilot CLI | Shares Claude Code hooks | Env detection |
 | Gemini CLI | `gemini-extension.json` | Context file |
 
 Start with what the user actually uses. Others can be added later via `bundles-forge:adapting-platforms`.

@@ -23,7 +23,7 @@ Replace all placeholders before writing to the target project.
 
 | Template File | Target Path | Purpose |
 |---------------|-------------|---------|
-| `assets/hooks/session-start` | `hooks/session-start` | Bootstrap injection script (shared across Claude Code, Cursor, Copilot CLI) |
+| `assets/hooks/session-start` | `hooks/session-start` | Bootstrap injection script (shared across Claude Code, Cursor) |
 | `assets/hooks/run-hook.cmd` | `hooks/run-hook.cmd` | Windows polyglot hook runner |
 | `assets/scripts/bump-version.sh` | `scripts/bump-version.sh` | Version sync tool (bump, check, audit) |
 | `assets/root/version-bump.json` | `.version-bump.json` | Version sync config (adapt `files` array to target platforms) |
