@@ -1,4 +1,4 @@
-# Installing Skill Forge for Codex
+# Installing Bundles Forge for Codex
 
 Enable skills in Codex via native skill discovery. Clone and symlink.
 
@@ -10,19 +10,19 @@ Enable skills in Codex via native skill discovery. Clone and symlink.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/odradekai/skill-forge.git ~/.codex/skill-forge
+   git clone https://github.com/odradekai/bundles-forge.git ~/.codex/bundles-forge
    ```
 
 2. **Create the skills symlink:**
    ```bash
    mkdir -p ~/.agents/skills
-   ln -s ~/.codex/skill-forge/skills ~/.agents/skills/skill-forge
+   ln -s ~/.codex/bundles-forge/skills ~/.agents/skills/bundles-forge
    ```
 
    **Windows (PowerShell):**
    ```powershell
    New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
-   cmd /c mklink /J "$env:USERPROFILE\.agents\skills\skill-forge" "$env:USERPROFILE\.codex\skill-forge\skills"
+   cmd /c mklink /J "$env:USERPROFILE\.agents\skills\bundles-forge" "$env:USERPROFILE\.codex\bundles-forge\skills"
    ```
 
 3. **Restart Codex** to discover the skills.
@@ -30,7 +30,7 @@ Enable skills in Codex via native skill discovery. Clone and symlink.
 ## Updating
 
 ```bash
-cd ~/.codex/skill-forge && git pull
+cd ~/.codex/bundles-forge && git pull
 ```
 
 Skills update instantly through the symlink.
@@ -38,6 +38,6 @@ Skills update instantly through the symlink.
 ## Uninstalling
 
 ```bash
-rm ~/.agents/skills/skill-forge
-rm -rf ~/.codex/skill-forge
+rm ~/.agents/skills/bundles-forge
+rm -rf ~/.codex/bundles-forge
 ```

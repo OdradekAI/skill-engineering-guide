@@ -1,28 +1,28 @@
-# Skill Forge
+# Bundles Forge
 
 [中文](README.zh.md)
 
-A skill-project engineering toolkit: scaffolding, platform adaptation, version management, auditing, and skill lifecycle management across all major AI coding platforms.
+A bundles engineering toolkit: scaffolding, platform adaptation, version management, auditing, and skill lifecycle management across all major AI coding platforms.
 
 ## Installation
 
 ### Claude Code
 
 ```bash
-claude plugin install skill-forge
+claude plugin install bundles-forge
 ```
 
 Or for development:
 
 ```bash
-git clone https://github.com/odradekai/skill-forge.git
-cd skill-forge
+git clone https://github.com/odradekai/bundles-forge.git
+cd bundles-forge
 claude plugin link .
 ```
 
 ### Cursor
 
-Search for `skill-forge` in the Cursor plugin marketplace, or use `/add-plugin skill-forge`.
+Search for `bundles-forge` in the Cursor plugin marketplace, or use `/add-plugin bundles-forge`.
 
 ### Codex
 
@@ -35,48 +35,48 @@ See [`.opencode/INSTALL.md`](.opencode/INSTALL.md)
 ### Copilot CLI
 
 ```bash
-copilot plugin install skill-forge
+copilot plugin install bundles-forge
 ```
 
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/odradekai/skill-forge.git
+gemini extensions install https://github.com/odradekai/bundles-forge.git
 ```
 
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| `using-skill-forge` | Bootstrap meta-skill — establishes how to find and use all other skills |
-| `designing-skill-projects` | Plan a new skill-project or decompose a complex skill through structured interview |
-| `scaffolding-skill-projects` | Generate project structure, manifests, hooks, and bootstrap skill |
-| `writing-skill-content` | Guide authoring of SKILL.md files — structure, descriptions, progressive disclosure |
-| `auditing-skill-projects` | Systematic quality assessment with 9-category scoring |
-| `optimizing-skill-projects` | Engineering optimization — descriptions, token efficiency, workflow chains |
-| `adapting-skill-platforms` | Add platform support (Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI) |
-| `managing-skill-versions` | Version sync infrastructure, drift detection, and auditing |
-| `iterating-skill-feedback` | Iterate on skill improvements based on user feedback — validate, fork external skills, auto-audit |
-| `scanning-skill-security` | Scan skill-projects for security risks in hooks, plugins, agent prompts, and instructions |
-| `releasing-skill-projects` | Full release pipeline — audit, security scan, version bump, CHANGELOG, publish |
+| `using-bundles-forge` | Bootstrap meta-skill — establishes how to find and use all other skills |
+| `designing` | Plan a new bundles or decompose a complex skill through structured interview |
+| `scaffolding` | Generate project structure, manifests, hooks, and bootstrap skill |
+| `writing-skill` | Guide authoring of SKILL.md files — structure, descriptions, progressive disclosure |
+| `auditing` | Systematic quality assessment with 9-category scoring |
+| `optimizing` | Engineering optimization — descriptions, token efficiency, workflow chains |
+| `adapting-platforms` | Add platform support (Claude Code, Cursor, Codex, OpenCode, Copilot CLI, Gemini CLI) |
+| `managing-versions` | Version sync infrastructure, drift detection, and auditing |
+| `iterating-feedback` | Iterate on skill improvements based on user feedback — validate, fork external skills, auto-audit |
+| `scanning-security` | Scan bundles for security risks in hooks, plugins, agent prompts, and instructions |
+| `releasing` | Full release pipeline — audit, security scan, version bump, CHANGELOG, publish |
 
 ## Workflow
 
-The skills cover the full lifecycle of a skill-project:
+The skills cover the full lifecycle of a bundles:
 
 ```
-designing-skill-projects → scaffolding-skill-projects → writing-skill-content
+designing → scaffolding → writing-skill
                                                               ↓
-                           auditing-skill-projects ← ── ── ── ┘
+                           auditing ← ── ── ── ┘
                                 ↓               ↓
-               optimizing-skill-projects   iterating-skill-feedback
+               optimizing   iterating-feedback
                (project engineering)       (single-skill effectiveness)
                                 ↓               ↓
-                           releasing-skill-projects
+                           releasing
                                     ↑
-              scanning-skill-security (called by audit + release)
-              adapting-skill-platforms (add platforms at any phase)
-              managing-skill-versions (supports all phases)
+              scanning-security (called by audit + release)
+              adapting-platforms (add platforms at any phase)
+              managing-versions (supports all phases)
 ```
 
 1. **Design** — interview to determine project scope, or decompose a complex skill into a project
@@ -102,11 +102,11 @@ designing-skill-projects → scaffolding-skill-projects → writing-skill-conten
 
 | Command | Redirects To |
 |---------|-------------|
-| `/use-skill-forge` | `skill-forge:using-skill-forge` |
-| `/design-project` | `skill-forge:designing-skill-projects` |
-| `/scaffold-project` | `skill-forge:scaffolding-skill-projects` |
-| `/audit-project` | `skill-forge:auditing-skill-projects` |
-| `/scan-security` | `skill-forge:scanning-skill-security` |
+| `/use-bundles-forge` | `bundles-forge:using-bundles-forge` |
+| `/design-project` | `bundles-forge:designing` |
+| `/scaffold-project` | `bundles-forge:scaffolding` |
+| `/audit-project` | `bundles-forge:auditing` |
+| `/scan-security` | `bundles-forge:scanning-security` |
 
 Other skills are triggered automatically via their descriptions — no slash command needed.
 

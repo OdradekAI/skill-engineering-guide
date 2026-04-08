@@ -1,21 +1,21 @@
 {
-  "name": "skill-forge",
-  "displayName": "Skill Forge",
-  "description": "Skill-Project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
-  "version": "1.2.0",
+  "name": "bundles-forge",
+  "displayName": "Bundles Forge",
+  "description": "Bundles engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
+  "version": "1.3.0",
   "author": {
     "name": "Luiz",
     "email": "odradekai@outlook.com"
   },
-  "homepage": "https://github.com/odradekai/skill-forge",
-  "repository": "https://github.com/odradekai/skill-forge",
+  "homepage": "https://github.com/odradekai/bundles-forge",
+  "repository": "https://github.com/odradekai/bundles-forge",
   "license": "MIT",
   "keywords": [
     "skills",
     "scaffolding",
     "platform-adaptation",
     "version-management",
-    "skill-engineering"
+    "bundles-engineering"
   ],
   "skills": "./skills/",
   "agents": "./agents/",

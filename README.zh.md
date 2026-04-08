@@ -1,4 +1,4 @@
-# Skill Forge
+# Bundles Forge
 
 [English](README.md)
 
@@ -9,20 +9,20 @@
 ### Claude Code
 
 ```bash
-claude plugin install skill-forge
+claude plugin install bundles-forge
 ```
 
 开发模式：
 
 ```bash
-git clone https://github.com/odradekai/skill-forge.git
-cd skill-forge
+git clone https://github.com/odradekai/bundles-forge.git
+cd bundles-forge
 claude plugin link .
 ```
 
 ### Cursor
 
-在 Cursor 插件市场搜索 `skill-forge`，或使用 `/add-plugin skill-forge`。
+在 Cursor 插件市场搜索 `bundles-forge`，或使用 `/add-plugin bundles-forge`。
 
 ### Codex
 
@@ -35,48 +35,48 @@ claude plugin link .
 ### Copilot CLI
 
 ```bash
-copilot plugin install skill-forge
+copilot plugin install bundles-forge
 ```
 
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/odradekai/skill-forge.git
+gemini extensions install https://github.com/odradekai/bundles-forge.git
 ```
 
 ## 技能一览
 
 | 技能 | 说明 |
 |------|------|
-| `using-skill-forge` | 引导元技能 — 建立如何发现和使用所有其他技能的入口 |
-| `designing-skill-projects` | 通过结构化访谈规划新技能项目，或将复杂技能拆分为项目 |
-| `scaffolding-skill-projects` | 生成项目结构、平台清单、钩子脚本和引导技能 |
-| `writing-skill-content` | 指导 SKILL.md 文件编写 — 结构、描述、渐进式加载 |
-| `auditing-skill-projects` | 9 大类系统化质量评估与评分 |
-| `optimizing-skill-projects` | 工程化优化 — 描述、token 效率、工作流链路 |
-| `adapting-skill-platforms` | 添加平台支持（Claude Code、Cursor、Codex、OpenCode、Copilot CLI、Gemini CLI） |
-| `managing-skill-versions` | 版本同步基础设施、漂移检测与审计 |
-| `iterating-skill-feedback` | 基于用户反馈迭代改进技能 — 验证建议、fork 外部技能、自动回审 |
-| `scanning-skill-security` | 扫描技能项目中钩子、插件、Agent 提示词和指令的安全风险 |
-| `releasing-skill-projects` | 完整发布流水线 — 审计、安全扫描、版本升级、CHANGELOG、发布 |
+| `using-bundles-forge` | 引导元技能 — 建立如何发现和使用所有其他技能的入口 |
+| `designing` | 通过结构化访谈规划新技能项目，或将复杂技能拆分为项目 |
+| `scaffolding` | 生成项目结构、平台清单、钩子脚本和引导技能 |
+| `writing-skill` | 指导 SKILL.md 文件编写 — 结构、描述、渐进式加载 |
+| `auditing` | 9 大类系统化质量评估与评分 |
+| `optimizing` | 工程化优化 — 描述、token 效率、工作流链路 |
+| `adapting-platforms` | 添加平台支持（Claude Code、Cursor、Codex、OpenCode、Copilot CLI、Gemini CLI） |
+| `managing-versions` | 版本同步基础设施、漂移检测与审计 |
+| `iterating-feedback` | 基于用户反馈迭代改进技能 — 验证建议、fork 外部技能、自动回审 |
+| `scanning-security` | 扫描技能项目中钩子、插件、Agent 提示词和指令的安全风险 |
+| `releasing` | 完整发布流水线 — 审计、安全扫描、版本升级、CHANGELOG、发布 |
 
 ## 工作流
 
 技能覆盖技能项目的完整生命周期：
 
 ```
-designing-skill-projects → scaffolding-skill-projects → writing-skill-content
+designing → scaffolding → writing-skill
                                                               ↓
-                           auditing-skill-projects ← ── ── ── ┘
+                           auditing ← ── ── ── ┘
                                 ↓               ↓
-               optimizing-skill-projects   iterating-skill-feedback
+               optimizing   iterating-feedback
                （项目工程优化）              （单技能效果迭代）
                                 ↓               ↓
-                           releasing-skill-projects
+                           releasing
                                     ↑
-              scanning-skill-security（被 audit 和 release 调用）
-              adapting-skill-platforms（任意阶段均可添加平台）
-              managing-skill-versions（支撑所有阶段）
+              scanning-security（被 audit 和 release 调用）
+              adapting-platforms（任意阶段均可添加平台）
+              managing-versions（支撑所有阶段）
 ```
 
 1. **设计** — 通过访谈确定项目范围，或将复杂技能拆解为项目
@@ -102,11 +102,11 @@ designing-skill-projects → scaffolding-skill-projects → writing-skill-conten
 
 | 命令 | 指向 |
 |------|------|
-| `/use-skill-forge` | `skill-forge:using-skill-forge` |
-| `/design-project` | `skill-forge:designing-skill-projects` |
-| `/scaffold-project` | `skill-forge:scaffolding-skill-projects` |
-| `/audit-project` | `skill-forge:auditing-skill-projects` |
-| `/scan-security` | `skill-forge:scanning-skill-security` |
+| `/use-bundles-forge` | `bundles-forge:using-bundles-forge` |
+| `/design-project` | `bundles-forge:designing` |
+| `/scaffold-project` | `bundles-forge:scaffolding` |
+| `/audit-project` | `bundles-forge:auditing` |
+| `/scan-security` | `bundles-forge:scanning-security` |
 
 其他技能通过描述自动触发，无需斜杠命令。
 

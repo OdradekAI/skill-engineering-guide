@@ -28,10 +28,10 @@ fi
 
 echo ""
 echo "[2] Hook reads correct bootstrap skill"
-if grep -q "using-skill-forge/SKILL.md" "$HOOK"; then
-  pass "references using-skill-forge/SKILL.md"
+if grep -q "using-bundles-forge/SKILL.md" "$HOOK"; then
+  pass "references using-bundles-forge/SKILL.md"
 else
-  fail "does not reference using-skill-forge/SKILL.md"
+  fail "does not reference using-bundles-forge/SKILL.md"
 fi
 
 echo ""
@@ -68,10 +68,10 @@ else
   fail "output missing EXTREMELY_IMPORTANT marker"
 fi
 
-if echo "$claude_output" | grep -q "skill-forge"; then
-  pass "output contains skill-forge reference"
+if echo "$claude_output" | grep -q "bundles-forge"; then
+  pass "output contains bundles-forge reference"
 else
-  fail "output missing skill-forge reference"
+  fail "output missing bundles-forge reference"
 fi
 
 echo ""

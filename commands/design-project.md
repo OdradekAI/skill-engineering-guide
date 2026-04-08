@@ -1,7 +1,7 @@
 ---
-description: "Plan a new skill-project — use the skill-forge:designing-skill-projects skill instead"
+description: "Plan new bundles — use the bundles-forge:designing skill instead"
 ---
 
-This command invokes the designing-skill-projects skill. Use it to plan a new skill-project through structured interview.
+This command invokes the designing skill. Use it to plan new bundles through structured interview.
 
-Invoke the `skill-forge:designing-skill-projects` skill to begin.
+Invoke the `bundles-forge:designing` skill to begin.

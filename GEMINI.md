@@ -1,2 +1,2 @@
-@./skills/using-skill-forge/SKILL.md
-@./skills/using-skill-forge/references/gemini-tools.md
+@./skills/using-bundles-forge/SKILL.md
+@./skills/using-bundles-forge/references/gemini-tools.md

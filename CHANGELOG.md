@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.3.0] - 2026-04-08
+
+### Changed
+
+- Renamed project from `skill-forge` to `bundles-forge`
+- Replaced `skill-project` / `skill-projects` terminology with `bundles` throughout
+- Renamed all 11 skill directories:
+  - `auditing-skill-projects` → `auditing`
+  - `designing-skill-projects` → `designing`
+  - `optimizing-skill-projects` → `optimizing`
+  - `releasing-skill-projects` → `releasing`
+  - `scaffolding-skill-projects` → `scaffolding`
+  - `adapting-skill-platforms` → `adapting-platforms`
+  - `iterating-skill-feedback` → `iterating-feedback`
+  - `managing-skill-versions` → `managing-versions`
+  - `scanning-skill-security` → `scanning-security`
+  - `writing-skill-content` → `writing-skill`
+  - `using-skill-forge` → `using-bundles-forge`
+- Renamed OpenCode plugin file to `bundles-forge.js`
+- Renamed command `/use-skill-forge` → `/use-bundles-forge`
+- Updated all repository URLs to `odradekai/bundles-forge`
+- Replaced all `skill-forge:` cross-reference prefixes with `bundles-forge:`
+- Updated all cross-reference skill names to match new directory names
+
 ## [1.2.0] - 2026-04-07
 
 ### Added

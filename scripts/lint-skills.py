@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skill quality linter for skill-projects.
+Skill quality linter for bundles.
 
 Validates SKILL.md frontmatter, descriptions, line counts, cross-references,
 and relative path links across all skills in a project.
@@ -243,9 +243,9 @@ def format_markdown(results):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Lint skill quality in a skill-project.")
+    parser = argparse.ArgumentParser(description="Lint skill quality in a bundles project.")
     parser.add_argument("project_root", nargs="?", default=".",
-                        help="Skill-Project root (default: current directory)")
+                        help="Bundles root (default: current directory)")
     parser.add_argument("--json", action="store_true", help="Output JSON instead of markdown")
     args = parser.parse_args()
 

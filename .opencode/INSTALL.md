@@ -1,4 +1,4 @@
-# Installing Skill Forge for OpenCode
+# Installing Bundles Forge for OpenCode
 
 ## Installation
 
@@ -8,8 +8,8 @@ Add to your `opencode.json` under the `plugins` key:
 {
   "plugins": [
     {
-      "name": "skill-forge",
-      "url": "https://github.com/odradekai/skill-forge.git"
+      "name": "bundles-forge",
+      "url": "https://github.com/odradekai/bundles-forge.git"
     }
   ]
 }

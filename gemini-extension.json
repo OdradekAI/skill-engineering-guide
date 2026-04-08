@@ -1,11 +1,12 @@
 {
-  "name": "skill-forge",
-  "description": "Skill-Project engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
-  "version": "1.2.0",
+  "name": "bundles-forge",
+  "description": "Bundles engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
+  "version": "1.3.0",
   "author": {
     "name": "Luiz",
     "email": "odradekai@outlook.com"
   },
-  "repository": "https://github.com/odradekai/skill-forge",
+  "repository": "https://github.com/odradekai/bundles-forge",
+  "license": "MIT",
   "contextFileName": "GEMINI.md"
 }

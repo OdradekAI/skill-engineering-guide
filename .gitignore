@@ -1,4 +1,5 @@
 .repos
+.claude/
 node_modules/
 .worktrees/
 worktrees/

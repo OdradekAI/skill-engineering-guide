@@ -1,7 +1,7 @@
 ---
-description: "Audit a skill-project for quality issues — use the skill-forge:auditing-skill-projects skill instead"
+description: "Audit bundles for quality issues — use the bundles-forge:auditing skill instead"
 ---
 
-This command invokes the auditing-skill-projects skill. Use it to run a systematic quality assessment of a skill-project.
+This command invokes the auditing skill. Use it to run a systematic quality assessment of bundles.
 
-Invoke the `skill-forge:auditing-skill-projects` skill to begin.
+Invoke the `bundles-forge:auditing` skill to begin.

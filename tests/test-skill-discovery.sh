@@ -18,17 +18,17 @@ echo "=== Skill Discovery Tests ==="
 echo ""
 
 EXPECTED_SKILLS=(
-  adapting-skill-platforms
-  auditing-skill-projects
-  designing-skill-projects
-  iterating-skill-feedback
-  managing-skill-versions
-  optimizing-skill-projects
-  releasing-skill-projects
-  scaffolding-skill-projects
-  scanning-skill-security
-  using-skill-forge
-  writing-skill-content
+  adapting-platforms
+  auditing
+  designing
+  iterating-feedback
+  managing-versions
+  optimizing
+  releasing
+  scaffolding
+  scanning-security
+  using-bundles-forge
+  writing-skill
 )
 
 echo "[1] Skills directory exists"
