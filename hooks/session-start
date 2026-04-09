@@ -7,7 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 # Read the bootstrap meta-skill content
-bootstrap_content=$(cat "${PLUGIN_ROOT}/skills/using-bundles-forge/SKILL.md" 2>/dev/null || echo "Error reading bootstrap skill")
+bootstrap_content=$(cat "${PLUGIN_ROOT}/skills/using-bundles-forge/SKILL.md" 2>/dev/null)
+if [ -z "$bootstrap_content" ]; then
+  echo "Error: cannot read bootstrap skill at ${PLUGIN_ROOT}/skills/using-bundles-forge/SKILL.md" >&2
+  exit 1
+fi
 
 # JSON-escape using bash parameter substitution (fast, no external deps)
 escape_for_json() {

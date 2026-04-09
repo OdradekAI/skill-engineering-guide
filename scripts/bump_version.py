@@ -208,14 +208,15 @@ def cmd_audit(repo_root):
         return has_drift
 
 
-def cmd_bump(repo_root, new_version):
+def cmd_bump(repo_root, new_version, dry_run=False):
     if not SEMVER_RE.match(new_version):
         print(f"error: '{new_version}' doesn't look like a version (expected X.Y.Z)",
               file=sys.stderr)
         sys.exit(1)
 
     config = load_config(repo_root)
-    print(f"Bumping all declared files to {new_version}...\n")
+    prefix = "[DRY RUN] " if dry_run else ""
+    print(f"{prefix}Bumping all declared files to {new_version}...\n")
 
     for path, field in declared_files(config):
         fpath = repo_root / path
@@ -223,13 +224,17 @@ def cmd_bump(repo_root, new_version):
             print(f"  SKIP (missing): {path}")
             continue
         old_ver = read_version(repo_root, path, field)
-        write_version(repo_root, path, field, new_version)
+        if not dry_run:
+            write_version(repo_root, path, field, new_version)
         label = f"{path} ({field})"
         print(f"  {label:<45}  {old_ver} -> {new_version}")
 
     print()
-    print("Done. Running audit to check for missed files...\n")
-    cmd_audit(repo_root)
+    if dry_run:
+        print("Dry run complete — no files were modified.")
+    else:
+        print("Done. Running audit to check for missed files...\n")
+        cmd_audit(repo_root)
 
 
 def main():
@@ -241,6 +246,8 @@ def main():
                         help="Report current versions (detect drift)")
     parser.add_argument("--audit", action="store_true",
                         help="Check + scan repo for undeclared version strings")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Preview version bump without writing files")
     args = parser.parse_args()
 
     script_dir = Path(__file__).resolve().parent
@@ -256,7 +263,7 @@ def main():
         if args.command.startswith("--"):
             print(f"error: unknown flag '{args.command}'", file=sys.stderr)
             sys.exit(1)
-        cmd_bump(repo_root, args.command)
+        cmd_bump(repo_root, args.command, dry_run=args.dry_run)
     else:
         parser.print_help()
 

@@ -148,8 +148,10 @@ def classify_file(rel_path):
         return "agent_prompt"
     if "scripts" in parts and any(name.endswith(e) for e in (".sh", ".py", ".js")):
         return "bundled_script"
-    if name == "skill.md" or ("references" in parts and name.endswith(".md")):
+    if name == "skill.md":
         return "skill_content"
+    if "references" in parts and name.endswith(".md"):
+        return None
     return None
 
 # ---------------------------------------------------------------------------
@@ -225,9 +227,10 @@ def scan_file(path, rel_path, file_type):
 def collect_scannable_files(project_root):
     """Collect all scannable files from known directories.
 
-    Note: this includes scripts/ itself, so the security scanner will also
-    audit its own source files and sibling scripts. This is intentional —
-    audit tooling should not be exempt from its own rules.
+    Note: this includes scripts/, so sibling scripts are audited. The scanner
+    itself is excluded by absolute-path comparison in run_scan() — but only
+    when scanning the project it lives in. Other projects with a file at the
+    same relative path are scanned normally.
     """
     scan_dirs = ["skills", "hooks", "agents", "scripts", ".opencode"]
     files = []
@@ -242,10 +245,13 @@ def collect_scannable_files(project_root):
 
 def run_scan(project_root):
     project_root = Path(project_root).resolve()
+    self_path = Path(__file__).resolve()
     all_files = collect_scannable_files(project_root)
     results = {"files": [], "summary": {"critical": 0, "warning": 0, "info": 0}}
 
     for f in all_files:
+        if f.resolve() == self_path:
+            continue
         rel = f.relative_to(project_root)
         file_type = classify_file(rel)
         if file_type is None:

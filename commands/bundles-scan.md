@@ -1,7 +1,9 @@
 ---
-description: "Scan a bundle-plugin for security risks — use the bundles-forge:auditing skill instead"
+description: "Scan a bundle-plugin for security risks only — runs Category 9 (Security) from the auditing skill without the full 9-category audit"
 ---
 
-This command invokes the auditing skill with a focus on security scanning. Use it to scan for security risks in hooks, plugins, agent prompts, and skill instructions.
+This command invokes the auditing skill in **security-only mode**. It runs only Category 9 (Security Scan) plus the `scan_security.py` script, skipping quality, structure, and documentation checks.
 
-Invoke the `bundles-forge:auditing` skill to begin.
+Use this when you want a quick security check without a full audit.
+
+Invoke the `bundles-forge:auditing` skill with the context: **security-only scan requested via bundles-scan**.

@@ -94,6 +94,10 @@ When optimizing a description, never overwrite the original blindly. Use a copy-
 7. User decides → adopt optimized version (replace original) or discard
 ```
 
+**If subagent dispatch is unavailable:** Ask the user which fallback to use:
+- **Sequential inline:** Run both evaluations in sequence within this conversation (caveat: seeing the original first may bias the optimized evaluation — note this in results)
+- **Skip A/B:** Apply the change directly with a simple verification pass instead of comparative evaluation
+
 **What to compare:**
 - Trigger rate: how many of the test prompts correctly activated the skill?
 - False negatives: did the optimized description miss cases the original caught?
@@ -102,6 +106,8 @@ When optimizing a description, never overwrite the original blindly. Use a copy-
 **When to skip A/B eval:** If the change is purely additive (adding triggering conditions that were previously missing) and doesn't modify existing trigger phrases, a simple verification pass is sufficient.
 
 ### Target 2: Token Efficiency
+
+> **Canonical source:** Token budgets are defined in `bundles-forge:authoring` (Token Efficiency section). Repeated here for optimizer context.
 
 Every token in a frequently-loaded skill costs context budget across every session.
 
@@ -253,6 +259,8 @@ After applying changes to the copy, verify with a parallel comparison:
 ```
 
 **When to skip A/B eval:** If the feedback is about structural issues (missing section, wrong heading level, broken reference) rather than behavioral differences, a simple verification pass is sufficient — no need for subagent comparison.
+
+**If subagent dispatch is unavailable:** Same fallback as description A/B eval — ask the user to choose sequential inline or skip A/B.
 
 **Rules:**
 - Never apply feedback without user confirmation of the improvement plan

@@ -90,6 +90,16 @@ gemini extensions install <repo-url>
 
 ---
 
+## Platform-Specific Limitations
+
+### Codex: No Bootstrap Routing Table
+
+Codex has no hook-based bootstrap injection. It reads `AGENTS.md` (which points to `CLAUDE.md`) for guidelines, but neither file contains the full skill routing table. Codex users rely entirely on description-based matching for skill discovery. This is a deliberate design choice — Codex's native skill discovery mechanism uses directory symlinks and does not support the same hook lifecycle as Claude Code or Cursor.
+
+### Cursor: No Re-injection on Context Clear
+
+Cursor's `hooks-cursor.json` only fires on `sessionStart` — there is no equivalent to Claude Code's `clear|compact` matcher. If a Cursor user clears context mid-session, the bootstrap is not re-injected. The agent loses the routing table until a new session starts. This is a platform limitation, not a bundles-forge issue.
+
 ## Platform Differences Summary
 
 | Aspect | Claude Code | Cursor | Codex | OpenCode | Gemini |

@@ -194,6 +194,11 @@ def run_lint(project_root):
 
     results = {"skills": [], "summary": {"critical": 0, "warning": 0, "info": 0}}
 
+    skill_dirs = [d for d in sorted(skills_dir.iterdir()) if d.is_dir()]
+    if not skill_dirs:
+        print("warning: skills/ directory is empty — no skills to check",
+              file=sys.stderr)
+
     for skill_dir in sorted(skills_dir.iterdir()):
         if not skill_dir.is_dir():
             continue

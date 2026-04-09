@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.2] - 2026-04-09
+
+### Changed
+
+- **CLAUDE.md** — comprehensive rewrite with architecture documentation (directory layout, skill lifecycle flow, session bootstrap, agent dispatch), executable commands reference, and key conventions. Replaces the brief contributor guidelines with a full project context file.
+- **`bundles-scan` command** — now explicitly describes security-only mode (Category 9 only) instead of generically redirecting to the full audit skill.
+- **`hooks/session-start`** — improved error handling: exits with code 1 when bootstrap skill is unreadable instead of silently injecting an error string.
+- **`scan_security.py`** — reference markdown files (`references/*.md`) are no longer scanned (documentation, not executable content); scanner self-excludes by absolute-path comparison to avoid false positives on its own source.
+- **`auditing/SKILL.md`** — rephrased security checklist table wording to avoid SC2 false positives from the scanner.
+
+### Added
+
+- **Security-only mode** in `auditing` skill — when invoked via `bundles-scan` or explicitly requested, runs only Category 9 (Security) and `scan_security.py`, skipping Categories 1-8.
+- **Subagent fallback** in `auditing`, `scaffolding`, and `optimizing` — inline execution path when subagent dispatch is unavailable, with user confirmation prompt.
+- **`--dry-run` flag** in `bump_version.py` — preview version bump without writing files.
+- **Empty `skills/` directory warning** in `lint_skills.py` — warns when no skill directories are found.
+- **Platform removal** section in `porting` skill — step-by-step guide for deprecating platform support.
+- **Platform-specific limitations** in `porting/references/platform-adapters.md` — documents Codex bootstrap routing gap and Cursor context-clear re-injection limitation.
+- **Safety-boundary exception** in `authoring` — absolute directives (Never/Always) remain appropriate for security gates, version sync, and release pipeline controls.
+- **Token efficiency canonical source** cross-reference in `optimizing` — points to `authoring` as the source of truth for token budgets.
+- **`test_integration.py`** support in test runner — `run-all.sh` now loops over all Python test files.
+
 ## [1.4.1] - 2026-04-09
 
 ### Changed

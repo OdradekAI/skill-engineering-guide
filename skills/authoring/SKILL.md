@@ -106,7 +106,7 @@ A well-structured SKILL.md typically includes:
 
 ### Instruction Style
 
-**Explain the why, not just the what.** Today's LLMs are smart — they respond much better to understanding reasoning than to rigid directives. If you find yourself writing MUST or ALWAYS in all caps, that's a signal to reframe: explain the reasoning so the agent understands why the thing matters.
+**Explain the why, not just the what.** Today's LLMs are smart — they respond much better to understanding reasoning than to rigid directives. If you find yourself writing MUST or ALWAYS in all caps, that's a signal to reframe: explain the reasoning so the agent understands why the thing matters. Exception: absolute directives (Never/Always) remain appropriate for safety boundaries — security scanning gates, version sync checks, and release pipeline controls where the cost of non-compliance is unrecoverable.
 
 ```markdown
 # Less effective — rigid rule without reasoning

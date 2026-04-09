@@ -16,6 +16,10 @@ Systematically evaluate a bundle-plugin project or a single skill across applica
 
 **Announce at start:** "I'm using the auditing skill to audit [this project / this skill]."
 
+### Security-Only Mode
+
+When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 9 (Security) and the `scan_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 9-category audit.
+
 ## Step 1: Resolve Input & Detect Scope
 
 The target can be a local path, a GitHub URL, or a zip file. Normalize the input to a local directory before scope detection.
@@ -75,6 +79,8 @@ python scripts/scan_security.py --json <project-root>  # security JSON output
 
 Dispatch the `auditor` agent (`agents/auditor.md`) for automated assessment if subagents are available. The auditor runs read-only and returns a scored report.
 
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline (same checks, same report format, but within this conversation context). Proceed inline?" If confirmed, perform the 9-category checks directly using the audit checklist and security checklist references, then compile the report in the same format the auditor would produce.
+
 ### Step 2: Scan
 
 Read the project root. Identify:
@@ -106,8 +112,8 @@ Scans 5 attack surfaces. See `references/security-checklist.md` for the full pat
 
 | Target | Risk Level | What to Look For |
 |--------|-----------|------------------|
-| SKILL.md content | High | Data exfiltration instructions, destructive commands, safety overrides, encoding tricks |
-| Hook scripts | High | Network calls, env var exfiltration, system config modification |
+| SKILL.md content | High | Data-leak instructions, destructive commands, safety overrides, encoding tricks |
+| Hook scripts | High | Network calls, env-var leakage, system config modification |
 | OpenCode plugins | High | Dynamic code execution, network access, message manipulation |
 | Agent prompts | Medium | Privilege escalation, scope expansion, safety overrides |
 | Bundled scripts | Medium | Network calls, system modifications, unsanitized inputs |

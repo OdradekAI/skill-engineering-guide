@@ -121,6 +121,8 @@ Generated for all intelligent-mode projects regardless of platform selection:
 
 Dispatch the `inspector` agent (`agents/inspector.md`) for automated validation if subagents are available.
 
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the post-scaffold validation inline (structure, manifests, version sync, hooks, skill quality). Proceed inline?" If confirmed, perform the inspector checks directly using the audit checklist for criteria, then report PASS/FAIL.
+
 ## Quick Reference: Placeholder Map
 
 | Placeholder | Source |

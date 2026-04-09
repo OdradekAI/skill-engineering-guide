@@ -79,6 +79,18 @@ If the platform uses session hooks (Claude Code, Cursor), ensure `session-start`
 - Hooks handle new platform: test with appropriate env var
 - README has installation instructions
 
+## Platform Removal
+
+When deprecating or removing support for a platform:
+
+1. **Delete manifest files** — remove the platform's manifest directory or file (e.g., `.cursor-plugin/` or `gemini-extension.json`)
+2. **Update `.version-bump.json`** — remove entries for deleted manifests so version sync no longer tracks them
+3. **Clean hooks configuration** — if the platform had its own hooks file (e.g., `hooks-cursor.json`), delete it. If `session-start` had platform-specific branches, remove or simplify them
+4. **Update documentation** — remove the platform's installation section from README and any platform-specific install docs
+5. **Verify** — run `python scripts/bump_version.py --check` to confirm no stale references; run `bundles-forge:auditing` to catch broken cross-references
+
+**Announce at start:** "I'm using the porting skill to remove <platform> support."
+
 ## Common Mistakes
 
 | Mistake | Fix |

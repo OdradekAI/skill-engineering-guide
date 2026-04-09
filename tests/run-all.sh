@@ -24,19 +24,22 @@ done
 # Run Python tests (cross-platform)
 if command -v python3 &>/dev/null || command -v python &>/dev/null; then
   PYTHON_CMD=$(command -v python3 || command -v python)
-  echo ""
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "Running: test_scripts.py (Python)"
-  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo ""
-  if "$PYTHON_CMD" "$SCRIPT_DIR/test_scripts.py" -v; then
-    TOTAL_PASS=$((TOTAL_PASS + 1))
-  else
-    TOTAL_FAIL=$((TOTAL_FAIL + 1))
-  fi
+
+  for py_test in test_scripts.py test_integration.py; do
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "Running: $py_test (Python)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    if "$PYTHON_CMD" "$SCRIPT_DIR/$py_test" -v; then
+      TOTAL_PASS=$((TOTAL_PASS + 1))
+    else
+      TOTAL_FAIL=$((TOTAL_FAIL + 1))
+    fi
+  done
 else
   echo ""
-  echo "[WARN] Python not found — skipping test_scripts.py"
+  echo "[WARN] Python not found — skipping Python tests"
 fi
 
 echo ""
