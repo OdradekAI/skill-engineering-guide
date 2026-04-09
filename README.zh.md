@@ -105,6 +105,50 @@ flowchart LR
 
 没有斜杠命令的技能通过两种方式调用：**自动匹配**（Agent 将用户意图与技能的 `description` 字段匹配）或**显式引用**（其他技能在指令中通过 `bundles-forge:<skill-name>` 链式调用）。
 
+## 审计
+
+### 通过 Agent 审计（交互式）
+
+Agent 根据目标路径自动检测审计范围：
+
+| 命令 | 范围 | 检查类别 |
+|------|------|---------|
+| `/bundles-audit` | 完整项目 | 9 大类（结构、清单、版本同步、技能质量、交叉引用、钩子、测试、文档、安全） |
+| `/bundles-audit skills/authoring` | 单个技能 | 4 类（结构、技能质量、交叉引用、安全） |
+| `/bundles-scan` | 仅安全扫描 | 第 9 类，覆盖所有攻击面 |
+
+**范围检测逻辑：**
+
+| 目标 | 检测方式 | 模式 |
+|------|---------|------|
+| 有 `skills/` 目录 + `package.json` | 项目根目录 | 完整 9 类审计 |
+| 包含 `SKILL.md`，无 `skills/` 子目录 | 技能目录 | 轻量 4 类审计 |
+
+报告保存至 `.bundles-forge/` 目录，文件名格式为 `<project>-<version>-audit.YYYY-MM-DD.md`。完整项目报告包含 **逐技能分解** — 每个技能都有定性摘要（结论、亮点、核心问题）和 4 类评分。
+
+### 通过脚本审计（CI / 自动化）
+
+```bash
+# 完整项目审计
+python scripts/audit_project.py .                # Markdown 报告输出到 stdout
+python scripts/audit_project.py --json .          # 机器可读 JSON
+
+# 单技能质量检查
+python scripts/lint_skills.py skills/authoring    # Markdown 报告
+python scripts/lint_skills.py --json skills/authoring
+
+# 安全扫描
+python scripts/scan_security.py .                 # 项目级
+python scripts/scan_security.py skills/authoring  # 单技能
+```
+
+退出码：`0` = 通过，`1` = 有警告，`2` = 有严重问题。CI 集成请使用 `--json` 标志。
+
+### 审计之后
+
+- **严重问题** → 立即修复或调用 `bundles-forge:optimizing` 进行引导式修复
+- **准备发布** → 调用 `bundles-forge:releasing` 执行发布前流水线（版本升级、CHANGELOG、发布）
+
 ## 架构
 
 <details>

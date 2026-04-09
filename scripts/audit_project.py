@@ -262,6 +262,34 @@ def run_audit(project_root):
 # Output
 # ---------------------------------------------------------------------------
 
+def _classify_check(check_code):
+    """Map a check code to one of the 4 skill-level categories."""
+    if check_code.startswith("S"):
+        return "Structure"
+    if check_code.startswith("Q"):
+        return "Skill Quality"
+    if check_code.startswith("X"):
+        return "Cross-References"
+    if check_code.startswith("SEC") or check_code.startswith("SC"):
+        return "Security"
+    return "Skill Quality"
+
+
+def _skill_category_counts(findings):
+    """Tally findings per skill-level category."""
+    cats = {
+        "Structure": {"critical": 0, "warning": 0, "info": 0},
+        "Skill Quality": {"critical": 0, "warning": 0, "info": 0},
+        "Cross-References": {"critical": 0, "warning": 0, "info": 0},
+        "Security": {"critical": 0, "warning": 0, "info": 0},
+    }
+    for f in findings:
+        cat = _classify_check(f.get("check", ""))
+        sev = f.get("severity", "info")
+        cats[cat][sev] = cats[cat].get(sev, 0) + 1
+    return cats
+
+
 def format_markdown(results, project_name):
     out = [
         f"## Bundle-Plugin Audit: {project_name}\n",
@@ -309,6 +337,33 @@ def format_markdown(results, project_name):
     for cat, data in results["categories"].items():
         c = data["counts"]
         out.append(f"| {cat} | {c.get('critical', 0)} | {c.get('warning', 0)} | {c.get('info', 0)} |")
+
+    # Per-skill breakdown
+    skill_results = lint_detail.get("skills", [])
+    if skill_results:
+        out.append("")
+        out.append("### Per-Skill Breakdown\n")
+        for sr in skill_results:
+            skill_name = sr["skill"]
+            out.append(f"#### {skill_name}\n")
+
+            findings = sr.get("findings", [])
+            if not findings:
+                out.append("No findings.\n")
+                continue
+
+            for f in findings:
+                sev_char = f["severity"][0].upper()
+                out.append(f"- [{sev_char}] {f['check']}: {f['message']}")
+
+            cat_counts = _skill_category_counts(findings)
+            out.append("")
+            out.append("| Category | Critical | Warning | Info |")
+            out.append("|----------|----------|---------|------|")
+            for cat_name, counts in cat_counts.items():
+                out.append(f"| {cat_name} | {counts['critical']} "
+                           f"| {counts['warning']} | {counts['info']} |")
+            out.append("")
 
     return "\n".join(out)
 

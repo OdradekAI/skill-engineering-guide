@@ -38,6 +38,11 @@ When auditing a project, you will:
    - Warnings (should fix)
    - Info items (consider)
    - Category breakdown table
+   - **Per-skill breakdown** — for each skill, include:
+     - **Verdict**: one-sentence characterization of skill quality
+     - **Strengths**: up to 3 concise bullet points
+     - **Key Issues**: up to 3 specific, objective bullet points
+     - 4-category scores (Structure, Skill Quality, Cross-References, Security)
    - Prioritized recommendations
 
 5. **Save the report** to `.bundles-forge/` in the project root:
@@ -53,3 +58,15 @@ When auditing a project, you will:
    - For version sync: actually run `python scripts/bump_version.py --check` if available
    - For manifests: actually parse JSON to verify validity
    - For security: compare against legitimate baselines documented in the security checklist
+
+### Single Skill Audit Mode
+
+When the target is a single skill (not a full project), run only the 4 applicable categories: Structure, Skill Quality, Cross-References, and Security.
+
+Produce a 3-layer report:
+
+1. **Qualitative Summary** — Verdict (one sentence), Strengths (up to 3), Key Issues (up to 3). Base this on reading the SKILL.md and assessing its design intent, clarity, and fitness for purpose. Do not include actionable fix suggestions — that is `optimizing`'s responsibility.
+2. **Scored Findings** — all findings grouped by severity (Critical / Warning / Info)
+3. **Category Breakdown** — 4-category score table
+
+Save to `.bundles-forge/<skill-name>-audit.YYYY-MM-DD.md`. End the report with: "For improvement, invoke `bundles-forge:optimizing`."

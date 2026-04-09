@@ -90,6 +90,9 @@ Run for every SKILL.md in the project.
 | Q10 | Info | Skill has Overview section |
 | Q11 | Info | Skill has Common Mistakes section |
 | Q12 | Info | Heavy reference content (100+ lines) extracted to supporting files |
+| Q13 | Warning/Info | Token budget: bootstrap skill body ≤ 200 lines (warning); regular skill reports estimated token count when high (info) |
+| Q14 | Warning | `allowed-tools` frontmatter references scripts/paths that actually exist |
+| Q15 | Info | Conditional blocks (`If ... unavailable` etc.) over 30 lines should be in `references/` |
 
 **Description anti-patterns (Q6):**
 - Contains step-by-step workflow → agents shortcut to description
@@ -104,14 +107,16 @@ Run for every SKILL.md in the project.
 |-------|----------|----------|
 | X1 | Warning | All `<project>:<skill-name>` references resolve to existing skills |
 | X2 | Warning | No broken relative-path references to supporting files |
-| X3 | Info | Skills with dependencies document them in an Integration section |
-| X4 | Info | Workflow chain has no circular dependencies |
-| X5 | Info | Terminal skills (end of chain) are clearly marked |
+| X3 | Warning | Text references to subdirectories (`references/`, `templates/`, etc.) match actual skill directory contents |
+| X4 | Info | Skills with dependencies document them in an Integration section |
+| X5 | Info | Workflow chain has no circular dependencies |
+| X6 | Info | Terminal skills (end of chain) are clearly marked |
 
 **How to check:**
 1. Extract all `<project>:<name>` patterns from all SKILL.md files
 2. Verify each `<name>` matches a directory under `skills/`
 3. Extract all relative file references and verify they exist
+4. Scan for prose references to subdirectories and verify they exist
 
 ---
 
@@ -186,48 +191,4 @@ curl|wget|nc |eval\(|child_process|\.env|api_key|secret|ignore safety|override|b
 
 ## Audit Report Template
 
-After running all checks, compile findings into this format:
-
-```markdown
-## Bundle-Plugin Audit: <project-name>
-
-**Date:** <date>
-**Platforms:** <target platforms>
-**Skills:** <count> skills
-
-### Overall Score: X/10
-
-### Critical Issues (must fix)
-- [C1] <category>.<check>: <description>
-- [C2] ...
-
-### Warnings (should fix)
-- [W1] <category>.<check>: <description>
-- [W2] ...
-
-### Info (consider)
-- [I1] <category>.<check>: <description>
-- [I2] ...
-
-### Category Breakdown
-
-| Category | Score | Critical | Warning | Info |
-|----------|-------|----------|---------|------|
-| Structure | X/10 | 0 | 1 | 0 |
-| Platform Manifests | X/10 | 0 | 0 | 1 |
-| Version Sync | X/10 | 0 | 0 | 0 |
-| Skill Quality | X/10 | 0 | 2 | 1 |
-| Cross-References | X/10 | 0 | 0 | 0 |
-| Hooks | X/10 | 0 | 1 | 0 |
-| Testing | X/10 | 0 | 0 | 2 |
-| Documentation | X/10 | 0 | 1 | 0 |
-| Security | X/10 | 0 | 0 | 0 |
-
-### Recommendations
-
-1. <highest-impact fix>
-2. <next priority>
-3. ...
-```
-
-Order recommendations by impact: critical fixes first, then warnings that affect the most users, then info items.
+After running all checks, compile findings using the six-layer report template in `references/report-template.md`. The template provides both a full project format and a single skill format, with Go/No-Go decision logic, quantified impact scales, and confidence levels.

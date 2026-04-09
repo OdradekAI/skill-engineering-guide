@@ -105,6 +105,50 @@ The bootstrap meta-skill `using-bundles-forge` is injected at session start via 
 
 Skills without a slash command are invoked **automatically** (the agent matches user intent to the skill's `description` field) or **explicitly** when another skill chains to them via `bundles-forge:<skill-name>` references.
 
+## Auditing
+
+### Via Agent (Interactive)
+
+The agent auto-detects the audit scope from the target path:
+
+| Command | Scope | Categories |
+|---------|-------|-----------|
+| `/bundles-audit` | Full project | 9 categories (structure, manifests, version sync, skill quality, cross-refs, hooks, testing, docs, security) |
+| `/bundles-audit skills/authoring` | Single skill | 4 categories (structure, skill quality, cross-refs, security) |
+| `/bundles-scan` | Security only | Category 9 across all attack surfaces |
+
+**Scope detection logic:**
+
+| Target | Detection | Mode |
+|--------|----------|------|
+| Has `skills/` directory + `package.json` | Project root | Full 9-category audit |
+| Contains `SKILL.md`, no `skills/` subdirectory | Skill directory | Lightweight 4-category audit |
+
+Reports are saved to `.bundles-forge/` with filenames like `<project>-<version>-audit.YYYY-MM-DD.md`. Full project reports include a **per-skill breakdown** — each skill gets a qualitative summary (verdict, strengths, key issues) and 4-category scores.
+
+### Via Scripts (CI / Automation)
+
+```bash
+# Full project audit
+python scripts/audit_project.py .                # markdown report to stdout
+python scripts/audit_project.py --json .          # machine-readable JSON
+
+# Single skill quality check
+python scripts/lint_skills.py skills/authoring    # markdown report
+python scripts/lint_skills.py --json skills/authoring
+
+# Security scan
+python scripts/scan_security.py .                 # project-wide
+python scripts/scan_security.py skills/authoring  # single skill
+```
+
+Exit codes: `0` = pass, `1` = warnings, `2` = critical findings. Use `--json` for CI integration.
+
+### After the Audit
+
+- **Critical findings** → fix immediately or invoke `bundles-forge:optimizing` for guided remediation
+- **Ready to publish** → invoke `bundles-forge:releasing` for the pre-release pipeline (version bump, CHANGELOG, publish)
+
 ## Architecture
 
 <details>

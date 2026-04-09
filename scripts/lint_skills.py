@@ -37,6 +37,21 @@ WORKFLOW_SUMMARY_PHRASES = re.compile(
 KEBAB_CASE_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 CROSS_REF_RE = re.compile(r"`([a-z0-9-]+):([a-z0-9-]+)`")
 RELATIVE_PATH_RE = re.compile(r"`((?:references|assets|scripts|templates)/[^`]+)`")
+ALLOWED_TOOLS_PATH_RE = re.compile(r"\b(scripts/[^\s*)+]+(?:\.py|\.sh|\.js)?)")
+REFERENCED_DIR_RE = re.compile(
+    r"(?:in|under|from|see)\s+`(references|templates|assets|examples)/`",
+    re.IGNORECASE,
+)
+_INSTRUCTIONAL_CONTEXT_RE = re.compile(
+    r"move|extract|create|put|place|→|——|should\s+be|"
+    r"one\s+file\s+per|a\s+file\s+under|files?\s+under",
+    re.IGNORECASE,
+)
+CONDITIONAL_BLOCK_RE = re.compile(
+    r"^\*\*(?:If|When)\b.*[:：]?\*\*$|"
+    r"^(?:If|When)\s+.*(?:unavailable|not available|fails?|missing|skip)",
+    re.IGNORECASE,
+)
 
 
 def parse_frontmatter(content):
@@ -181,6 +196,75 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
         if not refs_dir.is_dir() or not any(refs_dir.iterdir()):
             findings.append(dict(check="Q12", severity="info",
                                  message="SKILL.md has 300+ lines but no references/ files"))
+
+    # Q13: Static token budget (bootstrap skills have a tighter 200-line budget)
+    body_lines = len(body.splitlines())
+    word_count = len(body.split())
+    estimated_tokens = int(word_count * 1.3)
+    if is_bootstrap and body_lines > 200:
+        findings.append(dict(check="Q13", severity="warning",
+                             message=f"Bootstrap skill body is {body_lines} lines "
+                                     f"(~{estimated_tokens} tokens); budget is 200 lines"))
+    elif not is_bootstrap and estimated_tokens > 4000:
+        findings.append(dict(check="Q13", severity="info",
+                             message=f"SKILL.md body ~{estimated_tokens} estimated tokens "
+                                     f"({word_count} words, {body_lines} lines)"))
+
+    # Q14: allowed-tools dependency existence
+    allowed_tools = fm.get("allowed-tools", "")
+    if allowed_tools:
+        for m in ALLOWED_TOOLS_PATH_RE.finditer(allowed_tools):
+            tool_path = m.group(1)
+            resolved = project_root / tool_path
+            if not resolved.exists() and not any(project_root.glob(tool_path)):
+                findings.append(dict(check="Q14", severity="warning",
+                                     message=f"allowed-tools references '{tool_path}' "
+                                             "which does not exist"))
+
+    # X3: Documentation vs implementation consistency — skill text uses
+    # locative phrases like "in `references/`" implying the directory exists.
+    # Skip instructional context (teaching users to create/extract to these dirs).
+    seen_x3_dirs = set()
+    for m in REFERENCED_DIR_RE.finditer(body):
+        ref_dir_name = m.group(1)
+        if ref_dir_name in seen_x3_dirs:
+            continue
+        line_start = body.rfind("\n", 0, m.start()) + 1
+        line_end = body.find("\n", m.end())
+        if line_end == -1:
+            line_end = len(body)
+        line_text = body[line_start:line_end]
+        if _INSTRUCTIONAL_CONTEXT_RE.search(line_text):
+            continue
+        if not (skill_dir / ref_dir_name).is_dir():
+            seen_x3_dirs.add(ref_dir_name)
+            findings.append(dict(check="X3", severity="warning",
+                                 message=f"Text references '{ref_dir_name}/' directory "
+                                         "but it does not exist in skill directory"))
+
+    # Q15: Conditional branch reachability — large blocks guarded by
+    # "If ... unavailable" style conditions should be in references/
+    body_line_list = body.splitlines()
+    i = 0
+    while i < len(body_line_list):
+        line = body_line_list[i]
+        if CONDITIONAL_BLOCK_RE.match(line.strip()):
+            block_start = i
+            i += 1
+            while i < len(body_line_list):
+                next_line = body_line_list[i].strip()
+                if next_line.startswith("## ") or next_line.startswith("### ") \
+                        or CONDITIONAL_BLOCK_RE.match(next_line):
+                    break
+                i += 1
+            block_size = i - block_start
+            if block_size > 30:
+                findings.append(dict(check="Q15", severity="info",
+                                     message=f"Conditional block at line {block_start + 1} "
+                                             f"spans {block_size} lines; consider moving "
+                                             "to references/"))
+        else:
+            i += 1
 
     return findings
 

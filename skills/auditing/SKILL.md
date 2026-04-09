@@ -128,28 +128,27 @@ Each category: 0-10 scale. Overall = weighted average.
 
 ### Step 5: Report
 
-Present as:
+Compile findings into the six-layer report format defined in `references/report-template.md`. The template structures the report as a **decision document** — Layer 1 enables a 30-second Go/No-Go decision, deeper layers provide evidence and methodology.
 
-```
-## Bundle-Plugin Audit: <project-name>
+**Report layers:**
 
-### Score: X/10
+1. **Decision Brief** — Go/No-Go recommendation, top 3 risks, remediation estimate
+2. **Risk Matrix** — all findings in one table with quantified impact, exploitability, and confidence
+3. **Findings by Category** — 9 categories as sections, each listing component-level findings with inline evidence
+4. **Methodology** — scope, tools, limitations, out-of-scope declaration
+5. **Appendix** — per-skill breakdown, component inventory, raw script outputs
 
-### Critical (must fix)
-- [C1] ...
+**Go/No-Go logic:** Scripts provide an automated baseline (Critical → `NO-GO`, Warning-only → `CONDITIONAL GO`, clean → `GO`). The auditor may adjust the recommendation but must record the rationale.
 
-### Warning (should fix)
-- [W1] ...
+**Key rules:**
+- Every finding gets a category-prefixed ID (e.g. `SEC-001`, `STR-002`) for cross-referencing
+- Every finding includes severity (P0–P3), confidence (Confirmed/Likely/Suspected), and quantified impact
+- Categories with no findings still appear with "No findings. All checks pass." — readers need to distinguish "checked and clean" from "not checked"
+- Qualitative summaries (Verdict / Strengths / Key Issues) per skill go in the Appendix, not the main body
 
-### Info (consider)
-- [I1] ...
+**Qualitative summaries** are produced by the auditor agent or inline by the main agent. Scripts output per-skill findings and counts but not qualitative judgments.
 
-### Category Breakdown
-| Category | Score | Notes |
-|----------|-------|-------|
-| Structure | X/10 | ... |
-| ...      | ...   | ...   |
-```
+**Audit context adaptation:** The template has conditional sections for pre-release (release readiness), post-change (regression check), and third-party evaluation (install safety). Choose the context that matches the audit trigger.
 
 ### Step 6: Fix or Optimize
 
@@ -170,8 +169,8 @@ When the target is a single skill directory or SKILL.md file, run only the 4 cat
 | Category | Checks Run | What It Catches |
 |----------|-----------|----------------|
 | Structure | S2, S3, S9 | Skill has own directory, contains SKILL.md, directory name matches frontmatter `name` |
-| Skill Quality | Q1–Q12 (all) | Frontmatter validity, description conventions, token efficiency, section structure |
-| Cross-References | X1, X2, X3 | Outgoing `project:skill-name` refs resolve, relative paths exist, Integration section present |
+| Skill Quality | Q1–Q15 (all) | Frontmatter validity, description conventions, token budget, allowed-tools deps, section structure, conditional block reachability |
+| Cross-References | X1, X2, X3 | Outgoing `project:skill-name` refs resolve, relative paths exist, referenced subdirectories exist |
 | Security | SEC1, SEC5, SEC8, SEC9, SEC10 | Sensitive file access, safety overrides, encoding tricks, scope constraints, error handling |
 
 **Skipped categories:** Platform Manifests, Version Sync, Hooks, Testing, Documentation — these require project-level context.
@@ -188,29 +187,21 @@ python scripts/scan_security.py <skill-directory>        # security scan on skil
 ```
 Read target skill
   → Run 4-category checks (Structure, Quality, Cross-Refs, Security)
-  → Score each
-  → Compile lightweight report
+  → Produce qualitative summary (Verdict, Strengths, Key Issues)
+  → Score each category
+  → Compile report
   → Present findings
 ```
 
 ### Report Format
 
-```
-## Skill Audit: <skill-name>
+Use the **Single Skill Audit Report** template from `references/skill-report-template.md`. It provides a three-layer structure (Decision Brief, Findings by Category, Skill Profile) with its own decision vocabulary, optimized for the 4-category skill scope.
 
-### Score: X/10
-
-### Findings
-- [C/W/I] <category>.<check>: <description>
-
-### Category Breakdown
-| Category | Score | Notes |
-|----------|-------|-------|
-| Structure | X/10 | ... |
-| Skill Quality | X/10 | ... |
-| Cross-References | X/10 | ... |
-| Security | X/10 | ... |
-```
+**Qualitative summary guidelines:**
+- **Verdict** — one sentence capturing the skill's overall quality and fitness for purpose
+- **Strengths** — what the skill does well (max 3, be concise)
+- **Key Issues** — the most impactful problems found (max 3, be specific and objective)
+- Do not include actionable fix suggestions — that is `bundles-forge:optimizing`'s responsibility
 
 ### Third-Party Skill Scanning
 

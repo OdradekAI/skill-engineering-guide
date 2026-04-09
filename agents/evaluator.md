@@ -38,6 +38,15 @@ Return a structured report:
 ### Prompt 2: "<prompt text>"
 ...
 
+### Execution Observations (self-reported)
+
+These fields are self-reported based on following the skill instructions — not runtime instrumentation.
+
+**Files referenced:** <list of files the skill instructions directed you to read, in order>
+**Branches taken:** <which conditional paths you followed (e.g. "subagent available" vs "inline fallback")>
+**Unused sections:** <SKILL.md sections that were not relevant to any test prompt>
+**Estimated info utilization:** <percentage of loaded skill content that actually informed your decisions>
+
 ### Summary
 - Prompts tested: N
 - Triggered correctly: N/N

@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.5.0] - 2026-04-10
+
+### Added
+
+- **Audit report template system** — six-layer report template (`references/report-template.md`) for full project audits with Go/No-Go decision logic, quantified impact scales, and confidence levels. Separate three-layer template (`references/skill-report-template.md`) for single skill audits.
+- **Per-skill breakdown** in audit output — `audit_project.py` markdown reports now include a section with per-skill findings and 4-category score tables; `auditor` agent instructions updated to produce qualitative summaries (Verdict, Strengths, Key Issues) per skill.
+- **Evaluator execution observations** — `evaluator` agent reports now include self-reported fields: files referenced, branches taken, unused sections, and estimated info utilization.
+- **New lint checks** in `lint_skills.py` — Q13 (token budget enforcement for bootstrap skills), Q14 (`allowed-tools` path validation against actual filesystem), Q15 (conditional block reachability — blocks over 30 lines flagged for extraction to `references/`).
+- **Enhanced X3 check** — now validates that prose references to subdirectories (`references/`, `templates/`, etc.) match actual skill directory contents; original X3 (Integration section) renumbered to X4.
+- **Auditing documentation** in README (en/zh) — comprehensive section covering Agent-based and script-based audit workflows, scope detection logic, exit codes, and post-audit guidance.
+- **Single skill audit mode** in `auditor` agent — 4-category audit with 3-layer report when target is a skill directory instead of a full project.
+
+### Changed
+
+- **`auditing/SKILL.md`** — report step now references the six-layer template instead of inline format; updated check ranges to Q1–Q15 and renumbered cross-reference checks X1–X6.
+- **`audit-checklist.md`** — inline report template replaced with pointer to `references/report-template.md`; added Q13–Q15 and X3–X6 check definitions.
+
 ## [1.4.3] - 2026-04-09
 
 ### Changed
