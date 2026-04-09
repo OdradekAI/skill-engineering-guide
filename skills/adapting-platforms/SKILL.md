@@ -1,13 +1,13 @@
 ---
 name: adapting-platforms
-description: "Use when adding Claude Code, Cursor, Codex, OpenCode, or Gemini CLI support to an existing bundles repository, when platform manifests need updating or fixing, when migrating a bundles repository to a new platform, or when platform-specific hooks or configuration need changes"
+description: "Use when adding Claude Code, Cursor, Codex, OpenCode, or Gemini CLI support to a bundle-plugin, updating or fixing platform manifests, migrating to a new platform, or changing platform-specific hooks and configuration"
 ---
 
 # Adapting Skill Platforms
 
 ## Overview
 
-Add support for a new AI coding platform to an existing bundles repository. Each platform has its own manifest format, discovery mechanism, and hook wiring. This skill generates the correct adapter files and wires them into the project.
+Add support for a new AI coding platform to an existing bundle-plugin repository. Each platform has its own manifest format, discovery mechanism, and hook wiring. This skill generates the correct adapter files and wires them into the project.
 
 **Core principle:** One project, many platforms. Platform adapters translate the same skills into each platform's native format.
 

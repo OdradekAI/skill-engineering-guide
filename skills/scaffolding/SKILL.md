@@ -1,13 +1,13 @@
 ---
 name: scaffolding
-description: "Use when generating project structure for new bundles — supports both minimal plugin packaging (just skills + manifest) and full multi-platform projects with hooks, bootstrap, and version infrastructure — use after design is complete (invoke bundles-forge:designing first if no design exists)"
+description: "Use when generating project structure for new bundle-plugins — supports minimal packaging (skills + manifest) and full multi-platform projects with hooks, bootstrap, and version infrastructure. Use after design is complete"
 ---
 
-# Scaffolding Bundles
+# Scaffolding Bundle-Plugins
 
 ## Overview
 
-Generate a bundles project from a design blueprint. Supports two modes: **minimal** (quick packaging of standalone skills) and **intelligent** (full multi-platform project with hooks, bootstrap, and version infrastructure).
+Generate a bundle-plugin project from a design blueprint. Supports two modes: **minimal** (quick packaging of standalone skills) and **intelligent** (full multi-platform project with hooks, bootstrap, and version infrastructure).
 
 **Core principle:** Generate only what's needed. Every platform, every file has a reason to exist.
 
@@ -117,7 +117,7 @@ Generated for all intelligent-mode projects regardless of platform selection:
 5. **Security baseline** — run `bundles-forge:auditing` on generated hooks and plugin code
 6. **Report** — show the user the generated structure and next steps
 
-Dispatch the `scaffold-reviewer` agent (`agents/scaffold-reviewer.md`) for automated validation if subagents are available.
+Dispatch the `reviewer` agent (`agents/reviewer.md`) for automated validation if subagents are available.
 
 ## Quick Reference: Placeholder Map
 

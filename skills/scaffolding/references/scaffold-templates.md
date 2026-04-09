@@ -1,6 +1,6 @@
 # Scaffold Templates
 
-Index of ready-to-use template files for generating new bundles. All templates live in `assets/` — read each file directly when generating.
+Index of ready-to-use template files for generating new bundle-plugins. All templates live in `assets/` — read each file directly when generating.
 
 Replace all placeholders before writing to the target project.
 

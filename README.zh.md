@@ -43,7 +43,7 @@ gemini extensions install https://github.com/odradekai/bundles-forge.git
 ```mermaid
 graph TB
     BundlesForge["bundles-forge\n(工程化工具链)"] -->|"创建 / 维护"| Bundles
-    Bundles["Bundles\n(以技能集合为核心的插件)"] -->|包含| Skills["Skills\n(SKILL.md)"]
+    Bundles["Bundle-Plugin\n(以技能集合为核心的插件)"] -->|包含| Skills["Skills\n(SKILL.md)"]
     Bundles -->|包含| Agents["Agents\n(子代理提示词)"]
     Bundles -->|包含| Hooks["Hooks\n(会话引导)"]
     Bundles -->|包含| Commands["Commands\n(斜杠命令)"]
@@ -55,14 +55,14 @@ graph TB
 |------|------|
 | **Skill** | 能力的原子单元 — 一个 `SKILL.md` 文件（可附带 `references/`），AI Agent 通过其 `description` 字段发现并按需加载。 |
 | **Plugin** | AI 编程平台的分发格式。一个 Plugin 可包含 skills、agents、commands、hooks、MCP servers 等组件。 |
-| **Bundles** | 以**协作式技能集合**为核心的 Plugin 组织形态 — 技能之间相互引用、形成工作流。这是本项目使用的命名约定，并非平台官方术语。 |
-| **bundles-forge** | 一个工程化工具链（本身也是一个 bundles plugin），用于跨 5 个平台创建、审计、优化和发布 bundles 项目。 |
+| **Bundle-plugin** | 以**协作式技能集合**为核心的 Plugin 组织形态 — 技能之间相互引用、形成工作流。"Bundles" 是本项目对此模式的简称。 |
+| **bundles-forge** | 一个工程化工具链（本身也是一个 bundle-plugin），用于跨 5 个平台创建、审计、优化和发布 bundle-plugin 项目。 |
 
 ### 为什么需要 Bundles？
 
-普通插件可能只有一个技能做一件事。而 **bundles** 项目中的技能会 _协作_：技能 A 的输出供技能 B 消费，技能 C 验证 A 和 B 的产物。bundles-forge 本身就是一个 bundles — `designing` 输出设计方案给 `scaffolding`，后者触发 `auditing`，审计可能调用 `optimizing`。
+普通插件可能只有一个技能做一件事。而 **bundle-plugin** 项目中的技能会 _协作_：技能 A 的输出供技能 B 消费，技能 C 验证 A 和 B 的产物。bundles-forge 本身就是一个 bundle-plugin — `designing` 输出设计方案给 `scaffolding`，后者触发 `auditing`，审计可能调用 `optimizing`。
 
-如果你的插件有 3 个以上相互协作形成工作流的技能，你就是在构建 bundles。本工具链为这种模式提供脚手架、质量关卡和多平台发布能力。
+如果你的插件有 3 个以上相互协作形成工作流的技能，你就是在构建 bundle-plugin。本工具链为这种模式提供脚手架、质量关卡和多平台发布能力。
 
 ### 技能间的调用机制
 
@@ -107,7 +107,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Input["用户消息"] --> Check{"与 bundles 相关？"}
+    Input["用户消息"] --> Check{"与 bundle-plugin 相关？"}
     Check -->|否| Direct["直接回复"]
     Check -->|是| How{"如何调用？"}
     How -->|"斜杠命令\n(/audit-project)"| Cmd["命令映射到技能"]
@@ -133,7 +133,7 @@ flowchart TD
 | 技能 | 说明 |
 |------|------|
 | `using-bundles-forge` | 引导元技能 — 会话启动时通过钩子注入；建立技能路由、命名约定和完整的技能清单 |
-| `designing` | 通过结构化访谈规划新技能项目，或将复杂技能拆分为项目 |
+| `designing` | 通过结构化访谈规划新 bundle-plugin，或将复杂技能拆分为 bundle-plugin 项目 |
 | `scaffolding` | 生成项目结构、平台清单、钩子脚本和引导技能 |
 | `writing-skill` | 指导 SKILL.md 文件编写 — 结构、描述、渐进式加载 |
 | `auditing` | 质量评估（9 大类）和安全扫描（5 大攻击面） |
@@ -145,7 +145,7 @@ flowchart TD
 
 ### 完整生命周期
 
-8 个技能覆盖 bundles 项目的完整生命周期 — 从初始设计到发布：
+8 个技能覆盖 bundle-plugin 项目的完整生命周期 — 从初始设计到发布：
 
 ```mermaid
 flowchart LR
@@ -176,15 +176,16 @@ flowchart LR
 | 技能 | 独立使用场景 |
 |------|------------|
 | `writing-skill` | 为任意项目指导编写单个 SKILL.md |
-| `auditing` | 对任意现有 bundles 项目执行质量审计或安全扫描 |
+| `auditing` | 对任意现有 bundle-plugin 项目执行质量审计或安全扫描 |
 | `optimizing` | 优化现有项目或基于用户反馈改进技能 |
 
 ## Agents
 
 | Agent | 职责 |
 |-------|------|
-| `scaffold-reviewer` | 验证脚手架生成的项目结构 |
-| `project-auditor` | 执行系统化质量审计与安全扫描 |
+| `reviewer` | 验证脚手架生成的项目结构 |
+| `auditor` | 执行系统化质量审计与安全扫描 |
+| `evaluator` | 运行 A/B 技能评估的单侧测试，用于优化对比 |
 
 ## 命令
 

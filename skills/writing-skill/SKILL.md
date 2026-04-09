@@ -1,17 +1,17 @@
 ---
 name: writing-skill
-description: "Use when writing or improving individual skill content within a bundles — covers SKILL.md structure, frontmatter conventions, description writing for reliable triggering, instruction style, progressive disclosure, and bundled resource organization. Also use when a user has scaffolded a bundles and needs guidance on filling in the actual skill content"
+description: "Use when writing or improving skill content in a bundle-plugin — SKILL.md structure, frontmatter conventions, description writing for reliable triggering, instruction style, and resource organization. Also use after scaffolding for content guidance"
 ---
 
 # Writing Skill Content
 
 ## Overview
 
-Guide the authoring of effective SKILL.md files and supporting resources within a bundles. Good skill content is the difference between a skill that agents consistently find, follow, and produce quality results with — and one that gets ignored or misinterpreted.
+Guide the authoring of effective SKILL.md files and supporting resources within a bundle-plugin. Good skill content is the difference between a skill that agents consistently find, follow, and produce quality results with — and one that gets ignored or misinterpreted.
 
 **Core principle:** Write for the agent's experience. Every instruction should be discoverable (good description), loadable (right size), and followable (clear, motivated instructions).
 
-This skill distills best practices from the [Anthropic skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) into actionable guidance for bundles authors.
+This skill distills best practices from the [Anthropic skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) into actionable guidance for bundle-plugin authors.
 
 **Announce at start:** "I'm using the writing-skill skill to help author skill content."
 
@@ -47,8 +47,8 @@ The description is the **primary triggering mechanism** — it determines whethe
 - **Start with "Use when..."** — this framing helps agents match user intent to skill purpose
 - **Describe triggering conditions, not workflow** — testing shows that when descriptions summarize a skill's process, agents follow the description as a shortcut instead of reading the full SKILL.md. A description saying "scans structure, checks manifests, scores categories" caused agents to do exactly that sequence from the description alone, skipping the detailed instructions
 - **Be slightly pushy** — agents tend to under-trigger skills. Include related scenarios, edge cases, and alternative phrasings. If there's even a chance the skill applies, the description should hint at it
-- **Keep under 500 characters** — this is metadata that's always in context
-- **Scope appropriately** — if the skill is for bundles specifically, say so. Don't let the description match unrelated contexts
+- **Keep under 250 characters** — descriptions over 250 are truncated in the skill listing, losing trigger keywords
+- **Scope appropriately** — if the skill is for bundle-plugins specifically, say so. Don't let the description match unrelated contexts
 
 ```yaml
 # BAD: Summarizes workflow — agent shortcuts to this
@@ -58,7 +58,38 @@ description: "Scans project structure, validates manifests, checks version sync,
 description: "Use when auditing any project for quality"
 
 # GOOD: Triggering conditions, properly scoped, pushy
-description: "Use when reviewing a bundles for structural issues, version drift, manifest problems, or skill quality, before releasing a bundles, or when a user points to a skill folder to review"
+description: "Use when reviewing a bundle-plugin for structural issues, version drift, manifest problems, or skill quality, before releasing a bundle-plugin, or when a user points to a skill folder to review"
+```
+
+### Optional Frontmatter Fields
+
+Beyond `name` and `description`, Claude Code supports fields that control invocation, execution context, and tool access. Use these when the defaults don't fit.
+
+| Field | Effect | When to Use |
+|-------|--------|-------------|
+| `disable-model-invocation: true` | Only the user can invoke via `/name` | Side-effect workflows: deploy, commit, send messages |
+| `user-invocable: false` | Hidden from `/` menu, only Claude invokes | Background knowledge that isn't a user action |
+| `allowed-tools` | Pre-approve tools without per-use prompts | Skills that need specific tool access (e.g., `Bash(git *)`) |
+| `context: fork` | Run in an isolated subagent context | Self-contained tasks that shouldn't consume main context |
+| `agent` | Which subagent type to use with `context: fork` | Pair with fork: `Explore` for read-only, `Plan` for planning |
+| `argument-hint` | Shown during autocomplete (e.g., `[issue-number]`) | Skills that take arguments |
+| `model` | Override the session model | Specialized tasks needing a specific model |
+| `effort` | Override reasoning effort (`low`/`medium`/`high`/`max`) | Tasks needing more or less reasoning depth |
+| `paths` | Glob patterns limiting when skill auto-activates | Skills tied to specific file types or directories |
+| `hooks` | Lifecycle hooks scoped to the skill | Pre/post validation when the skill runs |
+| `shell` | `bash` (default) or `powershell` for inline commands | Windows-specific skills |
+
+**Example combining fields:**
+
+```yaml
+---
+name: deploy
+description: "Use when deploying the application to production"
+disable-model-invocation: true
+allowed-tools: Bash(git *) Bash(npm *)
+context: fork
+argument-hint: "[environment]"
+---
 ```
 
 ## Writing the Body
@@ -106,7 +137,7 @@ Every token in a frequently-loaded skill costs context budget across every sessi
 |--------|--------|
 | Bootstrap skill (always loaded) | < 200 lines |
 | Regular skill body | < 500 lines |
-| Description (always in context) | < 500 characters |
+| Description (always in context) | < 250 characters |
 
 **Techniques for staying lean:**
 - Cross-reference other skills (`project:skill-name`) instead of repeating content
@@ -177,7 +208,7 @@ Create an `assets/` file when:
 | No examples, only abstract rules | Add at least one concrete example per key instruction |
 | Writing for humans, not agents | Use imperative form, clear structure, explicit output formats |
 | Description too narrow | Be pushy — list related scenarios, edge cases, alternative phrasings |
-| Description too broad | Scope to the right context (e.g., "bundles" not just "any project") |
+| Description too broad | Scope to the right context (e.g., "bundle-plugins" not just "any project") |
 
 ## Integration
 

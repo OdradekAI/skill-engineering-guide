@@ -1,6 +1,6 @@
 # Security Checklist
 
-Structured criteria for evaluating security risks in a bundles repository. Each category targets a specific file type with pattern-based checks. Use this during a security scan — work through each category, note findings with file paths and line numbers, and compile the report.
+Structured criteria for evaluating security risks in a bundle-plugin repository. Each category targets a specific file type with pattern-based checks. Use this during a security scan — work through each category, note findings with file paths and line numbers, and compile the report.
 
 ## Risk Levels
 

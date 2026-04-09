@@ -1,13 +1,13 @@
 ---
 name: auditing
-description: "Use when reviewing a bundles for structural issues, version drift, manifest problems, skill quality, or security risks, before releasing a bundles, after significant changes, when scanning third-party skills before installation, when a user points to a specific skill folder or file to review, or as a periodic bundles health check — auto-detects scope (full project vs single skill) and runs only applicable checks"
+description: "Use when reviewing a bundle-plugin for structural issues, version drift, manifest problems, skill quality, or security risks — before releasing, after changes, or when scanning third-party skills. Auto-detects scope (full project vs single skill)"
 ---
 
-# Auditing Bundles
+# Auditing Bundle-Plugins
 
 ## Overview
 
-Systematically evaluate a bundles project or a single skill across applicable quality categories — including security scanning — score each, and produce an actionable report.
+Systematically evaluate a bundle-plugin project or a single skill across applicable quality categories — including security scanning — score each, and produce an actionable report.
 
 **Core principle:** Measure before you fix. A scored audit prevents both under-reaction and over-engineering.
 
@@ -72,6 +72,8 @@ python scripts/scan-security.py --json <project-root>  # security JSON output
 
 `audit-project.py` orchestrates `scan-security.py` (security) and `lint-skills.py` (skill quality), then adds structure, manifest, version-sync, hook, and documentation checks.
 
+Dispatch the `auditor` agent (`agents/auditor.md`) for automated assessment if subagents are available. The auditor runs read-only and returns a scored report.
+
 ### Step 2: Scan
 
 Read the project root. Identify:
@@ -120,7 +122,7 @@ Each category: 0-10 scale. Overall = weighted average.
 Present as:
 
 ```
-## Bundles Audit: <project-name>
+## Bundle-Plugin Audit: <project-name>
 
 ### Score: X/10
 

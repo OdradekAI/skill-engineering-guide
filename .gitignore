@@ -1,5 +1,6 @@
 .repos
 .claude/
+.bundles-forge/
 node_modules/
 .worktrees/
 worktrees/

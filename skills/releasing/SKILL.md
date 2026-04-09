@@ -1,13 +1,13 @@
 ---
 name: releasing
-description: "Use when preparing to release or publish a bundles, bumping to a new version, when version drift is detected across manifests, setting up version sync infrastructure, creating a release checklist, updating CHANGELOG, or publishing to platform marketplaces — orchestrates version management and the full pre-release verification and publishing workflow"
+description: "Use when releasing a bundle-plugin, bumping versions, fixing version drift across manifests, setting up version sync infrastructure, updating CHANGELOG, or publishing to marketplaces. Orchestrates the full pre-release verification pipeline"
 ---
 
-# Releasing Bundles
+# Releasing Bundle-Plugins
 
 ## Overview
 
-Orchestrate the complete release workflow for a bundles: verify quality, scan for security risks, bump versions, update documentation, and publish to target platforms. This skill also owns version management infrastructure — keeping all platform manifests in sync.
+Orchestrate the complete release workflow for a bundle-plugin: verify quality, scan for security risks, bump versions, update documentation, and publish to target platforms. This skill also owns version management infrastructure — keeping all platform manifests in sync.
 
 **Core principle:** Release is a checkpoint, not a formality. Every release deserves the full pipeline — even "minor" version bumps can introduce drift or break platform installs.
 
@@ -56,7 +56,7 @@ Three commands (requires `jq` and `bash`):
 ## Prerequisites
 
 Before starting the release process, confirm:
-- The project is a bundles (has `skills/` directory and `package.json`)
+- The project is a bundle-plugin (has `skills/` directory and `package.json`)
 - All skill content changes are committed
 - The user knows the target version number (or wants help deciding)
 

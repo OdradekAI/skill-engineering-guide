@@ -101,7 +101,7 @@ class TestAuditProject(unittest.TestCase):
             [sys.executable, str(SCRIPTS_DIR / "audit-project.py"), str(REPO_ROOT)],
             capture_output=True, text=True
         )
-        self.assertIn("Bundles Audit", result.stdout)
+        self.assertIn("Bundle-Plugin Audit", result.stdout)
 
     def test_audit_json_output(self):
         result = subprocess.run(

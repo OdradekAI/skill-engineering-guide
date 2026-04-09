@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skill quality linter for bundles.
+Skill quality linter for bundle-plugins.
 
 Validates SKILL.md frontmatter, descriptions, line counts, cross-references,
 and relative path links across all skills in a project.
@@ -107,10 +107,10 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
         if WORKFLOW_SUMMARY_PHRASES.search(desc):
             findings.append(dict(check="Q6", severity="warning",
                                  message="Description appears to summarize workflow instead of triggering conditions"))
-        # Q7: length
-        if len(desc) > 500:
+        # Q7: length (Claude Code truncates descriptions beyond 250 chars in skill listing)
+        if len(desc) > 250:
             findings.append(dict(check="Q7", severity="warning",
-                                 message=f"Description is {len(desc)} chars (max 500)"))
+                                 message=f"Description is {len(desc)} chars (max 250)"))
 
     # Q8: frontmatter size
     if len(fm_raw) > 1024:
@@ -243,9 +243,9 @@ def format_markdown(results):
 # ---------------------------------------------------------------------------
 
 def main():
-    parser = argparse.ArgumentParser(description="Lint skill quality in a bundles project.")
+    parser = argparse.ArgumentParser(description="Lint skill quality in a bundle-plugin project.")
     parser.add_argument("project_root", nargs="?", default=".",
-                        help="Bundles root (default: current directory)")
+                        help="Bundle-plugin root (default: current directory)")
     parser.add_argument("--json", action="store_true", help="Output JSON instead of markdown")
     args = parser.parse_args()
 

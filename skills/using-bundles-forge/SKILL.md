@@ -1,6 +1,6 @@
 ---
 name: using-bundles-forge
-description: "Use when starting any conversation involving bundles — designing, scaffolding, auditing, optimizing, adapting platforms, writing skill content, or releasing. Also use when splitting a complex skill into a project, or when unsure which bundles-forge skill applies"
+description: "Use when starting any conversation involving bundle-plugins — designing, scaffolding, auditing, optimizing, adapting platforms, writing skills, or releasing. Also use when unsure which bundles-forge skill applies"
 ---
 
 <SUBAGENT-STOP>
@@ -9,13 +9,13 @@ If you were dispatched as a subagent to execute a specific task, skip this skill
 
 ## Pre-flight Check
 
-Before invoking any bundles-forge skill on a target directory, verify the target is a bundles project:
+Before invoking any bundles-forge skill on a target directory, verify the target is a bundle-plugin project:
 - Does it have a `skills/` directory?
 - Does it have a `package.json`?
 
-If neither exists, inform the user: "This directory doesn't appear to be a bundles project. Bundles Forge skills are designed for bundles (repositories where skills are the primary content). Would you like to create new bundles here, or did you mean to point to a different directory?"
+If neither exists, inform the user: "This directory doesn't appear to be a bundle-plugin project. Bundles Forge skills are designed for bundle-plugins (repositories where skills are the primary content). Would you like to create a new bundle-plugin here, or did you mean to point to a different directory?"
 
-Exception: `bundles-forge:auditing` and `bundles-forge:optimizing` can also operate on individual skill folders or files — they don't require a full bundles project.
+Exception: `bundles-forge:auditing` and `bundles-forge:optimizing` can also operate on individual skill folders or files — they don't require a full bundle-plugin project.
 
 ## Instruction Priority
 
@@ -39,10 +39,10 @@ Skills use Claude Code tool names as the default. Non-Claude-Code platforms: see
 
 ## The Rule
 
-**Invoke relevant skills BEFORE any response or action** when working with bundles. If there's even a small chance a skill applies, invoke it to check.
+**Invoke relevant skills BEFORE any response or action** when working with bundle-plugins. If there's even a small chance a skill applies, invoke it to check.
 
 ```
-User message about bundles
+User message about bundle-plugins
   → Might any skill apply?
     → yes → Invoke Skill tool → Follow skill → Respond
     → no  → Respond directly
@@ -54,7 +54,7 @@ These skills are invoked directly by users. Each has a matching command in `comm
 
 | Skill | When to Use |
 |-------|-------------|
-| `bundles-forge:designing` | Planning new bundles, splitting or composing skills, combining third-party skills |
+| `bundles-forge:designing` | Planning new bundle-plugins, splitting or composing skills, combining third-party skills |
 | `bundles-forge:auditing` | Reviewing a project for quality issues, security risks, or before release |
 | `bundles-forge:optimizing` | Engineering optimization, feedback iteration, descriptions, token efficiency |
 | `bundles-forge:releasing` | Version management, release pipeline: audit, version bump, publish |

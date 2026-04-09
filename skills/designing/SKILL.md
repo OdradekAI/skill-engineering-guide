@@ -1,9 +1,9 @@
 ---
 name: designing
-description: "Use when planning new bundles, splitting or decomposing a complex skill into structured bundles, combining or composing multiple existing skills into a unified project, deciding which skills to include and how they chain together, mapping platform targets, choosing a bootstrap strategy, or when a user has a vague idea about packaging or organizing their skills — always use this before any scaffolding or code generation to avoid costly rework"
+description: "Use when planning new bundle-plugins, splitting complex skills into structured projects, combining skills into unified bundles, mapping platform targets, or when a user has a vague idea about packaging skills. Use before scaffolding to avoid rework"
 ---
 
-# Designing Bundles
+# Designing Bundle-Plugins
 
 ## Overview
 
@@ -11,7 +11,7 @@ Turn a vague idea ("I want to package my skills") into a concrete project bluepr
 
 **Core principle:** Understand what you're building before generating anything. Five minutes of interview saves hours of rework.
 
-**Announce at start:** "I'm using the designing skill to plan your bundles."
+**Announce at start:** "I'm using the designing skill to plan your bundle-plugin."
 
 ## Three Entry Points
 
@@ -25,7 +25,7 @@ If the user has an existing skill they want to break apart, start with Scenario 
 
 ## Scenario B: Decomposition Analysis
 
-When the user wants to split a complex skill into bundles, analyze the existing skill before designing the new project.
+When the user wants to split a complex skill into a bundle-plugin, analyze the existing skill before designing the new project.
 
 ### B1. Read the Existing Skill
 
@@ -57,17 +57,17 @@ Get user approval on the decomposition before proceeding to the Interview (Scena
 
 ## Scenario C: Composition Analysis
 
-When the user wants to combine multiple existing skills into unified bundles, analyze compatibility and design the orchestration before scaffolding.
+When the user wants to combine multiple existing skills into a unified bundle-plugin, analyze compatibility and design the orchestration before scaffolding.
 
 ### C1. Inventory Existing Skills
 
 Collect all candidate skills. For each one, record:
-- Source (local file, git repo, marketplace plugin, another bundles project)
+- Source (local file, git repo, marketplace plugin, another bundle-plugin project)
 - Current structure (standalone SKILL.md, has references/, has scripts/)
 - Frontmatter quality (has name/description? follows conventions?)
 - Rigid or flexible type
 
-**For third-party skills** (marketplace, GitHub, other bundles), additionally record:
+**For third-party skills** (marketplace, GitHub, other bundle-plugins), additionally record:
 - License (MIT, Apache-2.0, proprietary, unknown)
 - Version or commit hash at time of evaluation
 - Maintenance status (actively maintained, archived, unknown)
@@ -221,7 +221,7 @@ Does the user want an always-loaded meta-skill (`using-<project>`) that teaches 
 - Multiple platforms targeted
 
 **Skip when:**
-- Single bundles project
+- Single bundle-plugin project
 - Skills are fully independent utilities
 
 ### 6. Advanced Components (intelligent mode — ask only if relevant)
@@ -243,7 +243,7 @@ Skip this step entirely if no signals emerged from earlier answers.
 After the interview, compile a design summary:
 
 ```markdown
-## Bundles Design: <project-name>
+## Bundle-Plugin Design: <project-name>
 
 **Mode:** minimal / intelligent
 **Platforms:** <list>

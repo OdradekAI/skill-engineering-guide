@@ -1,6 +1,6 @@
 # Audit Checklist
 
-Structured criteria for evaluating a bundles. Each category has specific checks with severity levels. Use this when running an audit — work through each category, note findings, and compile the report.
+Structured criteria for evaluating a bundle-plugin. Each category has specific checks with severity levels. Use this when running an audit — work through each category, note findings, and compile the report.
 
 ## Scoring
 
@@ -84,7 +84,7 @@ Run for every SKILL.md in the project.
 | Q4 | Warning | `name` uses only letters, numbers, hyphens |
 | Q5 | Warning | `description` starts with "Use when..." |
 | Q6 | Warning | `description` describes triggering conditions, not workflow summary |
-| Q7 | Warning | `description` is under 500 characters |
+| Q7 | Warning | `description` is under 250 characters (truncated in skill listing beyond this) |
 | Q8 | Warning | Frontmatter total under 1024 characters |
 | Q9 | Warning | SKILL.md body under 500 lines |
 | Q10 | Info | Skill has Overview section |
@@ -189,7 +189,7 @@ curl|wget|nc |eval\(|child_process|\.env|api_key|secret|ignore safety|override|b
 After running all checks, compile findings into this format:
 
 ```markdown
-## Bundles Audit: <project-name>
+## Bundle-Plugin Audit: <project-name>
 
 **Date:** <date>
 **Platforms:** <target platforms>

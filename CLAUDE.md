@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a bundles engineering toolkit supporting 5 platforms: Claude Code, Cursor, Codex, OpenCode, and Gemini CLI. It contains 8 skills covering the full lifecycle of bundles development.
+This is a bundle-plugin engineering toolkit supporting 5 platforms: Claude Code, Cursor, Codex, OpenCode, and Gemini CLI. It contains 8 skills covering the full lifecycle of bundle-plugin development.
 
 ## Development Workflow
 
@@ -15,7 +15,7 @@ This is a bundles engineering toolkit supporting 5 platforms: Claude Code, Curso
 
 - **Skill naming:** lowercase with hyphens, directory name must match frontmatter `name` field
 - **Descriptions:** must start with "Use when..." and describe triggering conditions, not workflow steps
-- **Descriptions:** stay under 500 characters, frontmatter under 1024 characters total
+- **Descriptions:** stay under 250 characters (truncated beyond this), frontmatter under 1024 characters total
 - **Heavy reference content:** extract to `references/` subdirectory (threshold: 100+ lines)
 - **Cross-references:** use `bundles-forge:<skill-name>` format
 

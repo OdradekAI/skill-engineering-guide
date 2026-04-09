@@ -2,7 +2,7 @@
 
 [中文](README.zh.md)
 
-A bundles engineering toolkit: scaffolding, platform adaptation, version management, auditing, and skill lifecycle management across 5 AI coding platforms.
+A bundle-plugin engineering toolkit: scaffolding, platform adaptation, version management, auditing, and skill lifecycle management across 5 AI coding platforms.
 
 ## Installation
 
@@ -43,7 +43,7 @@ gemini extensions install https://github.com/odradekai/bundles-forge.git
 ```mermaid
 graph TB
     BundlesForge["bundles-forge\n(engineering toolkit)"] -->|"creates / maintains"| Bundles
-    Bundles["Bundles\n(a plugin organized around skills)"] -->|contains| Skills["Skills\n(SKILL.md)"]
+    Bundles["Bundle-Plugin\n(a plugin organized around skills)"] -->|contains| Skills["Skills\n(SKILL.md)"]
     Bundles -->|contains| Agents["Agents\n(subagent prompts)"]
     Bundles -->|contains| Hooks["Hooks\n(session bootstrap)"]
     Bundles -->|contains| Commands["Commands\n(slash shortcuts)"]
@@ -55,14 +55,14 @@ graph TB
 |------|-----------|
 | **Skill** | The atomic unit of capability — a `SKILL.md` file (with optional `references/`) that an AI agent discovers through its `description` field and loads on demand. |
 | **Plugin** | The distribution format for AI coding platforms. A plugin can contain skills, agents, commands, hooks, MCP servers, and other components. |
-| **Bundles** | A plugin organized primarily around a **collection of collaborative skills** — skills that reference each other and form workflows. This is a naming convention used in this project, not an official platform term. |
-| **bundles-forge** | An engineering toolkit (itself a bundles plugin) for creating, auditing, optimizing, and releasing bundles projects across 5 platforms. |
+| **Bundle-plugin** | A plugin organized primarily around a **collection of collaborative skills** — skills that reference each other and form workflows. "Bundles" is a shorthand used in this project for this pattern. |
+| **bundles-forge** | An engineering toolkit (itself a bundle-plugin) for creating, auditing, optimizing, and releasing bundle-plugin projects across 5 platforms. |
 
 ### Why Bundles?
 
-A regular plugin might have one skill doing one thing. A **bundles** project has skills that _collaborate_: skill A produces output that skill B consumes, skill C validates what A and B created. bundles-forge itself is a bundles — `designing` feeds into `scaffolding`, which triggers `auditing`, which may call `optimizing`.
+A regular plugin might have one skill doing one thing. A **bundle-plugin** project has skills that _collaborate_: skill A produces output that skill B consumes, skill C validates what A and B created. bundles-forge itself is a bundle-plugin — `designing` feeds into `scaffolding`, which triggers `auditing`, which may call `optimizing`.
 
-If your plugin has 3+ skills that form a workflow, you're building a bundles. This toolkit gives you scaffolding, quality gates, and multi-platform publishing for that pattern.
+If your plugin has 3+ skills that form a workflow, you're building a bundle-plugin. This toolkit gives you scaffolding, quality gates, and multi-platform publishing for that pattern.
 
 ### How Skills Invoke Each Other
 
@@ -107,7 +107,7 @@ Once the bootstrap context is loaded, the agent routes user requests to the righ
 
 ```mermaid
 flowchart TD
-    Input["User message"] --> Check{"Related to bundles?"}
+    Input["User message"] --> Check{"Related to bundle-plugins?"}
     Check -->|No| Direct["Respond directly"]
     Check -->|Yes| How{"How to invoke?"}
     How -->|"Slash command\n(/audit-project)"| Cmd["Command maps to skill"]
@@ -133,7 +133,7 @@ flowchart TD
 | Skill | Description |
 |-------|-------------|
 | `using-bundles-forge` | Bootstrap meta-skill — injected at session start via hooks; establishes skill routing, naming conventions, and the full skill inventory |
-| `designing` | Plan a new bundles or decompose a complex skill through structured interview |
+| `designing` | Plan a new bundle-plugin or decompose a complex skill through structured interview |
 | `scaffolding` | Generate project structure, manifests, hooks, and bootstrap skill |
 | `writing-skill` | Guide authoring of SKILL.md files — structure, descriptions, progressive disclosure |
 | `auditing` | Quality assessment (9 categories) and security scanning (5 attack surfaces) |
@@ -145,7 +145,7 @@ flowchart TD
 
 ### Full Lifecycle
 
-The 8 skills cover the complete lifecycle of a bundles project — from initial design to publishing:
+The 8 skills cover the complete lifecycle of a bundle-plugin project — from initial design to publishing:
 
 ```mermaid
 flowchart LR
@@ -176,15 +176,16 @@ The following skills can be invoked independently, without going through the ful
 | Skill | Standalone Use Case |
 |-------|-------------------|
 | `writing-skill` | Guide writing a single SKILL.md for any project |
-| `auditing` | Run a quality audit or security scan on any existing bundles project |
+| `auditing` | Run a quality audit or security scan on any existing bundle-plugin project |
 | `optimizing` | Optimize an existing project or iterate on skill feedback |
 
 ## Agents
 
 | Agent | Role |
 |-------|------|
-| `scaffold-reviewer` | Validates scaffolded project structure |
-| `project-auditor` | Executes systematic quality audit with security scanning |
+| `reviewer` | Validates scaffolded project structure |
+| `auditor` | Executes systematic quality audit with security scanning |
+| `evaluator` | Runs one side of an A/B skill evaluation for optimization |
 
 ## Commands
 

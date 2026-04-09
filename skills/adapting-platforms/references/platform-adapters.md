@@ -12,9 +12,13 @@ All templates use `<project-name>` as a placeholder — replace with the actual 
 
 **Additional shared files:** `hooks/session-start`, `hooks/run-hook.cmd` (see scaffolding assets for templates)
 
-Claude Code discovers `skills/` and `hooks/hooks.json` by convention — no path declarations needed in plugin.json.
+Claude Code discovers `skills/`, `commands/`, `agents/`, and `hooks/hooks.json` by convention — no path declarations needed in plugin.json. Optional components (`bin/`, `output-styles/`, `.mcp.json`, `.lsp.json`, `settings.json`) are also auto-discovered at their default locations.
 
-**Install method:** Marketplace `claude plugin install` or `/plugin install`. For development: `claude plugin link .`
+**Plugin manifest fields:** `name` (required), `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`. Component path overrides: `commands`, `agents`, `skills`, `hooks`, `mcpServers`, `outputStyles`, `lspServers`, `userConfig`, `channels`.
+
+**Plugin agent restrictions:** Plugin-shipped agents do not support `hooks`, `mcpServers`, or `permissionMode` frontmatter fields.
+
+**Install method:** Marketplace `claude plugin install` or `/plugin install`. For development: `claude --plugin-dir .`
 
 **Version bump entry:**
 ```json
@@ -93,6 +97,24 @@ gemini extensions install <repo-url>
 | Discovery | Convention | Explicit paths | Symlink | Plugin config | Context file |
 | Hook format | `hooks.json` (PascalCase) | `hooks-cursor.json` (camelCase) | N/A | JS plugin | N/A |
 | Skills path | Auto `skills/` | Declared in manifest | Symlink | Registered in JS | `@` includes |
+
+## Claude Code Hook Events
+
+Claude Code supports 25+ hook events. The most relevant for plugin development:
+
+| Event | Matcher | Use Case |
+|-------|---------|----------|
+| `SessionStart` | `startup\|resume\|clear\|compact` | Bootstrap injection (use matcher to exclude `resume`) |
+| `PreToolUse` | Tool name (regex) | Validate or block tool calls |
+| `PostToolUse` | Tool name (regex) | Run linters/formatters after edits |
+| `Stop` | (none) | Post-response actions |
+| `SubagentStart` / `SubagentStop` | Agent type name | Subagent lifecycle hooks |
+| `FileChanged` | Filename (basename) | React to file changes on disk |
+| `CwdChanged` | (none) | React to directory changes |
+
+**Hook types:** `command` (shell), `http` (POST to URL), `prompt` (LLM evaluation), `agent` (agentic verifier with tools).
+
+**Environment variables:** Use `${CLAUDE_PLUGIN_ROOT}` for bundled files, `${CLAUDE_PLUGIN_DATA}` for persistent state that survives updates.
 
 ## Shared Hook: `session-start`
 

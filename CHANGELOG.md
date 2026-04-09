@@ -2,6 +2,33 @@
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-04-09
+
+### Changed
+
+- **Terminology standardization** — "Bundles" → "Bundle-plugin" / "bundle-plugin" across all SKILL.md files, README (en/zh), CLAUDE.md, AGENTS.md, commands, scripts, and references. Establishes "bundle-plugin" as the canonical term.
+- **Description length limit** — lowered from 500 to 250 characters across `lint-skills.py`, `audit-checklist.md`, `writing-skill`, and `optimizing`. Claude Code truncates descriptions beyond 250 chars in the skill listing.
+- **All skill descriptions** — rewritten to fit within the 250-character limit while preserving triggering accuracy.
+- **`marketplace.json` structure** — `description` moved into `metadata` object to match Claude Code marketplace schema.
+- **`package.json` keyword** — `skill-engineering` → `bundle-plugin-engineering`; Claude/Cursor plugin keywords `bundles-engineering` → `bundle-plugin-engineering`.
+- **`optimizing` skill** — A/B evaluation now dispatches `evaluator` agents (`agents/evaluator.md`) instead of generic subagents.
+- **`scaffolding` skill** — validation now dispatches `reviewer` agent (`agents/reviewer.md`) instead of `scaffold-reviewer`.
+- **`auditing` skill** — now references `auditor` agent (`agents/auditor.md`) for automated assessment.
+
+### Added
+
+- **`evaluator` agent** (`agents/evaluator.md`) — runs one side of an A/B skill evaluation for optimization comparisons.
+- **Optional Frontmatter Fields** section in `writing-skill` — documents Claude Code advanced fields: `disable-model-invocation`, `user-invocable`, `allowed-tools`, `context: fork`, `agent`, `argument-hint`, `model`, `effort`, `paths`, `hooks`, `shell`.
+- **Claude Code Hook Events** reference in `adapting-platforms/references/platform-adapters.md` — documents 7 key hook events, hook types, and environment variables (`${CLAUDE_PLUGIN_ROOT}`, `${CLAUDE_PLUGIN_DATA}`).
+- **Plugin manifest fields** and **agent restrictions** in platform-adapters reference.
+- **`hooks.json` matcher** — added `startup|clear|compact` matcher for `SessionStart` hook.
+- **`.gitignore`** — added `.bundles-forge/` pattern for plugin data directory.
+
+### Removed
+
+- **`project-auditor` agent** — replaced by `auditor` (`agents/auditor.md`).
+- **`scaffold-reviewer` agent** — replaced by `reviewer` (`agents/reviewer.md`).
+
 ## [1.3.2] - 2026-04-09
 
 ### Added

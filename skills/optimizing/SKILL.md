@@ -1,13 +1,13 @@
 ---
 name: optimizing
-description: "Use when performing engineering optimization on an existing bundles or a single skill — improving descriptions for better triggering, reducing token usage, optimizing workflow chains, fixing audit findings, iterating on user feedback about a skill's behavior or output quality, or when a user reports that a skill produces incorrect or incomplete results — auto-detects scope (full project vs single skill)"
+description: "Use when optimizing a bundle-plugin or single skill — improving descriptions for better triggering, reducing token usage, fixing audit findings, or iterating on user feedback about skill behavior. Auto-detects scope (full project vs single skill)"
 ---
 
-# Optimizing Bundles
+# Optimizing Bundle-Plugins
 
 ## Overview
 
-Targeted improvement of a bundles project or a single skill. Unlike a full audit, optimization focuses on goals: better triggering, lower token cost, tighter workflow chains, and feedback-driven skill refinement.
+Targeted improvement of a bundle-plugin project or a single skill. Unlike a full audit, optimization focuses on goals: better triggering, lower token cost, tighter workflow chains, and feedback-driven skill refinement.
 
 **Core principle:** Optimize for the agent's experience. Every improvement should make skills easier to discover, faster to load, and clearer to follow.
 
@@ -63,7 +63,7 @@ The highest-impact optimization. Descriptions are the primary mechanism for skil
 - Start with "Use when..." — describe triggering conditions only
 - Never summarize the skill's workflow in the description
 - Include concrete symptoms, situations, and contexts
-- Keep under 500 characters
+- Keep under 250 characters (descriptions over 250 are truncated in the skill listing)
 
 **Why workflow summaries are harmful:** Testing revealed that when a description summarizes a skill's process, agents follow the description shortcut instead of reading the full SKILL.md. A description saying "code review between tasks" caused agents to do ONE review, even though the skill's flowchart showed TWO reviews.
 
@@ -72,7 +72,7 @@ The highest-impact optimization. Descriptions are the primary mechanism for skil
 description: Use for auditing - scans structure, checks manifests, scores categories, generates report
 
 # GOOD: Triggering conditions only — agent reads the full skill
-description: Use when reviewing a bundles for structural issues, version drift, or before release
+description: Use when reviewing a bundle-plugin for structural issues, version drift, or before release
 ```
 
 **Testing approach:** Use A/B eval (see below) to compare triggering accuracy before and after the change.
@@ -85,9 +85,9 @@ When optimizing a description, never overwrite the original blindly. Use a copy-
 1. Copy the skill to a working version (e.g. `<skill-name>-optimized/`)
 2. Apply the description change to the copy only
 3. Create 5+ realistic test prompts that should trigger this skill
-4. Dispatch two subagents in parallel:
-   - Subagent A: has the ORIGINAL skill loaded → run all test prompts
-   - Subagent B: has the OPTIMIZED skill loaded → run all test prompts
+4. Dispatch two `evaluator` agents (`agents/evaluator.md`) in parallel:
+   - Evaluator A: label "original", loaded with the ORIGINAL skill → run all test prompts
+   - Evaluator B: label "optimized", loaded with the OPTIMIZED skill → run all test prompts
 5. Compare: which version triggered correctly on more prompts?
 6. Present results to user with side-by-side comparison
 7. User decides → adopt optimized version (replace original) or discard
@@ -243,9 +243,9 @@ After applying changes to the copy, verify with a parallel comparison:
 
 ```
 1. Identify the specific scenario from the user's feedback (the input that produced wrong results)
-2. Dispatch two subagents in parallel:
-   - Subagent A: follows the ORIGINAL skill → processes the scenario
-   - Subagent B: follows the OPTIMIZED skill → processes the scenario
+2. Dispatch two `evaluator` agents (`agents/evaluator.md`) in parallel:
+   - Evaluator A: label "original", follows the ORIGINAL skill → processes the scenario
+   - Evaluator B: label "optimized", follows the OPTIMIZED skill → processes the scenario
 3. Compare outputs side-by-side
 4. Present to user: "Original produced X, optimized produced Y — which is better?"
 5. User decides → adopt or discard
