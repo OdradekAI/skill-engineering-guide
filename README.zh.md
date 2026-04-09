@@ -315,6 +315,14 @@ flowchart LR
 gemini extensions install https://github.com/odradekai/bundles-forge.git
 ```
 
+## 长会话使用建议
+
+技能内容、审计报告和脚本输出会随对话持续累积在上下文中。如果 Agent 变慢或丢失早期上下文：
+
+- **为每个主要生命周期阶段开启新会话**（blueprinting、authoring、auditing）
+- **使用斜杠命令**（`/bundles-audit`、`/bundles-optimize`）将 Agent 重新锚定到当前任务
+- **优先使用脚本输出而非内联检查** — `python scripts/audit_project.py .` 产出紧凑摘要，避免 Agent 逐项推理占用上下文
+
 ## 贡献
 
 欢迎贡献。请遵循现有代码风格，并通过 `python scripts/bump_version.py --check` 确保所有平台清单版本同步。

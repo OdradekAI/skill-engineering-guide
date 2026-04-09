@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.3] - 2026-04-09
+
+### Changed
+
+- **`lint_skills.py`** — frontmatter parser now handles YAML block scalars (`|` and `>`), with improved multiline value joining and a rationale comment explaining the zero-dependency design choice.
+- **`scan_security.py`** — HK11 regex refined to reduce false positives on common shell redirections (e.g., `>/dev/null`); AG4 (elevated permission claims) now suppresses findings when the line contains negative context (never, do not, prohibited, etc.).
+- **`optimizing/SKILL.md`** — A/B evaluation fallback uses randomized execution order (coin flip) to reduce ordering bias when subagents are unavailable.
+- **`tests/test-bootstrap-injection.sh`** — platform detection tests upgraded from static `grep` on hook source to runtime output validation (verifies `additional_context` / `hookSpecificOutput` in actual output).
+
+### Added
+
+- **Long session tips** in both READMEs (en/zh) — guidance for managing context accumulation across extended sessions: fresh sessions per lifecycle phase, slash commands for re-anchoring, and script output over inline checks.
+- **Clone/download failure handling** in `auditing` and `optimizing` skills — explicit error reporting and user-facing alternatives instead of silent skips.
+
 ## [1.4.2] - 2026-04-09
 
 ### Changed

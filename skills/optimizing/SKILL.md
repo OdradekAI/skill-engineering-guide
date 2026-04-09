@@ -29,6 +29,8 @@ The target can be a local path, a GitHub URL, or a zip file. Normalize the input
 | Zip/tar.gz file path | Extract to temp directory |
 | GitHub release/archive URL (`.zip`/`.tar.gz`) | Download, then extract to temp directory |
 
+**If clone/download fails:** Tell the user what failed (network error, 404, auth required, rate limit) and suggest alternatives — provide the repo as a local path or zip file. Do not silently skip or proceed with partial data.
+
 ### Scope Detection
 
 After normalization, determine the scope from the resolved local path:
@@ -95,7 +97,7 @@ When optimizing a description, never overwrite the original blindly. Use a copy-
 ```
 
 **If subagent dispatch is unavailable:** Ask the user which fallback to use:
-- **Sequential inline:** Run both evaluations in sequence within this conversation (caveat: seeing the original first may bias the optimized evaluation — note this in results)
+- **Sequential inline:** Run both evaluations in sequence within this conversation. Randomize which version runs first (flip a coin) to reduce ordering bias — note the execution order in results so the user can judge accordingly
 - **Skip A/B:** Apply the change directly with a simple verification pass instead of comparative evaluation
 
 **What to compare:**
@@ -260,7 +262,7 @@ After applying changes to the copy, verify with a parallel comparison:
 
 **When to skip A/B eval:** If the feedback is about structural issues (missing section, wrong heading level, broken reference) rather than behavioral differences, a simple verification pass is sufficient — no need for subagent comparison.
 
-**If subagent dispatch is unavailable:** Same fallback as description A/B eval — ask the user to choose sequential inline or skip A/B.
+**If subagent dispatch is unavailable:** Same fallback as description A/B eval — ask the user to choose sequential inline (randomized order) or skip A/B.
 
 **Rules:**
 - Never apply feedback without user confirmation of the improvement plan

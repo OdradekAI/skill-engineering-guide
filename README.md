@@ -315,6 +315,14 @@ See [`.opencode/INSTALL.md`](.opencode/INSTALL.md)
 gemini extensions install https://github.com/odradekai/bundles-forge.git
 ```
 
+## Tips for Long Sessions
+
+Skills, audit reports, and script output accumulate in the conversation context over a long session. If you notice the agent slowing down or losing track of earlier context:
+
+- **Start a fresh session** for each major lifecycle phase (blueprinting, authoring, auditing)
+- **Use slash commands** (`/bundles-audit`, `/bundles-optimize`) to re-anchor the agent on the current task
+- **Prefer script output over inline checks** — `python scripts/audit_project.py .` produces a compact summary instead of the agent reasoning through each check
+
 ## Contributing
 
 Contributions welcome. Please follow the existing code style and ensure all platform manifests stay in sync using `python scripts/bump_version.py --check`.

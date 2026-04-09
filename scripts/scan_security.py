@@ -72,7 +72,7 @@ HOOK_RULES = _compile([
      "Creating persistent services"),
     ("HK10", "critical", r"npm\s+(-g|install\s+-g)|pip\s+install\s+--user",
      "Installing global packages"),
-    ("HK11", "warning", r"(>|>>)\s*/|mkdir\s+-p\s+/(?!tmp)",
+    ("HK11", "warning", r"(?<![a-zA-Z_-])(>|>>)\s*/(?!dev/null)|mkdir\s+-p\s+/(?!tmp)",
      "Creating files outside project directory"),
     ("HK12", "warning", r"chmod\s+[2467]",
      "chmod with setuid/setgid bits"),
@@ -111,6 +111,11 @@ AGENT_RULES = _compile([
     ("AG5", "warning", r"elevated\s+perm|admin\s+access|root\s+access|sudo",
      "Elevated permission claims"),
 ])
+
+_NEGATIVE_CONTEXT_RE = re.compile(
+    r"\b(never|do\s+not|don't|must\s+not|cannot|prohibited|disallow|forbid)",
+    re.IGNORECASE,
+)
 
 SCRIPT_RULES = _compile([
     ("BS1", "critical", r"\b(curl|wget)\b",
@@ -208,6 +213,8 @@ def scan_file(path, rel_path, file_type):
             if pattern is None or check_id == "HK6":
                 continue
             if pattern.search(line):
+                if check_id == "AG4" and _NEGATIVE_CONTEXT_RE.search(line):
+                    continue
                 findings.append(dict(
                     check_id=check_id, risk=risk, line=line_num,
                     description=desc))

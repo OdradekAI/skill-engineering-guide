@@ -75,17 +75,17 @@ else
 fi
 
 echo ""
-echo "[6] Hook detects platforms"
-if grep -q 'CURSOR_PLUGIN_ROOT' "$HOOK"; then
-  pass "detects Cursor platform"
+echo "[6] Hook produces platform-appropriate JSON structure"
+if echo "$cursor_output" | grep -q 'additional_context'; then
+  pass "Cursor output uses additional_context format"
 else
-  fail "missing Cursor platform detection"
+  fail "Cursor output missing additional_context format"
 fi
 
-if grep -q 'CLAUDE_PLUGIN_ROOT' "$HOOK"; then
-  pass "detects Claude Code platform"
+if echo "$claude_output" | grep -q 'hookSpecificOutput'; then
+  pass "Claude Code output uses hookSpecificOutput format"
 else
-  fail "missing Claude Code platform detection"
+  fail "Claude Code output missing hookSpecificOutput format"
 fi
 
 echo ""

@@ -18,10 +18,16 @@ import sys
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
-# Frontmatter parsing (pure regex, no pyyaml dependency)
+# Frontmatter parsing (pure-stdlib, zero external dependencies)
+#
+# Why not PyYAML: bundle-plugins are designed for `git clone` → immediate use.
+# Requiring `pip install pyyaml` would break zero-setup workflows (CI runners,
+# containers, restricted corporate environments). Python 3.8+ stdlib is the
+# only hard dependency.
 # ---------------------------------------------------------------------------
 
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)
+_BLOCK_SCALAR_RE = re.compile(r"^[|>][+-]?\d*$")
 WORKFLOW_SUMMARY_PHRASES = re.compile(
     r"first\b.*then\b.*finally|step\s+\d|phase\s+\d|"
     r"scans?\s+.*checks?\s+.*generates?|"
@@ -40,20 +46,27 @@ def parse_frontmatter(content):
     raw = m.group(1)
     fm = {}
     current_key = None
+    block_join = " "
     for line in raw.split("\n"):
         if line.startswith("  ") and current_key:
-            fm[current_key] += " " + line.strip()
+            sep = block_join if fm[current_key] else ""
+            fm[current_key] += sep + line.strip()
             continue
         idx = line.find(":")
         if idx > 0:
             key = line[:idx].strip()
             val = line[idx + 1:].strip()
-            # Strip matched quote pairs only (preserves inner quotes)
+            if _BLOCK_SCALAR_RE.match(val):
+                fm[key] = ""
+                current_key = key
+                block_join = "\n" if val[0] == "|" else " "
+                continue
             if (val.startswith('"') and val.endswith('"')) or \
                (val.startswith("'") and val.endswith("'")):
                 val = val[1:-1]
             fm[key] = val
             current_key = key
+            block_join = " "
     body_start = m.end()
     return fm, content[body_start:]
 

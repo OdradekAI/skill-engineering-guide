@@ -37,6 +37,8 @@ The target can be a local path, a GitHub URL, or a zip file. Normalize the input
 
 **Security rule for remote sources:** Always clone/download without executing hooks or scripts. Use `--no-checkout` + selective `git checkout`, or extract archives without running post-install scripts. The audit itself will scan for risks — don't trigger them before scanning.
 
+**If clone/download fails:** Tell the user what failed (network error, 404, auth required, rate limit) and suggest alternatives — provide the repo as a local path or zip file. Do not silently skip the audit or proceed with partial data.
+
 ### Scope Detection
 
 After normalization, determine the audit scope from the resolved local path:
