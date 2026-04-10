@@ -1,6 +1,6 @@
 ---
 name: auditing
-description: "Use when reviewing a bundle-plugin for structural issues, version drift, manifest problems, skill quality, or security risks — before releasing, after changes, or when scanning third-party skills. Auto-detects scope (full project vs single skill)"
+description: "Use when reviewing a bundle-plugin for structural issues, version drift, skill quality, workflow integration, or security risks — before releasing, after changes, or after adding skills. Auto-detects scope (full project vs skill vs workflow)"
 allowed-tools: Bash(python scripts/*)
 ---
 
@@ -18,7 +18,7 @@ Systematically evaluate a bundle-plugin project or a single skill across applica
 
 ### Security-Only Mode
 
-When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 9 (Security) and the `scan_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 9-category audit.
+When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 9 (Security) and the `scan_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 10-category audit.
 
 ## Step 1: Resolve Input & Detect Scope
 
@@ -45,11 +45,13 @@ After normalization, determine the audit scope from the resolved local path:
 
 | Target | How to Detect | Mode |
 |--------|--------------|------|
-| Project root | Has `skills/` directory and `package.json` | **Full audit** — all 9 categories |
+| Project root | Has `skills/` directory and `package.json` | **Full audit** — all 10 categories |
+| Project root + workflow request | User explicitly requests workflow audit, or specifies `--focus-skills` | **Workflow audit** — 3-layer workflow checks (W1-W12) |
 | Single skill directory | Contains `SKILL.md` but no `skills/` subdirectory | **Skill audit** — 4 applicable categories |
 | Single SKILL.md file | Path ends in `SKILL.md` | **Skill audit** — 4 applicable categories |
 
 **If the target is a single skill, skip to the Skill Audit section below.**
+**If a workflow audit is requested, skip to the Workflow Audit section below.**
 
 ---
 
@@ -59,7 +61,7 @@ After normalization, determine the audit scope from the resolved local path:
 
 ```
 Scan project root
-  → Run 9-category checks (including security scan)
+  → Run 10-category checks (including security scan)
   → Score each category
   → Compile report
   → Present findings
@@ -73,15 +75,19 @@ Scan project root
 python scripts/audit_project.py <project-root>        # full audit with status
 python scripts/audit_project.py --json <project-root>  # machine-readable
 
+python scripts/audit_workflow.py <project-root>                          # workflow-only audit
+python scripts/audit_workflow.py --focus-skills skill-a,skill-b <root>   # focused workflow audit
+python scripts/audit_workflow.py --json <project-root>                   # workflow JSON output
+
 python scripts/scan_security.py <project-root>         # security-only scan
 python scripts/scan_security.py --json <project-root>  # security JSON output
 ```
 
-`audit_project.py` orchestrates `scan_security.py` (security) and `lint_skills.py` (skill quality), then adds structure, manifest, version-sync, hook, and documentation checks.
+`audit_project.py` orchestrates `scan_security.py` (security), `lint_skills.py` (skill quality), and `audit_workflow.py` (workflow integration), then adds structure, manifest, version-sync, hook, and documentation checks.
 
 Dispatch the `auditor` agent (`agents/auditor.md`) for automated assessment if subagents are available. The auditor runs read-only and returns a scored report.
 
-**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline (same checks, same report format, but within this conversation context). Proceed inline?" If confirmed, perform the 9-category checks directly using the audit checklist and security checklist references, then compile the report in the same format the auditor would produce.
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline (same checks, same report format, but within this conversation context). Proceed inline?" If confirmed, perform the 10-category checks directly using the audit checklist, workflow checklist, and security checklist references, then compile the report in the same format the auditor would produce.
 
 ### Step 2: Scan
 
@@ -92,7 +98,7 @@ Read the project root. Identify:
 
 ### Step 3: Check
 
-Run all 9 categories from `references/audit-checklist.md`. The checklist has 50+ individual checks with severity levels (Critical / Warning / Info).
+Run all 10 categories from `references/audit-checklist.md` and `references/workflow-checklist.md`. The checklists have 60+ individual checks with severity levels (Critical / Warning / Info).
 
 **Categories:**
 
@@ -102,7 +108,8 @@ Run all 9 categories from `references/audit-checklist.md`. The checklist has 50+
 | Platform Manifests | Medium | Format, valid paths, metadata |
 | Version Sync | High | Drift, `.version-bump.json` completeness |
 | Skill Quality | Medium | Frontmatter, descriptions, token efficiency |
-| Cross-References | Medium | `project:skill-name` resolution, broken links |
+| Cross-References | Medium | `project:skill-name` resolution, broken links (X1-X3) |
+| Workflow | High | Workflow graph topology, integration symmetry, artifact handoff (W1-W12) |
 | Hooks | Medium | Bootstrap injection, platform detection |
 | Testing | Medium | Test directory, test prompts, A/B eval results |
 | Documentation | Low | README, install docs, CHANGELOG |
@@ -134,7 +141,7 @@ Compile findings into the six-layer report format defined in `references/report-
 
 1. **Decision Brief** — Go/No-Go recommendation, top 3 risks, remediation estimate
 2. **Risk Matrix** — all findings in one table with quantified impact, exploitability, and confidence
-3. **Findings by Category** — 9 categories as sections, each listing component-level findings with inline evidence
+3. **Findings by Category** — 10 categories as sections, each listing component-level findings with inline evidence
 4. **Methodology** — scope, tools, limitations, out-of-scope declaration
 5. **Appendix** — per-skill breakdown, component inventory, raw script outputs
 
@@ -154,6 +161,7 @@ Compile findings into the six-layer report format defined in `references/report-
 
 - **Critical issues:** Offer to fix immediately
 - **Warnings:** Offer to fix or suggest `bundles-forge:optimizing`
+- **Workflow findings (W1-W12):** Route to `bundles-forge:optimizing` Target 4 (Workflow Chain Integrity)
 - **Info:** Note for future consideration
 
 **Termination rule:** After fixing critical/warning issues, run one re-audit to verify. Do not loop more than once — if the re-audit still has issues, present them to the user for manual decision.
@@ -178,7 +186,11 @@ When the target is a single skill directory or SKILL.md file, run only the 4 cat
 ### Script Shortcuts
 
 ```bash
-python scripts/lint_skills.py <skill-directory>         # skill quality only
+python scripts/audit_skill.py <skill-directory>          # combined 4-category skill audit
+python scripts/audit_skill.py <path>/SKILL.md            # also accepts SKILL.md path
+python scripts/audit_skill.py --json <skill-directory>   # JSON output
+
+python scripts/lint_skills.py <skill-directory>          # skill quality only
 python scripts/scan_security.py <skill-directory>        # security scan on skill files
 ```
 
@@ -215,6 +227,51 @@ When auditing a skill from an external source (marketplace, git, shared file):
 
 ---
 
+## Workflow Audit
+
+When the user explicitly requests a workflow audit, or when the Full audit's Cross-References category (X1-X3) or Workflow category (W1-W12) has warnings, run a dedicated workflow audit. This evaluates how skills connect, hand off artifacts, and compose into coherent chains.
+
+### When to Trigger
+
+- User explicitly requests "audit the workflow" or "check workflow integration"
+- After adding third-party skills to an existing project (via `bundles-forge:blueprinting` Scenario D)
+- After modifying Integration sections, Inputs/Outputs, or adding new skills to a chain
+- When the Full audit's Workflow category shows warnings — suggest: "Workflow issues detected. Run a focused workflow audit with `--focus-skills` for detailed diagnostics."
+
+### Script Shortcuts
+
+```bash
+python scripts/audit_workflow.py <project-root>                          # full workflow audit
+python scripts/audit_workflow.py --focus-skills skill-a,skill-b <root>   # focused on specific skills
+python scripts/audit_workflow.py --json <project-root>                   # machine-readable
+```
+
+Dispatch the `auditor` agent (`agents/auditor.md`) in Workflow Audit Mode for automated assessment if subagents are available.
+
+### Three-Layer Checks
+
+Checks are defined in `references/workflow-checklist.md` (W1-W12):
+
+| Layer | Weight | Checks | Automation |
+|-------|--------|--------|------------|
+| Static Structure | High | W1-W5 (cycles, reachability, Inputs/Outputs presence, artifact ID matching) | `lint_skills.py` graph analysis |
+| Semantic Interface | Medium | W6-W10 (Integration completeness, artifact clarity, Calls/Called by symmetry) | `audit_workflow.py` + agent review |
+| Behavioral Verification | Low | W11-W12 (Chain A/B Eval, trigger/exit in context) | `evaluator` agent dispatch |
+
+### Focus Mode
+
+When `--focus-skills skill-a,skill-b` is specified, all checks run on the full graph but the report partitions findings into **Focus Area** (directly involving specified skills) and **Context** (remaining findings). This enables incremental validation after adding new skills without missing cascade effects.
+
+### Report Format
+
+Use the **Workflow Audit Report** template from `references/workflow-report-template.md`. It provides a three-layer structure (Decision Brief, Findings by Layer, Skill Integration Map) with workflow-specific Go/No-Go logic.
+
+### Fix or Optimize
+
+Route workflow findings to `bundles-forge:optimizing` Target 4 (Workflow Chain Integrity). The optimizing skill consumes the `workflow-report` and applies targeted fixes to Integration sections, Inputs/Outputs, and artifact IDs.
+
+---
+
 ## Severity Levels
 
 - **Critical** — skill/project will not work correctly, or contains active security threats
@@ -228,7 +285,8 @@ When auditing a skill from an external source (marketplace, git, shared file):
 | Skipping version sync check | Always run `python scripts/bump_version.py --check` (full audit) |
 | Not checking description anti-patterns | Descriptions that summarize workflow cause agents to shortcut |
 | Ignoring cross-reference resolution | Broken `project:skill-name` refs = broken workflow chains |
-| Running full 9-category audit on a single skill | Let scope auto-detection handle it — 5 categories don't apply |
+| Running full 10-category audit on a single skill | Let scope auto-detection handle it — 6 categories don't apply |
+| Skipping workflow audit after adding third-party skills | New skills need workflow integration validation — use `--focus-skills` |
 | Skipping security because "I wrote it myself" | Accidental vulnerabilities are common — always scan |
 | Only scanning SKILL.md, ignoring hooks | Hooks are the highest-risk executable code (full audit) |
 
@@ -238,7 +296,9 @@ When auditing a skill from an external source (marketplace, git, shared file):
 
 ## Outputs
 
-- `audit-report` — scored report with findings across 9 categories (full project) or 4 categories (single skill), written to `.bundles-forge/` by the auditor agent. Consumed by `bundles-forge:optimizing` for targeted fixes
+- `audit-report` — scored report with findings across 10 categories (full project), written to `.bundles-forge/` by the auditor agent. Contains per-skill breakdowns. Consumed by `bundles-forge:optimizing` for targeted fixes
+- `skill-report` (skill mode) — 4-category scored report (Structure, Quality, Cross-Refs, Security) for a single skill, written to `.bundles-forge/`. Consumed by `bundles-forge:optimizing` (Skill Optimization)
+- `workflow-report` (workflow mode) — workflow-specific report with W1-W12 findings across static/semantic/behavioral layers, with focus/context partitioning. Consumed by `bundles-forge:optimizing` Target 4
 
 ## Integration
 
@@ -246,6 +306,9 @@ When auditing a skill from an external source (marketplace, git, shared file):
 
 **Called by:**
 - **bundles-forge:scaffolding** — post-scaffold verification
+- **bundles-forge:optimizing** — post-change verification after applying optimizations
+- **bundles-forge:releasing** — pre-release quality and security check
+- **bundles-forge:porting** — verify after platform adaptation
 
 **Calls:**
 - **bundles-forge:optimizing** — when findings need targeted fixes or user feedback iteration

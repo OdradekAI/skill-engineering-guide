@@ -137,7 +137,7 @@ This updates all declared files and runs an audit to catch any missed files.
 ## [X.Y.Z] - YYYY-MM-DD
 
 ### Added
-- New skill: `authoring` for skill authoring guidance
+- New skill: `bundles-forge:authoring` for skill authoring guidance
 
 ### Changed
 - Improved descriptions for better triggering accuracy

@@ -1,6 +1,6 @@
 ---
 name: blueprinting
-description: "Use when planning new bundle-plugins, splitting complex skills into structured projects, combining skills into unified bundles, mapping platform targets, or when a user has a vague idea about packaging skills. Use before scaffolding to avoid rework"
+description: "Use when planning new bundle-plugins, splitting complex skills, combining skills into bundles, adding skills to an existing project, or when a user has a vague idea about packaging skills. Use before scaffolding to avoid rework"
 ---
 
 # Blueprinting Bundle-Plugins
@@ -13,15 +13,16 @@ Turn a vague idea ("I want to package my skills") into a concrete project bluepr
 
 **Announce at start:** "I'm using the blueprinting skill to plan your bundle-plugin."
 
-## Three Entry Points
+## Four Entry Points
 
-This skill handles three scenarios:
+This skill handles four scenarios:
 
 - **Scenario A: New project from scratch** — Follow the full Interview below
 - **Scenario B: Splitting an existing complex skill** — Follow the Decomposition Analysis first, then the Interview to fill in remaining decisions
 - **Scenario C: Composing multiple existing skills** — Follow the Composition Analysis first, then the Interview to fill in remaining decisions
+- **Scenario D: Adding skills to an existing project** — Follow the Integration Planning analysis, then apply changes directly (no full Interview needed)
 
-If the user has an existing skill they want to break apart, start with Scenario B. If the user has multiple existing skills they want to combine into a unified project, start with Scenario C. Otherwise, start with Scenario A.
+If the user has an existing skill they want to break apart, start with Scenario B. If the user has multiple existing skills they want to combine into a **new** unified project, start with Scenario C. If the user wants to add skills to an **existing** bundle-plugin project, start with Scenario D. Otherwise, start with Scenario A.
 
 ## Scenario B: Decomposition Analysis
 
@@ -138,6 +139,72 @@ With the inventory and compatibility analysis in hand, design how the skills wor
 - **Bootstrap routing** — design the `using-<project>` skill's routing table to cover all composed skills
 
 Present the composition plan to the user. Get approval before proceeding to the Interview (Scenario A) to finalize project details like name, platforms, and bootstrap strategy.
+
+## Scenario D: Integration Planning
+
+When the user wants to add one or more skills (including third-party) to an **existing** bundle-plugin project. Unlike Scenario C (which creates a new project), Scenario D works within an existing project structure.
+
+### D1. Read Existing Project
+
+Read the existing project to understand the current state:
+- List all skills under `skills/` and their workflow connections
+- Map the current workflow graph (who calls whom, via `## Integration` sections)
+- Identify the bootstrap skill (`using-*`) and its routing table
+- Note current platforms, version, and project conventions
+
+### D2. Inventory New Skills
+
+For each skill being added, run the same analysis as Scenario C's C1 (Inventory Existing Skills):
+- Source (local file, git repo, marketplace, another bundle-plugin)
+- Current structure (standalone SKILL.md, has references/, has scripts/)
+- Frontmatter quality (follows project conventions?)
+
+**For third-party skills**, additionally record license, version/commit, maintenance status, and original namespace — same as C1's third-party checklist.
+
+### D3. Compatibility Analysis
+
+Reuse Scenario C's C2 (Analyze Compatibility) checks, but against the **existing project** rather than a blank slate:
+
+| Check | What to Look For |
+|-------|-----------------|
+| Naming conflicts | New skill name clashes with existing skills |
+| Description style | New skill follows project's description conventions |
+| Overlapping responsibilities | New skill duplicates or conflicts with existing skills |
+| Cross-reference conventions | New skill uses the correct project prefix |
+
+**For third-party skills**, also run C2's license compatibility, security posture, and staleness risk checks.
+
+### D3.5. Integration Intent
+
+For each new skill, determine integration intent — reuse Scenario C's C2.5 logic:
+
+- **Intent A: Repackage as-is** — copy with source attribution, no workflow changes
+- **Intent B: Integrate into workflow** — copy, adapt, and wire into existing chains
+
+### D3.6. Security Audit
+
+Run `bundles-forge:auditing` (Skill mode) on each new skill before copying it into the project. For third-party skills, this is mandatory — same as C2.6.
+
+### D4. Design Integration Plan
+
+With the existing project state and new skill analysis in hand, design how the new skills integrate:
+
+- **Insertion points** — where do new skills connect to the existing workflow graph? Which existing skills' `## Integration` sections need updates?
+- **New edges** — map all new `**Calls:**` and `**Called by:**` declarations needed
+- **Bootstrap updates** — does the `using-*` skill's routing table need new entries?
+- **Shared resources** — do new skills bring scripts or references that should be project-level?
+
+Present the integration plan to the user. This is lighter than a full Design Document — it covers only what changes, not the entire project.
+
+### D5. Apply and Verify
+
+After the user approves the integration plan:
+
+1. Copy new skills into `skills/` (with source attribution for third-party)
+2. Adapt as needed per integration intent (rewrite cross-refs, add Integration sections)
+3. Update existing skills' `## Integration` sections for new connections
+4. Update bootstrap skill routing if needed
+5. **Suggest workflow audit:** "Integration complete. Run `bundles-forge:auditing` in Workflow mode with `--focus-skills <new-skills>` to verify workflow integrity."
 
 ## Scenario A: The Interview
 
@@ -292,6 +359,8 @@ After the user approves the design:
 | Treating all third-party skills as repackage-only | Ask integration intent — workflow integration requires adaptation |
 | Using intelligent mode for simple skill packaging | Minimal mode exists for a reason — don't over-engineer |
 | Forgetting skill visibility classification | Entry-point vs internal determines commands/ and description style |
+| Using Scenario C when adding to an existing project | Scenario C creates new projects; Scenario D works within existing ones |
+| Skipping workflow audit after Scenario D | Always suggest `--focus-skills` workflow audit after integrating new skills |
 
 ## Inputs
 
@@ -305,6 +374,4 @@ After the user approves the design:
 
 **Calls:**
 - **bundles-forge:scaffolding** — after design approval
-
-**Pairs with:**
-- **bundles-forge:porting** — for adding platforms later
+- **bundles-forge:porting** — when blueprinting includes platform targets

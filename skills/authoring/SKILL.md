@@ -52,7 +52,7 @@ The description is the **primary triggering mechanism** — it determines whethe
 
 ```yaml
 # BAD: Summarizes workflow — agent shortcuts to this
-description: "Scans project structure, validates manifests, checks version sync, scores 9 categories, generates report"
+description: "Scans project structure, validates manifests, checks version sync, scores 10 categories, generates report"
 
 # BAD: Too vague — triggers on unrelated contexts
 description: "Use when auditing any project for quality"

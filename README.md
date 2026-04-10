@@ -52,7 +52,7 @@ cd your-bundle-plugin-project
 /bundles-audit
 ```
 
-Runs a 9-category quality assessment with security scanning across 5 attack surfaces.
+Runs a 10-category quality assessment with security scanning across 5 attack surfaces.
 
 ## Skills
 
@@ -75,7 +75,7 @@ flowchart LR
 | Design | `blueprinting` | Structured interview to determine project scope, platform targets, and skill decomposition. Produces a design document. |
 | Scaffold | `scaffolding` | Generates the complete project structure from the design — manifests, hooks, scripts, bootstrap skill, and per-platform files. |
 | Write | `authoring` | Guides SKILL.md authoring — frontmatter, "Use when..." descriptions, instructions, and progressive disclosure via `references/`. |
-| Audit | `auditing` | 9-category quality assessment including security scanning across 5 attack surfaces. |
+| Audit | `auditing` | 10-category quality assessment including security scanning across 5 attack surfaces. |
 | Optimize | `optimizing` | Engineering improvements — description triggering accuracy, token efficiency, workflow chains, and feedback iteration. |
 | Adapt | `porting` | Adds or fixes platform support. Generates manifests from templates. |
 | Release | `releasing` | Orchestrates the pre-release pipeline: version drift check, audit, version bump, CHANGELOG update, and publish guidance. |
@@ -107,47 +107,30 @@ Skills without a slash command are invoked **automatically** (the agent matches 
 
 ## Auditing
 
-### Via Agent (Interactive)
+Four audit scopes for different levels of granularity — the agent auto-detects scope from the target path:
 
-The agent auto-detects the audit scope from the target path:
+| Scope | Command / Script | What It Checks |
+|-------|-----------------|----------------|
+| Full Project | `/bundles-audit` or `audit_project.py` | 10 categories (structure, manifests, version sync, skill quality, cross-refs, workflow, hooks, testing, docs, security) |
+| Single Skill | `/bundles-audit skills/authoring` or `audit_skill.py` | 4 categories (structure, skill quality, cross-refs, security) |
+| Workflow | Explicit request or `audit_workflow.py` | 3 layers: static structure, semantic interface, behavioral verification (W1-W12) |
+| Security Only | `/bundles-scan` or `scan_security.py` | 5 attack surfaces (skill content, hooks, plugins, agents, scripts) |
 
-| Command | Scope | Categories |
-|---------|-------|-----------|
-| `/bundles-audit` | Full project | 9 categories (structure, manifests, version sync, skill quality, cross-refs, hooks, testing, docs, security) |
-| `/bundles-audit skills/authoring` | Single skill | 4 categories (structure, skill quality, cross-refs, security) |
-| `/bundles-scan` | Security only | Category 9 across all attack surfaces |
-
-**Scope detection logic:**
-
-| Target | Detection | Mode |
-|--------|----------|------|
-| Has `skills/` directory + `package.json` | Project root | Full 9-category audit |
-| Contains `SKILL.md`, no `skills/` subdirectory | Skill directory | Lightweight 4-category audit |
-
-Reports are saved to `.bundles-forge/` with filenames like `<project>-<version>-audit.YYYY-MM-DD.md`. Full project reports include a **per-skill breakdown** — each skill gets a qualitative summary (verdict, strengths, key issues) and 4-category scores.
-
-### Via Scripts (CI / Automation)
+### Quick Start (Scripts)
 
 ```bash
-# Full project audit
-python scripts/audit_project.py .                # markdown report to stdout
-python scripts/audit_project.py --json .          # machine-readable JSON
-
-# Single skill quality check
-python scripts/lint_skills.py skills/authoring    # markdown report
-python scripts/lint_skills.py --json skills/authoring
-
-# Security scan
-python scripts/scan_security.py .                 # project-wide
-python scripts/scan_security.py skills/authoring  # single skill
+python scripts/audit_project.py .                                      # full project audit
+python scripts/audit_skill.py skills/authoring                         # single skill audit
+python scripts/audit_workflow.py .                                     # workflow audit
+python scripts/audit_workflow.py --focus-skills new-skill .            # focused workflow audit
+python scripts/scan_security.py .                                      # security-only scan
 ```
 
-Exit codes: `0` = pass, `1` = warnings, `2` = critical findings. Use `--json` for CI integration.
+Exit codes: `0` = pass, `1` = warnings, `2` = critical findings. All scripts accept `--json` for CI integration.
 
-### After the Audit
+**After the audit:** Critical findings → fix or invoke `bundles-forge:optimizing`. Ready to publish → invoke `bundles-forge:releasing`.
 
-- **Critical findings** → fix immediately or invoke `bundles-forge:optimizing` for guided remediation
-- **Ready to publish** → invoke `bundles-forge:releasing` for the pre-release pipeline (version bump, CHANGELOG, publish)
+> For detailed usage, checklists, report templates, and CI integration patterns, see [`docs/auditing-guide.md`](docs/auditing-guide.md).
 
 ## Architecture
 
@@ -219,7 +202,7 @@ flowchart TB
     end
 
     SC -->|"post-scaffold validation"| RV
-    AU -->|"9-category quality + security audit"| AD
+    AU -->|"10-category quality + security audit"| AD
     OP -->|"A/B test: original skill"| EV1
     OP -->|"A/B test: optimized skill"| EV2
 
@@ -232,7 +215,7 @@ flowchart TB
 | Agent | Dispatched By | When | What It Does | Output |
 |-------|--------------|------|-------------|--------|
 | `inspector` | `scaffolding` | After project structure is generated | Validates directories, manifests, version sync, hooks, and skill frontmatter conventions | PASS/FAIL with issues by severity |
-| `auditor` | `auditing` | During a full or skill-scoped audit | Runs 9-category checklist (structure, manifests, version sync, quality, cross-refs, hooks, testing, docs, security) | Weighted score + critical/warning/info findings |
+| `auditor` | `auditing` | During a full or skill-scoped audit | Runs 10-category checklist (structure, manifests, version sync, quality, cross-refs, workflow, hooks, testing, docs, security) | Weighted score + critical/warning/info findings |
 | `evaluator` | `optimizing` | During description A/B test or feedback A/B test | Runs test prompts against a single SKILL.md variant (labelled `original` or `optimized`) and records whether each prompt triggers the skill correctly | Per-prompt trigger/response report |
 
 **Key detail:** `optimizing` dispatches **two evaluators in parallel** — one for the original skill, one for the optimized variant. The parent skill compares their reports to decide which version wins.
@@ -289,12 +272,13 @@ User runs /bundles-blueprint
 
 ```
 User runs /bundles-audit
-  → auditing: detect scope (full project vs single skill)
-  → Full project: 9 categories (structure, manifests, version sync,
-    quality, cross-refs, hooks, testing, docs, security)
+  → auditing: detect scope (full project vs single skill vs workflow)
+  → Full project: 10 categories (structure, manifests, version sync,
+    quality, cross-refs, workflow, hooks, testing, docs, security)
     → auditor agent runs checklist (if subagents available)
-    → Scripts: audit_project.py, scan_security.py, lint_skills.py
+    → Scripts: audit_project.py, audit_workflow.py, scan_security.py, lint_skills.py
   → Single skill: 4 categories (structure, quality, cross-refs, security)
+  → Workflow: 3 layers (static structure, semantic interface, behavioral)
   → Score + report with Critical / Warning / Info findings
   → Critical issues? → Offer to fix → Re-audit once
   → Warnings? → Suggest optimizing skill

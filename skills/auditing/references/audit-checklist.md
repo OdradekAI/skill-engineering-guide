@@ -23,11 +23,11 @@ The auditor agent (or inline auditor) may adjust the baseline by **±2 points** 
 
 | Weight Level | Numeric Value | Categories |
 |-------------|--------------|------------|
-| High | 3 | Structure, Version Sync, Security |
+| High | 3 | Structure, Version Sync, Workflow, Security |
 | Medium | 2 | Platform Manifests, Skill Quality, Cross-References, Hooks, Testing |
 | Low | 1 | Documentation |
 
-**Overall score** = `sum(score_i × weight_i) / sum(weight_i)` (total weight = 20).
+**Overall score** = `sum(score_i × weight_i) / sum(weight_i)` (total weight = 23).
 
 ---
 
@@ -121,30 +121,22 @@ Run for every SKILL.md in the project.
 
 ## Category 5: Cross-References (Weight: Medium)
 
+Static link resolution — verifies that references within skill content point to existing targets. For workflow graph analysis (cycles, reachability, artifact handoff), see `references/workflow-checklist.md` (W1-W12).
+
 | Check | Severity | Criteria |
 |-------|----------|----------|
 | X1 | Warning | All `<project>:<skill-name>` references resolve to existing skills |
 | X2 | Warning | No broken relative-path references to supporting files |
 | X3 | Warning | Text references to subdirectories (`references/`, `templates/`, etc.) match actual skill directory contents |
-| X4 | Info | Skills with dependencies document them in an Integration section |
-| X5 | Info | Workflow chain has no circular dependencies |
-| X6 | Info | Terminal skills (end of chain) are clearly marked |
-
-**Graph analysis rules** (automated by `G1`-`G4` in `lint_skills.py`):
-
-| Check | Severity | Criteria |
-|-------|----------|----------|
-| G1 | Warning/Info | No undeclared circular dependencies in the workflow graph. Cycles declared via `<!-- cycle:a,b -->` in `## Integration` are demoted to Info |
-| G2 | Info | All skills are reachable from entry points (skills referenced by `using-*` bootstrap). Skills declaring "Called by: user directly" in `## Integration` are exempt |
-| G3 | Info | Terminal skills (no outgoing cross-references) have an `## Outputs` section documenting final deliverables |
-| G4 | Info | Skills referenced by other skills have an `## Inputs` section declaring expected artifacts |
 
 **How to check:**
 1. Extract all `<project>:<name>` patterns from all SKILL.md files
 2. Verify each `<name>` matches a directory under `skills/`
 3. Extract all relative file references and verify they exist
 4. Scan for prose references to subdirectories and verify they exist
-5. Run `python scripts/lint_skills.py --json` and inspect the `graph` key for G1-G4 findings
+5. Run `python scripts/lint_skills.py --json` — X1-X3 findings are in per-skill results
+
+**Workflow graph checks (W1-W12)** have been moved to a dedicated category. See `references/workflow-checklist.md` and run `python scripts/audit_workflow.py` for workflow-specific analysis.
 
 ---
 
@@ -221,6 +213,12 @@ curl|wget|nc |eval\(|child_process|\.env|api_key|secret|ignore safety|override|b
 
 ---
 
-## Audit Report Template
+## Audit Report Templates
 
-After running all checks, compile findings using the six-layer report template in `references/report-template.md`. The template provides both a full project format and a single skill format, with Go/No-Go decision logic, quantified impact scales, and confidence levels.
+After running all checks, compile findings using the appropriate report template:
+
+- **Full project audit:** `references/report-template.md` — six-layer structure for 10-category audits
+- **Single skill audit:** `references/skill-report-template.md` — three-layer structure for 4-category audits (see `references/skill-checklist.md` for the 4-category checklist)
+- **Workflow audit:** `references/workflow-report-template.md` — three-layer structure for W1-W12 workflow checks
+
+All templates include Go/No-Go decision logic, quantified impact scales, and confidence levels.

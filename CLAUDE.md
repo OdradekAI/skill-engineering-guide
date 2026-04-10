@@ -25,7 +25,9 @@ python -m pytest tests/test_scripts.py -v -k test_lint_runs_without_error  # sin
 ```bash
 python scripts/lint_skills.py [project-root]       # skill frontmatter/quality lint
 python scripts/scan_security.py [project-root]     # 5-surface security scan
-python scripts/audit_project.py [project-root]     # combined audit (calls lint + scan)
+python scripts/audit_project.py [project-root]     # combined audit (calls lint + scan + workflow)
+python scripts/audit_skill.py [skill-dir]          # single skill audit (4 categories)
+python scripts/audit_workflow.py [project-root]    # workflow integration audit (W1-W12)
 ```
 
 All scripts accept `--json` for machine-readable output. Exit codes: 0 = pass, 1 = warnings, 2 = critical.
@@ -60,7 +62,7 @@ The `hooks/session-start` script runs on SessionStart, reads the `using-bundles-
 
 Skills dispatch read-only subagents (disallowed from editing files) that write reports to `.bundles-forge/`:
 - `inspector` — validates scaffolded structure (dispatched by `scaffolding`)
-- `auditor` — runs 9-category audit (dispatched by `auditing`)
+- `auditor` — runs 10-category audit (dispatched by `auditing`)
 - `evaluator` — A/B skill evaluation (dispatched in pairs by `optimizing`)
 
 ### Platform Manifests

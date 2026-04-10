@@ -52,7 +52,7 @@ cd your-bundle-plugin-project
 /bundles-audit
 ```
 
-执行 9 大类质量评估，含 5 大攻击面安全扫描。
+执行 10 大类质量评估，含 5 大攻击面安全扫描。
 
 ## 技能
 
@@ -75,7 +75,7 @@ flowchart LR
 | 设计 | `blueprinting` | 通过结构化访谈确定项目范围、目标平台和 skill 拆分方案，产出设计文档。 |
 | 搭建 | `scaffolding` | 根据设计方案生成完整的项目结构 — 清单、钩子、脚本、引导 skill 和各平台文件。 |
 | 编写 | `authoring` | 指导 SKILL.md 编写 — frontmatter、"Use when..." 描述、指令和通过 `references/` 实现的渐进式加载。 |
-| 审计 | `auditing` | 9 大类质量评估，含 5 大攻击面安全扫描。 |
+| 审计 | `auditing` | 10 大类质量评估，含 5 大攻击面安全扫描。 |
 | 优化 | `optimizing` | 工程改进 — 描述触发准确性、token 效率、工作流链路、反馈迭代。 |
 | 适配 | `porting` | 添加或修复平台支持，从模板生成清单。 |
 | 发布 | `releasing` | 编排发布前流水线：版本漂移检查、审计、版本升级、CHANGELOG 更新和发布指引。 |
@@ -107,47 +107,30 @@ flowchart LR
 
 ## 审计
 
-### 通过 Agent 审计（交互式）
+四种审计范围，覆盖不同粒度 — Agent 根据目标路径自动检测范围：
 
-Agent 根据目标路径自动检测审计范围：
+| 范围 | 命令 / 脚本 | 检查内容 |
+|------|------------|---------|
+| 完整项目 | `/bundles-audit` 或 `audit_project.py` | 10 大类（结构、清单、版本同步、技能质量、交叉引用、工作流、钩子、测试、文档、安全） |
+| 单个技能 | `/bundles-audit skills/authoring` 或 `audit_skill.py` | 4 类（结构、技能质量、交叉引用、安全） |
+| 工作流 | 显式请求 或 `audit_workflow.py` | 3 层：静态结构、语义接口、行为验证（W1-W12） |
+| 仅安全扫描 | `/bundles-scan` 或 `scan_security.py` | 5 大攻击面（技能内容、钩子、插件、Agent 提示词、脚本） |
 
-| 命令 | 范围 | 检查类别 |
-|------|------|---------|
-| `/bundles-audit` | 完整项目 | 9 大类（结构、清单、版本同步、技能质量、交叉引用、钩子、测试、文档、安全） |
-| `/bundles-audit skills/authoring` | 单个技能 | 4 类（结构、技能质量、交叉引用、安全） |
-| `/bundles-scan` | 仅安全扫描 | 第 9 类，覆盖所有攻击面 |
-
-**范围检测逻辑：**
-
-| 目标 | 检测方式 | 模式 |
-|------|---------|------|
-| 有 `skills/` 目录 + `package.json` | 项目根目录 | 完整 9 类审计 |
-| 包含 `SKILL.md`，无 `skills/` 子目录 | 技能目录 | 轻量 4 类审计 |
-
-报告保存至 `.bundles-forge/` 目录，文件名格式为 `<project>-<version>-audit.YYYY-MM-DD.md`。完整项目报告包含 **逐技能分解** — 每个技能都有定性摘要（结论、亮点、核心问题）和 4 类评分。
-
-### 通过脚本审计（CI / 自动化）
+### 快速开始（脚本）
 
 ```bash
-# 完整项目审计
-python scripts/audit_project.py .                # Markdown 报告输出到 stdout
-python scripts/audit_project.py --json .          # 机器可读 JSON
-
-# 单技能质量检查
-python scripts/lint_skills.py skills/authoring    # Markdown 报告
-python scripts/lint_skills.py --json skills/authoring
-
-# 安全扫描
-python scripts/scan_security.py .                 # 项目级
-python scripts/scan_security.py skills/authoring  # 单技能
+python scripts/audit_project.py .                                      # 完整项目审计
+python scripts/audit_skill.py skills/authoring                         # 单技能审计
+python scripts/audit_workflow.py .                                     # 工作流审计
+python scripts/audit_workflow.py --focus-skills new-skill .            # 聚焦式工作流审计
+python scripts/scan_security.py .                                      # 仅安全扫描
 ```
 
-退出码：`0` = 通过，`1` = 有警告，`2` = 有严重问题。CI 集成请使用 `--json` 标志。
+退出码：`0` = 通过，`1` = 有警告，`2` = 有严重问题。所有脚本支持 `--json` 用于 CI 集成。
 
-### 审计之后
+**审计之后：** 严重问题 → 修复或调用 `bundles-forge:optimizing`。准备发布 → 调用 `bundles-forge:releasing`。
 
-- **严重问题** → 立即修复或调用 `bundles-forge:optimizing` 进行引导式修复
-- **准备发布** → 调用 `bundles-forge:releasing` 执行发布前流水线（版本升级、CHANGELOG、发布）
+> 详细用法、检查清单、报告模板和 CI 集成模式请参见 [`docs/auditing-guide.md`](docs/auditing-guide.md)。
 
 ## 架构
 
@@ -219,7 +202,7 @@ flowchart TB
     end
 
     SC -->|"脚手架后验证"| RV
-    AU -->|"9 类质量 + 安全审计"| AD
+    AU -->|"10 类质量 + 安全审计"| AD
     OP -->|"A/B 测试：原始技能"| EV1
     OP -->|"A/B 测试：优化技能"| EV2
 
@@ -232,7 +215,7 @@ flowchart TB
 | Agent | 触发者 | 触发时机 | 作用 | 输出 |
 |-------|--------|---------|------|------|
 | `inspector` | `scaffolding` | 项目结构生成后 | 验证目录、清单、版本同步、钩子和技能 frontmatter 规范 | PASS/FAIL + 按严重级别分类的问题 |
-| `auditor` | `auditing` | 执行完整或技能级审计时 | 运行 9 大类检查清单（结构、清单、版本同步、质量、交叉引用、钩子、测试、文档、安全） | 加权评分 + 严重/警告/信息级发现 |
+| `auditor` | `auditing` | 执行完整或技能级审计时 | 运行 10 大类检查清单（结构、清单、版本同步、质量、交叉引用、工作流、钩子、测试、文档、安全） | 加权评分 + 严重/警告/信息级发现 |
 | `evaluator` | `optimizing` | 描述 A/B 测试或反馈 A/B 测试时 | 针对单个 SKILL.md 变体（标记为 `original` 或 `optimized`）运行测试提示词，记录每个提示词是否正确触发该技能 | 逐提示词触发/响应报告 |
 
 **关键细节：** `optimizing` 会**并行派遣两个 evaluator** — 一个测试原始技能，一个测试优化变体。父技能对比两份报告以决定哪个版本胜出。
@@ -289,12 +272,13 @@ flowchart LR
 
 ```
 用户执行 /bundles-audit
-  → auditing：检测范围（完整项目 vs 单个技能）
-  → 完整项目：9 大类检查（结构、清单、版本同步、
-    质量、交叉引用、钩子、测试、文档、安全）
+  → auditing：检测范围（完整项目 vs 单个技能 vs 工作流）
+  → 完整项目：10 大类检查（结构、清单、版本同步、
+    质量、交叉引用、工作流、钩子、测试、文档、安全）
     → auditor agent 运行检查清单（如子代理可用）
-    → 脚本：audit_project.py, scan_security.py, lint_skills.py
+    → 脚本：audit_project.py, audit_workflow.py, scan_security.py, lint_skills.py
   → 单个技能：4 类检查（结构、质量、交叉引用、安全）
+  → 工作流：3 层检查（静态结构、语义接口、行为验证）
   → 评分 + 报告（严重 / 警告 / 信息）
   → 发现严重问题？ → 提供修复 → 重审一次
   → 发现警告？ → 建议使用 optimizing 技能

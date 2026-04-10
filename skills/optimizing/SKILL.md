@@ -149,25 +149,25 @@ If SKILL.md is approaching 500 lines, extract sections into `references/`.
 
 ### Target 4: Workflow Chain Integrity
 
-Run the graph analysis rules automatically:
+Consume the `workflow-report` from `bundles-forge:auditing` (Workflow mode) to identify and fix workflow issues. If no workflow report is available, run the workflow audit first:
 
 ```bash
-python scripts/lint_skills.py --json <project-root>
+python scripts/audit_workflow.py <project-root>                          # full workflow audit
+python scripts/audit_workflow.py --focus-skills skill-a,skill-b <root>   # focused on specific skills
 ```
 
-Inspect the `graph` key in the JSON output. The linter automates checks G1-G4:
+**Fix by W-check priority:**
 
-| Check | What It Catches |
-|-------|----------------|
-| G1 | Circular dependencies (undeclared cycles are warnings; declared via `<!-- cycle:a,b -->` are info) |
-| G2 | Unreachable skills (not linked from bootstrap entry points) |
-| G3 | Terminal skills without `## Outputs` section |
-| G4 | Referenced skills without `## Inputs` section |
+| Finding | How to Fix |
+|---------|-----------|
+| W1 (undeclared cycle) | Add `<!-- cycle:a,b -->` in `## Integration` if the loop is intentional, or restructure the chain |
+| W2 (unreachable skill) | Add the skill to bootstrap routing, or declare `Called by: user directly` in `## Integration` |
+| W3/W4 (missing Inputs/Outputs) | Add `## Outputs` to terminal skills, `## Inputs` to referenced skills, with artifact IDs |
+| W5 (artifact ID mismatch) | Align backtick artifact IDs between upstream `## Outputs` and downstream `## Inputs` |
+| W9 (empty/placeholder sections) | Write meaningful semantic descriptions for each artifact in Inputs/Outputs |
+| W10 (asymmetric integration) | Ensure `**Calls:**` and `**Called by:**` declarations are symmetric across connected skills |
 
-Focus manual effort on:
-- Verifying that Inputs/Outputs artifact names are semantically clear
-- Confirming terminal skills produce user-visible deliverables
-- Checking that `## Inputs` artifact identifiers match upstream `## Outputs`
+**After fixes:** Use Chain A/B Eval (W11) to verify end-to-end handoff quality — dispatch `evaluator` agent with label "chain" and the ordered skill list. Focus on "broken" handoffs. First-time diagnosis should come from the Workflow audit; Chain Eval here is the post-fix verification step.
 
 ### Target 5: Platform Coverage (project only)
 
@@ -208,7 +208,7 @@ When the target is a single skill, run only the targets that apply at skill scop
 | 1. Description Triggering | **Full** | Evaluate and improve the description's triggering accuracy |
 | 2. Token Efficiency | **Full** | Check SKILL.md line count, references extraction |
 | 3. Progressive Disclosure | **Full** | Verify the 3-level loading structure |
-| 4. Workflow Chain Integrity | **Partial** | Check this skill's outgoing references resolve |
+| 4. Workflow Chain Integrity | **Partial** | Fix this skill's W9/W10 findings (Inputs/Outputs clarity, integration symmetry) |
 | 5. Platform Coverage | **Skip** | Project-level concern |
 | 6. Security Remediation | **Partial** | Fix security issues within this skill's content |
 | Feedback Iteration | **Full** | Process user feedback with 3-question validation |
@@ -217,6 +217,7 @@ When the target is a single skill, run only the targets that apply at skill scop
 
 ```
 Read target skill
+  → Consume `skill-report` if available (or extract per-skill findings from `audit-report`)
   → Determine goal: engineering optimization or feedback iteration?
   → Engineering: run applicable targets (1-4, partial 6)
   → Feedback: run feedback process (below)
@@ -307,7 +308,9 @@ After applying changes to the copy, verify with a parallel comparison:
 
 ## Inputs
 
-- `audit-report` (optional) — findings from `bundles-forge:auditing` identifying optimization targets
+- `audit-report` (optional) — findings from `bundles-forge:auditing` (full project mode). Contains per-skill breakdowns — when optimizing a single skill from a full audit, extract the relevant skill's findings from the Per-Skill Breakdown section
+- `skill-report` (optional) — findings from `bundles-forge:auditing` (skill mode). More precise input for Skill Optimization — 4-category scored report targeting a single skill
+- `workflow-report` (optional) — workflow-specific findings (W1-W12) from `bundles-forge:auditing` (workflow mode), consumed by Target 4
 - `user-feedback` (optional) — behavioral feedback about skill quality, triggering issues, or wrong output
 
 ## Outputs
@@ -321,6 +324,7 @@ After applying changes to the copy, verify with a parallel comparison:
 
 **Called by:**
 - **bundles-forge:auditing** — when audit finds optimization opportunities or user feedback issues
+- **bundles-forge:releasing** — fix quality findings during release pipeline
 
 **Calls:**
 - **bundles-forge:auditing** — post-change verification after applying optimizations

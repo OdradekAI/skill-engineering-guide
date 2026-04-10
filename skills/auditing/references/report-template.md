@@ -2,6 +2,8 @@
 
 Six-layer report structure for bundle-plugin audits. Each layer serves a distinct audience depth — Layer 1 enables a 30-second decision, Layer 6 provides raw data for deep dives.
 
+This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `scripts/audit_project.py` (produces compact Markdown or JSON).
+
 This template covers three audit contexts: **pre-release** (version gate), **post-change** (regression check), and **third-party evaluation** (install decision). For worked examples of each context, see `references/report-examples.md`.
 
 ## Finding ID Scheme
@@ -15,6 +17,7 @@ Each finding gets a unique, category-prefixed ID for cross-referencing:
 | `VER-NNN` | Version Sync |
 | `SKQ-NNN` | Skill Quality |
 | `XRF-NNN` | Cross-References |
+| `WFL-NNN` | Workflow |
 | `HOK-NNN` | Hooks |
 | `TST-NNN` | Testing |
 | `DOC-NNN` | Documentation |
@@ -127,7 +130,7 @@ python: "<version>"
 
 ## 3. Findings by Category
 
-<!-- Repeat for each of the 9 categories. Categories with no findings still appear. -->
+<!-- Repeat for each of the 10 categories. Categories with no findings still appear. -->
 
 ### 3.N <Category Name> (Score: X/10, Weight: <H/M/L>)
 
@@ -157,7 +160,7 @@ python: "<version>"
 | Dimension | Covered |
 |-----------|---------|
 | **Directories** | `skills/`, `agents/`, `commands/`, `hooks/`, `scripts/`, platform manifests, project root |
-| **Check categories** | 9 categories, 50+ individual checks |
+| **Check categories** | 10 categories, 60+ individual checks |
 | **Total files scanned** | <N> |
 
 ### Out of Scope
@@ -171,6 +174,7 @@ python: "<version>"
 | Tool | Purpose |
 |------|---------|
 | `audit_project.py` | Orchestrates full audit |
+| `audit_workflow.py` | Workflow integration analysis |
 | `scan_security.py` | Security pattern scanning |
 | `lint_skills.py` | Skill quality linting |
 | `bump_version.py` | Version drift detection |

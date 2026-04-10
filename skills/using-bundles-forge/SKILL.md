@@ -74,12 +74,12 @@ These skills are called as part of a workflow chain. Users typically don't invok
 
 When multiple skills could apply:
 
-1. **Design first** — if creating something new, splitting, or composing skills, start with `blueprinting`
-2. **Write content after scaffold** — use `authoring` to fill in SKILL.md files
+1. **Design first** — if creating something new, splitting, or composing skills, start with `bundles-forge:blueprinting`
+2. **Write content after scaffold** — use `bundles-forge:authoring` to fill in SKILL.md files
 3. **Audit before optimize** — understand the full picture before targeted fixes
 4. **Platform adapt after scaffold** — structure must exist before adding platforms
-5. **Optimize includes feedback** — use `optimizing` for both engineering improvements and user feedback iteration
-6. **Release as the final step** — use `releasing` to orchestrate audit, version bump, and publish
+5. **Optimize includes feedback** — use `bundles-forge:optimizing` for both engineering improvements and user feedback iteration
+6. **Release as the final step** — use `bundles-forge:releasing` to orchestrate audit, version bump, and publish
 
 ## Naming Conventions
 

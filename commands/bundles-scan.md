@@ -1,5 +1,5 @@
 ---
-description: "Scan a bundle-plugin for security risks only — runs Category 9 (Security) from the auditing skill without the full 9-category audit"
+description: "Scan a bundle-plugin for security risks only — runs Category 10 (Security) from the auditing skill without the full 10-category audit"
 ---
 
 This command invokes the auditing skill in **security-only mode**. It runs only Category 9 (Security Scan) plus the `scan_security.py` script, skipping quality, structure, and documentation checks.

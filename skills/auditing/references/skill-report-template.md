@@ -2,11 +2,13 @@
 
 Three-layer report for single skill audits (auto-detected by scope). Lighter than the full project template — no Risk Matrix, Methodology, or Appendix as separate layers. Evidence is inline in each finding; scope and tools are captured in the Skill Profile.
 
-For full project audits (9 categories), use `references/report-template.md` instead.
+This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `scripts/audit_skill.py` (produces compact Markdown or JSON).
+
+For full project audits (10 categories), use `references/report-template.md` instead.
 
 ## Finding ID Scheme
 
-Single skill audits use 4 of the 9 category prefixes:
+Single skill audits use 4 of the 10 category prefixes:
 
 | Prefix | Category |
 |--------|----------|

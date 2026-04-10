@@ -6,6 +6,8 @@ Orchestrates scan_security.py and lint_skills.py, then runs additional
 structural, version-sync, hook, and documentation checks to produce a
 combined project health report.
 
+For agent-authored rich reports, see skills/auditing/references/report-template.md.
+
 Usage:
     python scripts/audit_project.py [project-root]
     python scripts/audit_project.py --json [project-root]
@@ -21,6 +23,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
+import audit_workflow
 import bump_version
 import scan_security
 import lint_skills
@@ -35,6 +38,7 @@ CATEGORY_WEIGHTS = {
     "version_sync": 3,
     "skill_quality": 2,
     "cross_references": 2,
+    "workflow": 3,
     "hooks": 2,
     "testing": 2,
     "documentation": 1,
@@ -287,6 +291,7 @@ def run_audit(project_root):
 
     sec_results = scan_security.run_scan(root)
     lint_results = lint_skills.run_lint(root)
+    workflow_results = audit_workflow.run_workflow_audit(root)
     structure = check_structure(root)
     manifests = check_manifests(root)
     version_sync = check_version_sync(root)
@@ -328,6 +333,12 @@ def run_audit(project_root):
         "cross_references": {
             "findings": graph_findings,
             "counts": _count(graph_findings),
+        },
+        "workflow": {
+            "findings": (workflow_results.get("focus_findings", [])
+                         + workflow_results.get("context_findings", [])),
+            "counts": workflow_results["summary"],
+            "detail": workflow_results,
         },
         "hooks": {"findings": hooks, "counts": _count(hooks)},
         "testing": {"findings": testing, "counts": _count(testing)},
@@ -432,6 +443,7 @@ def format_markdown(results, project_name):
                 "severity": f.get("severity", "info"),
                 "message": f"{sr['skill']}: {f.get('message', '')}",
             }))
+
 
     for sev, heading in [
         ("critical", "### Critical (must fix)"),

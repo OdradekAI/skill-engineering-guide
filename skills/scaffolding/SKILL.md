@@ -163,7 +163,9 @@ Dispatch the `inspector` agent (`agents/inspector.md`) for automated validation 
 - **bundles-forge:blueprinting** — after design approval
 
 **Calls:**
+- **bundles-forge:authoring** — after scaffold, users author SKILL.md content
 - **bundles-forge:auditing** — post-scaffold verification
+
 **Pairs with:**
 - **bundles-forge:releasing** — version infrastructure setup
 - **bundles-forge:porting** — adding platforms later
