@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.5] - 2026-04-11
+
+### Added
+
+- **`scripts/check_docs.py`** — documentation consistency checker with 6 validation checks (D1–D6): skill list sync, cross-reference validity, platform manifest sync, script accuracy, agent list sync, and README data sync.
+- **`docs/releasing-guide.md`** — comprehensive human-readable guide to the release pipeline, covering all 8 steps from prerequisites through publishing.
+
+### Changed
+
+- **`skills/releasing/SKILL.md`** — major enhancement: hardened prerequisites (hard/soft requirement split), added Step 0 (prerequisites), Step 3 (documentation sync with change coherence review), CHANGELOG validation rules, and expanded common mistakes table.
+- **`CLAUDE.md`** — added `check_docs.py` to commands section and pre-release conventions; clarified platform manifests table with Version-synced column (Codex and OpenCode entries don't carry version strings).
+- **`AGENTS.md`** — added `check_docs.py` pre-release instruction.
+- **README.md / README.zh.md** — updated releasing skill description and `/bundles-release` flow to include documentation consistency and change coherence review steps.
+- **`commands/bundles-release.md`** — updated description to include documentation consistency and change coherence review.
+- **`check_docs.py` D3 check** — now respects "Version-synced: No" column in CLAUDE.md platform manifests table, skipping non-version-bearing entries.
+
 ## [1.5.4] - 2026-04-11
 
 ### Added
