@@ -176,7 +176,7 @@ flowchart LR
 | Audit | `auditing` | 10-category quality assessment including security scanning across 5 attack surfaces. |
 | Optimize | `optimizing` | Engineering improvements — description triggering accuracy, token efficiency, workflow chains, and feedback iteration. |
 | Adapt | `porting` | Adds or fixes platform support. Generates manifests from templates. |
-| Release | `releasing` | Orchestrates the pre-release pipeline: version drift check, audit, version bump, CHANGELOG update, and publish guidance. |
+| Release | `releasing` | Orchestrates the pre-release pipeline: version drift check, audit, documentation consistency, change coherence review, version bump, CHANGELOG update, and publish guidance. |
 
 The bootstrap meta-skill `using-bundles-forge` is injected at session start via hooks — it gives the agent awareness of all available skills and routes tasks automatically.
 
@@ -405,17 +405,19 @@ User runs /bundles-optimize
 
 #### `/bundles-release` — Version bump and publish
 
-**When to use:** Preparing a release — version drift check, quality gate, version bump, CHANGELOG update, and publishing guidance.
+**When to use:** Preparing a release — version drift check, quality gate, documentation consistency, version bump, CHANGELOG update, and publishing guidance.
 
 ```
 User runs /bundles-release
   → releasing: pre-flight checks
     → bump_version.py --check (version drift)
     → auditing (full quality + security)
+    → check_docs.py (documentation consistency)
   → Address critical findings (block release until resolved)
+  → Documentation sync (change coherence review + doc updates)
   → bump_version.py <new-version> (update all manifests)
   → Update CHANGELOG.md and README.md
-  → Final verification (--check + --audit)
+  → Final verification (--check + --audit + check_docs.py)
   → Commit, tag, push, gh release create
 ```
 

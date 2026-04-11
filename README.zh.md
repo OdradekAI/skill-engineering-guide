@@ -176,7 +176,7 @@ flowchart LR
 | 审计 | `auditing` | 10 大类质量评估，含 5 大攻击面安全扫描。 |
 | 优化 | `optimizing` | 工程改进 — 描述触发准确性、token 效率、工作流链路、反馈迭代。 |
 | 适配 | `porting` | 添加或修复平台支持，从模板生成清单。 |
-| 发布 | `releasing` | 编排发布前流水线：版本漂移检查、审计、版本升级、CHANGELOG 更新和发布指引。 |
+| 发布 | `releasing` | 编排发布前流水线：版本漂移检查、审计、文档一致性检查、变更一致性审查、版本升级、CHANGELOG 更新和发布指引。 |
 
 引导元技能 `using-bundles-forge` 在会话启动时通过钩子自动注入 — 它让 Agent 感知所有可用技能并自动路由任务。
 
@@ -405,17 +405,19 @@ flowchart LR
 
 #### `/bundles-release` — 版本升级与发布
 
-**适用场景：** 准备发布 — 版本漂移检查、质量关卡、版本升级、CHANGELOG 更新和发布指引。
+**适用场景：** 准备发布 — 版本漂移检查、质量关卡、文档一致性检查、版本升级、CHANGELOG 更新和发布指引。
 
 ```
 用户执行 /bundles-release
   → releasing：预检
     → bump_version.py --check（版本漂移检查）
     → auditing（完整质量 + 安全审计）
+    → check_docs.py（文档一致性检查）
   → 处理严重发现（解决前阻止发布）
+  → 文档同步（变更一致性审查 + 文档更新）
   → bump_version.py <new-version>（更新所有清单）
   → 更新 CHANGELOG.md 和 README.md
-  → 最终验证（--check + --audit）
+  → 最终验证（--check + --audit + check_docs.py）
   → 提交、打标签、推送、gh release create
 ```
 

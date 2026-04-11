@@ -72,13 +72,13 @@ Skills dispatch read-only subagents (disallowed from editing files) that write r
 
 Version is synchronized across these files (declared in `.version-bump.json`):
 
-| Platform | Manifest |
-|----------|----------|
-| Claude Code | `.claude-plugin/plugin.json` |
-| Cursor | `.cursor-plugin/plugin.json` |
-| Codex | `.codex/INSTALL.md` |
-| OpenCode | `.opencode/plugins/bundles-forge.js` |
-| Gemini CLI | `gemini-extension.json` |
+| Platform | Manifest | Version-synced |
+|----------|----------|:--------------:|
+| Claude Code | `.claude-plugin/plugin.json` | Yes |
+| Cursor | `.cursor-plugin/plugin.json` | Yes |
+| Codex | `.codex/INSTALL.md` | No (install guide) |
+| OpenCode | `.opencode/plugins/bundles-forge.js` | No (plugin loader) |
+| Gemini CLI | `gemini-extension.json` | Yes |
 
 ## Key Conventions
 

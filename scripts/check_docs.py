@@ -254,11 +254,16 @@ def check_platform_manifests(root, findings):
 
     vbump_paths = {f["path"] for f in vbump.get("files", [])}
 
-    # Parse Platform Manifests table — column 1 is Manifest
-    cells = _parse_table_column(claude_md, 1, section_header="Platform Manifests")
+    # Parse Platform Manifests table — column 1 is Manifest, column 2 (if
+    # present) is "Version-synced".  Only flag entries that are expected to
+    # carry a version string.
+    manifest_cells = _parse_table_column(claude_md, 1, section_header="Platform Manifests")
+    sync_cells = _parse_table_column(claude_md, 2, section_header="Platform Manifests")
+
     doc_paths = set()
-    for cell in cells:
-        # Extract backtick-wrapped paths
+    for idx, cell in enumerate(manifest_cells):
+        if idx < len(sync_cells) and re.search(r"\bNo\b", sync_cells[idx], re.IGNORECASE):
+            continue
         for m in re.finditer(r"`([^`]+)`", cell):
             doc_paths.add(m.group(1))
 
