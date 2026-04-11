@@ -15,6 +15,8 @@ Bundles Forge provides four audit scopes, each targeting a different level of gr
 
 All scopes share the same scoring formula, severity levels, and report conventions. The agent auto-detects scope from the target path — or you can invoke scripts directly.
 
+> **Canonical source:** Execution details (scoring formula, report format, qualitative assessment criteria) are defined in `agents/auditor.md` — the single source of truth for the audit protocol. This guide summarizes those details for reference.
+
 ---
 
 ## Common Concepts
@@ -48,10 +50,10 @@ The auditor agent may adjust the baseline by **±2 points** with rationale. Over
 ### Report Locations
 
 All audit reports are saved to `.bundles-forge/` with timestamped filenames:
-- Full audit: `<project>-<version>-audit.YYYY-MM-DD.md`
-- Skill audit: `<skill-name>-<version>-skill-audit.YYYY-MM-DD.md`
-- Workflow audit: `<project>-<version>-workflow-audit.YYYY-MM-DD.md`
-- Security scan: `<project>-<version>-security-scan.YYYY-MM-DD.md`
+- Full audit: `<project>-v<version>-audit.YYYY-MM-DD[.<lang>].md`
+- Skill audit: `<skill-name>-v<version>-skill-audit.YYYY-MM-DD[.<lang>].md`
+- Workflow audit: `<project>-v<version>-workflow-audit.YYYY-MM-DD[.<lang>].md`
+- Security scan: `<project>-v<version>-security-scan.YYYY-MM-DD[.<lang>].md`
 
 ### Exit Codes (All Scripts)
 

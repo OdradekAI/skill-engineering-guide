@@ -65,6 +65,8 @@ Skills dispatch read-only subagents (disallowed from editing files) that write r
 - `auditor` — runs 10-category audit (dispatched by `auditing`)
 - `evaluator` — A/B skill evaluation (dispatched in pairs by `optimizing`)
 
+**Design pattern:** Each agent file in `agents/` is a self-contained executor — it holds the complete execution protocol (what to check, how to score, how to report). Skills are orchestrators that handle scope detection, dispatch, result composition, and fallback. When subagents are unavailable, skills fall back to reading the agent file inline. This ensures a single source of truth with zero duplication between skills and agents.
+
 ### Platform Manifests
 
 Version is synchronized across these files (declared in `.version-bump.json`):

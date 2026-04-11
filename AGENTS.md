@@ -24,3 +24,4 @@ This is a bundle-plugin engineering toolkit supporting 5 platforms. It contains 
 | `optimizing` | Engineering optimization and feedback iteration |
 | `porting` | Add platform support |
 | `releasing` | Version management and release pipeline |
+| `using-bundles-forge` | Bootstrap meta-skill: skill discovery and routing |

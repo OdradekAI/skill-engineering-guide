@@ -41,8 +41,8 @@ When inspecting a scaffolded project, you will:
    - No description summarizes workflow (triggering conditions only)
 
 6. **Save the report** to `.bundles-forge/` in the project root:
-   - Filename: `<project-name>-<version>-inspection.YYYY-MM-DD.md` (read name and version from `package.json`)
-   - If a file with the same name exists, append a sequence number: `…-inspection.YYYY-MM-DD-2.md`
+   - Filename: `<project-name>-v<version>-inspection.YYYY-MM-DD[.<lang>].md` (read name and version from `package.json`; append `.<lang>` when not English)
+   - If a file with the same name exists, append a sequence number: `…-inspection.YYYY-MM-DD-2[.<lang>].md`
    - Only write new files — never modify or overwrite existing files in `.bundles-forge/`
    - Never modify any file in the project being inspected
 

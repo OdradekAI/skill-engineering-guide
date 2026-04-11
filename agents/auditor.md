@@ -17,7 +17,7 @@ When auditing a project, you will:
    - `skills/auditing/references/security-checklist.md` for security criteria
 
 2. **Execute all 10 categories**:
-   - **Structure**: Directory layout, required files, skill organization
+   - **Structure**: Directory layout, required files, skill organization, agent architecture (S10-S13: agent self-containment, skill-agent separation of concerns)
    - **Platform Manifests**: Format, paths, metadata for each target platform
    - **Version Sync**: `.version-bump.json` completeness, drift detection
    - **Skill Quality**: Frontmatter, descriptions, token efficiency
@@ -31,7 +31,7 @@ When auditing a project, you will:
    Category weights are defined in `skills/auditing/references/audit-checklist.md`.
 
 3. **Score each category** using the hybrid approach:
-   - Scripts compute a **baseline score**: `max(0, 10 - (critical × 3 + warning × 1))`
+   - Scripts compute a **baseline score**: `max(0, 10 - (critical_count × 3 + capped_warning_penalty))` where `capped_warning_penalty = sum(min(count_per_check_id, 3))` — warnings from the same check ID are capped at -3 penalty per ID
    - You may adjust the baseline by **±2 points** for qualitative factors the formula cannot capture
    - Any adjustment must include a one-sentence rationale
    - **Overall score** = weighted average: `sum(score_i × weight_i) / sum(weight_i)` (total weight = 23)
@@ -50,8 +50,8 @@ When auditing a project, you will:
    - Prioritized recommendations
 
 5. **Save the report** to `.bundles-forge/` in the project root:
-   - Filename: `<project-name>-<version>-audit.YYYY-MM-DD.md` (read name and version from `package.json`)
-   - If a file with the same name exists, append a sequence number: `…-audit.YYYY-MM-DD-2.md`
+   - Filename: `<project-name>-v<version>-audit.YYYY-MM-DD[.<lang>].md` (read name and version from `package.json`; append `.<lang>` when the report is not in English, e.g. `.zh`)
+   - If a file with the same name exists, append a sequence number: `…-audit.YYYY-MM-DD-2[.<lang>].md`
    - Only write new files — never modify or overwrite existing files in `.bundles-forge/`
    - Never modify any file in the project being audited
 
@@ -74,7 +74,7 @@ Compile the report using `skills/auditing/references/skill-report-template.md`. 
 2. **Findings by Category** — all findings grouped by the 4 categories, with severity (Critical / Warning / Info)
 3. **Skill Profile** — 4-category score table, file inventory, token counts, tools declared
 
-Save to `.bundles-forge/<skill-name>-<version>-skill-audit.YYYY-MM-DD.md` (read version from `package.json`). If a file with the same name exists, append a sequence number. End the report with: "**Next step:** The user can run `/bundles-optimize` for targeted improvements."
+Save to `.bundles-forge/<skill-name>-v<version>-skill-audit.YYYY-MM-DD[.<lang>].md` (read version from `package.json`; append `.<lang>` when not English). If a file with the same name exists, append a sequence number. End the report with: "**Next step:** The user can run `/bundles-optimize` for targeted improvements."
 
 ### Workflow Audit Mode
 
@@ -92,6 +92,6 @@ When explicitly requested for a workflow audit (or when `--focus-skills` is spec
 
 **Focus mode:** When `--focus-skills` is specified, partition all findings into **Focus Area** (directly involving specified skills) and **Context** (remaining graph findings).
 
-**Report:** Use `skills/auditing/references/workflow-report-template.md`. Save to `.bundles-forge/<project-name>-<version>-workflow-audit.YYYY-MM-DD.md` (read name and version from `package.json`).
+**Report:** Use `skills/auditing/references/workflow-report-template.md`. Save to `.bundles-forge/<project-name>-v<version>-workflow-audit.YYYY-MM-DD[.<lang>].md` (read name and version from `package.json`; append `.<lang>` when not English).
 
 End the report with: "**Next step:** The user can run `/bundles-optimize` for workflow fixes (Target 4: Workflow Chain Integrity)."

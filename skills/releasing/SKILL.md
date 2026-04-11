@@ -27,6 +27,7 @@ Declares every file and JSON path containing the version:
   "files": [
     { "path": "package.json", "field": "version" },
     { "path": ".claude-plugin/plugin.json", "field": "version" },
+    { "path": ".claude-plugin/marketplace.json", "field": "plugins.0.version" },
     { "path": ".cursor-plugin/plugin.json", "field": "version" },
     { "path": "gemini-extension.json", "field": "version" }
   ],

@@ -58,8 +58,8 @@ These fields are self-reported based on following the skill instructions — not
 ### Save the Report
 
 Write the evaluation report to `.bundles-forge/` in the project root:
-- Filename: `<project-name>-<version>-eval-<label>.YYYY-MM-DD.md` (read name and version from `package.json`, label is "original" or "optimized")
-- If a file with the same name exists, append a sequence number: `…-eval-<label>.YYYY-MM-DD-2.md`
+- Filename: `<project-name>-v<version>-eval-<label>.YYYY-MM-DD[.<lang>].md` (read name and version from `package.json`, label is "original" or "optimized"; append `.<lang>` when not English)
+- If a file with the same name exists, append a sequence number: `…-eval-<label>.YYYY-MM-DD-2[.<lang>].md`
 - Only write new files — never modify or overwrite existing files in `.bundles-forge/`
 - Never modify any file in the project being evaluated
 
@@ -120,8 +120,8 @@ For each skill in the chain:
 ### Save the Report
 
 Write the chain evaluation report to `.bundles-forge/` in the project root:
-- Filename: `<project-name>-<version>-chain-eval-<scenario-slug>.YYYY-MM-DD.md` (read name and version from `package.json`; scenario-slug is a kebab-case summary of the scenario, e.g. `design-to-scaffold`)
-- If a file with the same name exists, append a sequence number: `…-chain-eval-<scenario-slug>.YYYY-MM-DD-2.md`
+- Filename: `<project-name>-v<version>-chain-eval-<scenario-slug>.YYYY-MM-DD[.<lang>].md` (read name and version from `package.json`; scenario-slug is a kebab-case summary of the scenario, e.g. `design-to-scaffold`; append `.<lang>` when not English)
+- If a file with the same name exists, append a sequence number: `…-chain-eval-<scenario-slug>.YYYY-MM-DD-2[.<lang>].md`
 - Only write new files — never modify or overwrite existing files in `.bundles-forge/`
 - Never modify any file in the project being evaluated
 

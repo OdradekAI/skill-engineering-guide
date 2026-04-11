@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.5.4] - 2026-04-11
+
+### Added
+
+- **`agents/auditor.md`** — self-contained 10-category audit executor with full/skill/workflow modes, scoring rules, and report compilation protocol.
+- **`agents/evaluator.md`** — single-side A/B skill evaluation runner with chain evaluation support for workflow handoff verification.
+- **`agents/inspector.md`** — post-scaffold structural validator for manifests, version sync, hooks, and skill quality.
+- **`docs/auditing-guide.md`** — comprehensive guide covering all four audit scopes (full project, single skill, workflow, security-only), their tooling, and CI integration.
+- **`scripts/lint_skills.py`** — skill quality linter automating Q1-Q17, S9, X1-X3, and G1-G5 checks with `--json` output and capped warning scoring.
+- **`skills/auditing/SKILL.md`** — rewritten with scope auto-detection (project vs skill vs workflow), agent dispatch with inline fallback, and behavioral verification phase.
+- **`skills/optimizing/SKILL.md`** — rewritten with 6 optimization targets, scope auto-detection, chain A/B eval, and structured feedback iteration with 3-question validation.
+- **`skills/scaffolding/SKILL.md`** — rewritten with minimal/intelligent dual-mode scaffold layers, optional component support, and inspector agent dispatch.
+- **`examples/bundles-forge-v1.5.3-audit.zh.md`** — worked audit report example (Chinese) demonstrating the 10-category format.
+- **`skills/auditing/references/audit-checklist.md`** — Category 6 (Workflow) placeholder added with pointer to `workflow-checklist.md`, completing the 10-category numbering.
+
+### Changed
+
+- **Category numbering unified to 10 categories** — Workflow is now Category 6; Hooks→7, Testing→8, Documentation→9, Security→10. Updated across `auditing/SKILL.md`, `optimizing/SKILL.md`, `commands/bundles-scan.md`, and `audit-checklist.md`.
+- **Scoring formula unified** — `auditor.md` updated from simple `warning × 1` to capped version `capped_warning_penalty = sum(min(count_per_check_id, 3))`, matching `audit-checklist.md` and `workflow-checklist.md`.
+- **`AGENTS.md`** — added `using-bundles-forge` to Available Skills table (was listed in count but missing from table).
+- **`CLAUDE.md`** — updated architecture documentation with agent dispatch pattern, script inventory, and security rules.
+
+### Fixed
+
+- Category numbering contradiction — Security was referred to as both "Category 9" and "Category 10" across different files; now consistently Category 10.
+- `commands/bundles-scan.md` internal contradiction — YAML description said "Category 10" while body said "Category 9"; both now say Category 10.
+- `auditor.md` scoring formula mismatch with `audit-checklist.md` — auditor used simple `warning × 1` while checklist used capped version.
+- `skills/releasing/SKILL.md` `.version-bump.json` example missing `marketplace.json` entry.
+- `audit-checklist.md` total weight unverifiable — listed 9 categories summing to 20 while claiming total = 23; now lists all 10 categories summing to 23.
+
 ## [1.5.3] - 2026-04-11
 
 ### Added

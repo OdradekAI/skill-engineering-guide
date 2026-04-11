@@ -635,6 +635,66 @@ def run_lint(project_root):
         for f in graph_findings:
             results["summary"][f["severity"]] += 1
 
+    # -------------------------------------------------------------------
+    # Agent architecture checks (S10, S12) — skill-agent relationship
+    # -------------------------------------------------------------------
+    agents_dir = project_root / "agents"
+    if agents_dir.is_dir():
+        agent_findings = []
+
+        agent_files = sorted(agents_dir.glob("*.md"))
+        for agent_file in agent_files:
+            agent_content = agent_file.read_text(encoding="utf-8", errors="replace")
+            agent_fm, agent_body = parse_frontmatter(agent_content)
+            agent_name = agent_fm.get("name", agent_file.stem) if agent_fm else agent_file.stem
+            body_lines = [l for l in agent_body.strip().splitlines() if l.strip()]
+
+            # S10: Agent self-containment — body should have substantial
+            # instructions, not just a file-read pointer.
+            if len(body_lines) < 5:
+                agent_findings.append(dict(
+                    check="S10", severity="info",
+                    message=f"Agent '{agent_name}' has only {len(body_lines)} "
+                            "non-empty body lines — may not be self-contained"))
+
+        # S12: Inline fallback references agent file — skills that dispatch
+        # agents should reference the agent file in their fallback blocks.
+        _DISPATCH_RE = re.compile(
+            r"[Dd]ispatch.*`agents/([a-z0-9_-]+\.md)`")
+        _FALLBACK_AGENT_REF_RE = re.compile(
+            r"(?:read|follow|see)\s+`agents/", re.IGNORECASE)
+
+        for sr in results["skills"]:
+            sname = sr["skill"]
+            sdir = skills_dir / sname
+            smd = sdir / "SKILL.md"
+            if not smd.exists():
+                continue
+            scontent = smd.read_text(encoding="utf-8", errors="replace")
+
+            dispatched_agents = _DISPATCH_RE.findall(scontent)
+            if not dispatched_agents:
+                continue
+
+            has_fallback = ("unavailable" in scontent.lower()
+                           or "not available" in scontent.lower())
+            if not has_fallback:
+                continue
+
+            if not _FALLBACK_AGENT_REF_RE.search(scontent):
+                agent_list = ", ".join(dispatched_agents)
+                agent_findings.append(dict(
+                    check="S12", severity="info",
+                    message=f"Skill '{sname}' dispatches {agent_list} but "
+                            "its inline fallback does not reference the "
+                            "agent file — consider using 'read `agents/...`' "
+                            "for single source of truth"))
+
+        if agent_findings:
+            results["agent_architecture"] = agent_findings
+            for f in agent_findings:
+                results["summary"][f["severity"]] += 1
+
     return results
 
 # ---------------------------------------------------------------------------
@@ -655,6 +715,9 @@ def format_markdown(results):
             for f in sr["findings"]:
                 if f["severity"] == sev:
                     items.append(f"- [{f['check']}] {sr['skill']}: {f['message']}")
+        for f in results.get("agent_architecture", []):
+            if f["severity"] == sev:
+                items.append(f"- [{f['check']}] {f['message']}")
         if items:
             out.append(heading)
             out.extend(items)

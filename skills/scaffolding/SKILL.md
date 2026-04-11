@@ -119,9 +119,9 @@ Generated for all intelligent-mode projects regardless of platform selection:
 5. **Security baseline** — run `bundles-forge:auditing` on generated hooks and plugin code
 6. **Report** — show the user the generated structure and next steps
 
-Dispatch the `inspector` agent (`agents/inspector.md`) for automated validation if subagents are available.
+Dispatch the `inspector` agent (`agents/inspector.md`) for automated validation if subagents are available. The inspector is the single source of truth for post-scaffold validation — structure, manifests, version sync, hooks, and skill quality checks.
 
-**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the post-scaffold validation inline (structure, manifests, version sync, hooks, skill quality). Proceed inline?" If confirmed, perform the inspector checks directly using the audit checklist for criteria, then report PASS/FAIL.
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the post-scaffold validation inline. Proceed inline?" If confirmed, read `agents/inspector.md` and follow its validation instructions within this conversation context, then report PASS/FAIL.
 
 ## Quick Reference: Placeholder Map
 

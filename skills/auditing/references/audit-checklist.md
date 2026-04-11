@@ -46,6 +46,10 @@ The auditor agent (or inline auditor) may adjust the baseline by **±2 points** 
 | S7 | Info | `CHANGELOG.md` exists |
 | S8 | Info | `LICENSE` exists |
 | S9 | Info | Skill directory names match `name` field in SKILL.md frontmatter |
+| S10 | Info | Agent files in `agents/` are self-contained — body includes complete execution protocol, not just a pointer to an external file |
+| S11 | Warning | Skills that dispatch agents do not duplicate the agent's execution details (scoring formulas, report format, process steps). Agent file is the single source of truth |
+| S12 | Info | Skill inline fallback blocks (handling "subagent unavailable") reference the corresponding agent file (`agents/*.md`) rather than re-implementing the execution logic |
+| S13 | Info | Each skill-agent pair has clear responsibility separation — skill handles orchestration (scope detection, dispatch, result composition), agent handles execution (checks, scoring, reporting) |
 
 ---
 
@@ -142,7 +146,13 @@ Static link resolution — verifies that references within skill content point t
 
 ---
 
-## Category 6: Hooks (Weight: Medium)
+## Category 6: Workflow (Weight: High)
+
+See `references/workflow-checklist.md` for the full W1-W12 checklist covering three layers: Static Structure (W1-W5), Semantic Interface (W6-W10), and Behavioral Verification (W11-W12).
+
+---
+
+## Category 7: Hooks (Weight: Medium)
 
 Run only if the project uses session bootstrap hooks.
 
@@ -164,7 +174,7 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python3 -m json.tool
 
 ---
 
-## Category 7: Testing (Weight: Medium)
+## Category 8: Testing (Weight: Medium)
 
 | Check | Severity | Criteria |
 |-------|----------|----------|
@@ -180,7 +190,7 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python3 -m json.tool
 
 ---
 
-## Category 8: Documentation (Weight: Low)
+## Category 9: Documentation (Weight: Low)
 
 | Check | Severity | Criteria |
 |-------|----------|----------|
@@ -192,7 +202,7 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python3 -m json.tool
 
 ---
 
-## Category 9: Security (Weight: High)
+## Category 10: Security (Weight: High)
 
 Run security checks on all executable code, agent instructions, and hook scripts. See `references/security-checklist.md` for the full pattern list.
 

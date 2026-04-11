@@ -12,13 +12,13 @@ Systematically evaluate a bundle-plugin project or a single skill across applica
 
 **Core principle:** Measure before you fix. A scored audit prevents both under-reaction and over-engineering.
 
-**This skill includes security scanning.** Category 9 performs a security scan of skill content, hook scripts, plugin code, agent prompts, and bundled scripts. No need to invoke a separate security skill.
+**This skill includes security scanning.** Category 10 performs a security scan of skill content, hook scripts, plugin code, agent prompts, and bundled scripts. No need to invoke a separate security skill.
 
 **Announce at start:** "I'm using the auditing skill to audit [this project / this skill]."
 
 ### Security-Only Mode
 
-When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 9 (Security) and the `scan_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 10-category audit.
+When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 10 (Security) and the `scan_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 10-category audit.
 
 ## Step 1: Resolve Input & Detect Scope
 
@@ -85,9 +85,9 @@ python scripts/scan_security.py --json <project-root>  # security JSON output
 
 `audit_project.py` orchestrates `scan_security.py` (security), `lint_skills.py` (skill quality), and `audit_workflow.py` (workflow integration), then adds structure, manifest, version-sync, hook, and documentation checks.
 
-Dispatch the `auditor` agent (`agents/auditor.md`) for automated assessment if subagents are available. The auditor runs read-only and returns a scored report.
+Dispatch the `auditor` agent (`agents/auditor.md`) for automated assessment if subagents are available. The auditor runs read-only, executes all 10-category checks, scores them, compiles the report, and saves it to `.bundles-forge/`. The auditor is the single source of truth for execution details (scoring formula, report format, qualitative assessment criteria).
 
-**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline (same checks, same report format, but within this conversation context). Proceed inline?" If confirmed, perform the 10-category checks directly using the audit checklist, workflow checklist, and security checklist references, then compile the report in the same format the auditor would produce.
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline. Proceed inline?" If confirmed, read `agents/auditor.md` and follow its execution instructions within this conversation context. The agent file contains the complete audit protocol — 10-category checks, scoring rules, report compilation, and file-saving conventions.
 
 ### Step 2: Scan
 
@@ -96,66 +96,38 @@ Read the project root. Identify:
 - How many skills exist
 - Whether hooks, version sync, and bootstrap are present
 
-### Step 3: Check
+### Step 3: Check & Score & Report
 
-Run all 10 categories from `references/audit-checklist.md` and `references/workflow-checklist.md`. The checklists have 60+ individual checks with severity levels (Critical / Warning / Info).
+The auditor executes all 10 categories (Structure, Platform Manifests, Version Sync, Skill Quality, Cross-References, Workflow, Hooks, Testing, Documentation, Security), scores each on a 0-10 scale, and compiles a layered report. Full execution details — category weights, scoring formula, report format, Go/No-Go logic, and qualitative assessment criteria — are defined in `agents/auditor.md` (the single source of truth) and supported by checklists in `references/`.
 
-**Categories:**
+**Categories at a glance** (see `references/audit-checklist.md` for 60+ individual checks):
 
-| Category | Weight | What It Checks |
-|----------|--------|----------------|
-| Structure | High | Directory layout, required files |
-| Platform Manifests | Medium | Format, valid paths, metadata |
-| Version Sync | High | Drift, `.version-bump.json` completeness |
-| Skill Quality | Medium | Frontmatter, descriptions, token efficiency |
-| Cross-References | Medium | `project:skill-name` resolution, broken links (X1-X3) |
-| Workflow | High | Workflow graph topology, integration symmetry, artifact handoff (W1-W12) |
-| Hooks | Medium | Bootstrap injection, platform detection |
-| Testing | Medium | Test directory, test prompts, A/B eval results |
-| Documentation | Low | README, install docs, CHANGELOG |
-| Security | High | 5 attack surfaces — see Security Scan below |
+| Category | Weight |
+|----------|--------|
+| Structure | High |
+| Platform Manifests | Medium |
+| Version Sync | High |
+| Skill Quality | Medium |
+| Cross-References | Medium |
+| Workflow | High |
+| Hooks | Medium |
+| Testing | Medium |
+| Documentation | Low |
+| Security | High |
 
-### Security Scan (Category 9)
+### Security Scan (Category 10)
 
 Scans 5 attack surfaces. See `references/security-checklist.md` for the full pattern list.
 
-| Target | Risk Level | What to Look For |
-|--------|-----------|------------------|
-| SKILL.md content | High | Data-leak instructions, destructive commands, safety overrides, encoding tricks |
-| Hook scripts | High | Network calls, env-var leakage, system config modification |
-| OpenCode plugins | High | Dynamic code execution, network access, message manipulation |
-| Agent prompts | Medium | Privilege escalation, scope expansion, safety overrides |
-| Bundled scripts | Medium | Network calls, system modifications, unsanitized inputs |
+| Target | Risk Level |
+|--------|-----------|
+| SKILL.md content | High |
+| Hook scripts | High |
+| OpenCode plugins | High |
+| Agent prompts | Medium |
+| Bundled scripts | Medium |
 
 **Third-party skill scanning:** When scanning skills from external sources, clone/download without executing hooks, run the audit, and review critical findings with the user before installation. Never auto-install without scanning.
-
-### Step 4: Score
-
-Each category: 0-10 scale. Scripts compute baseline via `max(0, 10 - (critical × 3 + capped_warning_penalty))` where warnings from the same check ID are capped at -3 per ID. The auditor may adjust by ±2 with rationale. Overall = weighted average (High=3, Medium=2, Low=1).
-
-### Step 5: Report
-
-Compile findings into the six-layer report format defined in `references/report-template.md`. The template structures the report as a **decision document** — Layer 1 enables a 30-second Go/No-Go decision, deeper layers provide evidence and methodology.
-
-**Report layers:**
-
-1. **Decision Brief** — Go/No-Go recommendation, top 3 risks, remediation estimate
-2. **Risk Matrix** — all findings in one table with quantified impact, exploitability, and confidence
-3. **Findings by Category** — 10 categories as sections, each listing component-level findings with inline evidence
-4. **Methodology** — scope, tools, limitations, out-of-scope declaration
-5. **Appendix** — per-skill breakdown, component inventory, raw script outputs
-
-**Go/No-Go logic:** Scripts provide an automated baseline (Critical → `NO-GO`, Warning-only → `CONDITIONAL GO`, clean → `GO`). The auditor may adjust the recommendation but must record the rationale.
-
-**Key rules:**
-- Every finding gets a category-prefixed ID (e.g. `SEC-001`, `STR-002`) for cross-referencing
-- Every finding includes severity (P0–P3), confidence (Confirmed/Likely/Suspected), and quantified impact
-- Categories with no findings still appear with "No findings. All checks pass." — readers need to distinguish "checked and clean" from "not checked"
-- Qualitative summaries (Verdict / Strengths / Key Issues) per skill go in the Appendix, not the main body
-
-**Qualitative summaries** are produced by the auditor agent or inline by the main agent. Scripts output per-skill findings and counts but not qualitative judgments.
-
-**Audit context adaptation:** The template has conditional sections for pre-release (release readiness), post-change (regression check), and third-party evaluation (install safety). Choose the context that matches the audit trigger.
 
 ### Step 5b: Behavioral Verification (Optional)
 
@@ -202,26 +174,9 @@ python scripts/lint_skills.py <skill-directory>          # skill quality only
 python scripts/scan_security.py <skill-directory>        # security scan on skill files
 ```
 
-### Process
+### Process & Report
 
-```
-Read target skill
-  → Run 4-category checks (Structure, Quality, Cross-Refs, Security)
-  → Produce qualitative summary (Verdict, Strengths, Key Issues)
-  → Score each category
-  → Compile report
-  → Present findings
-```
-
-### Report Format
-
-Use the **Single Skill Audit Report** template from `references/skill-report-template.md`. It provides a three-layer structure (Decision Brief, Findings by Category, Skill Profile) with its own decision vocabulary, optimized for the 4-category skill scope.
-
-**Qualitative summary guidelines:**
-- **Verdict** — one sentence capturing the skill's overall quality and fitness for purpose
-- **Strengths** — what the skill does well (max 3, be concise)
-- **Key Issues** — the most impactful problems found (max 3, be specific and objective)
-- Do not include actionable fix suggestions — that is `bundles-forge:optimizing`'s responsibility
+The auditor (or inline executor) runs the 4-category checks, produces a qualitative summary (Verdict, Strengths, Key Issues), scores each category, and compiles the report using `references/skill-report-template.md`. Full process and report format details are in `agents/auditor.md` (Single Skill Audit Mode section).
 
 ### Third-Party Skill Scanning
 
@@ -254,32 +209,14 @@ python scripts/audit_workflow.py --focus-skills skill-a,skill-b <root>   # focus
 python scripts/audit_workflow.py --json <project-root>                   # machine-readable
 ```
 
-Dispatch the `auditor` agent (`agents/auditor.md`) in Workflow Audit Mode for automated assessment if subagents are available. The auditor handles W1-W10 (Static Structure + Semantic Interface).
+Dispatch the `auditor` agent (`agents/auditor.md`) in Workflow Audit Mode for automated assessment if subagents are available. The auditor handles W1-W10 (Static Structure + Semantic Interface) across three layers defined in `references/workflow-checklist.md`. Full workflow audit protocol, focus mode, and report format are in `agents/auditor.md` (Workflow Audit Mode section).
 
 **Phase 2 — Behavioral Verification (W11-W12):**
 After the auditor returns the workflow report, dispatch `evaluator` agent (`agents/evaluator.md`) with label "chain" for each workflow chain involving focus skills. Use the chain list and focus skills from the auditor's report. Skip if subagent dispatch is unavailable — note the skip in the final report. Append evaluator results to the workflow audit report.
 
 **Why two phases:** Subagents cannot dispatch other subagents, so the evaluator must be dispatched from this skill (main conversation), not from within the auditor.
 
-**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the workflow checks inline. Proceed?" If confirmed, perform the W1-W12 checks directly using the workflow checklist reference.
-
-### Three-Layer Checks
-
-Checks are defined in `references/workflow-checklist.md` (W1-W12):
-
-| Layer | Weight | Checks | Automation |
-|-------|--------|--------|------------|
-| Static Structure | High | W1-W5 (cycles, reachability, Inputs/Outputs presence, artifact ID matching) | `lint_skills.py` graph analysis |
-| Semantic Interface | Medium | W6-W10 (Integration completeness, artifact clarity, Calls/Called by symmetry) | `audit_workflow.py` + agent review |
-| Behavioral Verification | Low | W11-W12 (Chain A/B Eval, trigger/exit in context) | `evaluator` agent dispatch |
-
-### Focus Mode
-
-When `--focus-skills skill-a,skill-b` is specified, all checks run on the full graph but the report partitions findings into **Focus Area** (directly involving specified skills) and **Context** (remaining findings). This enables incremental validation after adding new skills without missing cascade effects.
-
-### Report Format
-
-Use the **Workflow Audit Report** template from `references/workflow-report-template.md`. It provides a three-layer structure (Decision Brief, Findings by Layer, Skill Integration Map) with workflow-specific Go/No-Go logic.
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the workflow checks inline. Proceed?" If confirmed, read `agents/auditor.md` (Workflow Audit Mode section) and follow its execution instructions inline, then handle W11-W12 from `references/workflow-checklist.md`.
 
 ### Fix or Optimize
 
