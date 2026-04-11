@@ -54,103 +54,18 @@ cd your-bundle-plugin-project
 
 Runs a 10-category quality assessment with security scanning across 5 attack surfaces.
 
-## Key Concepts
+## Concepts
 
-The [Claude Code plugin ecosystem](https://code.claude.com/docs/en/plugins) comprises several building blocks that work together. Understanding these concepts helps you see how bundles-forge's skills, agents, and hooks fit into the bigger picture.
+| Concept | What it is |
+|---------|------------|
+| **Skill** | Atomic capability unit (`SKILL.md`) — discovered by description, loaded on demand |
+| **Plugin** | Packaging/distribution unit — bundles skills, agents, hooks, and more |
+| **Subagent** | Isolated AI assistant for delegated tasks with its own context window |
+| **Hook** | Shell/HTTP/LLM action that fires automatically on lifecycle events |
+| **Command** | Slash command entry point (`/audit`) that invokes a skill |
+| **MCP** | Open standard connecting Claude to external tools and data sources |
 
-```mermaid
-graph TB
-    subgraph dist ["Distribution"]
-        Marketplace["Marketplace"]
-        Plugin["Plugin"]
-    end
-
-    subgraph comp ["Components bundled inside a Plugin"]
-        Skill["Skill"]
-        Subagent["Subagent"]
-        Hook["Hook"]
-        MCPServer["MCP Server"]
-        LSPServer["LSP Server"]
-        Command["Command"]
-    end
-
-    Marketplace -->|hosts| Plugin
-    Plugin -->|bundles| Skill
-    Plugin -->|bundles| Subagent
-    Plugin -->|bundles| Hook
-    Plugin -->|bundles| MCPServer
-    Plugin -->|bundles| LSPServer
-    Plugin -->|bundles| Command
-
-    Skill -->|"runs in via context:fork"| Subagent
-    Subagent -->|"preloads via skills field"| Skill
-    Subagent -->|"scoped mcpServers"| MCPServer
-    Subagent -->|"scoped hooks"| Hook
-    Hook -->|"reacts to lifecycle of"| Subagent
-    Skill -->|"chains to via prose"| Skill
-```
-
-### Core Concepts
-
-**[Skill](https://code.claude.com/docs/en/skills)** — The atomic capability unit. A `SKILL.md` file with YAML frontmatter (`name`, `description`, `allowed-tools`, etc.) that the agent discovers by its `description` and loads on demand. Skills can run inline in the main conversation or in an isolated subagent via `context: fork`. Skills chain to each other through prose instructions, not code APIs.
-
-> **In bundles-forge:** 8 skills form a lifecycle workflow — each skill's instructions tell the agent which skill to invoke next using the `bundles-forge:<name>` convention. See [How Skills Chain](#how-skills-chain).
-
-**[Plugin](https://code.claude.com/docs/en/plugins)** — The packaging and distribution unit. A directory containing `.claude-plugin/plugin.json` (manifest) plus any combination of skills, agents, hooks, MCP servers, LSP servers, commands, and output styles. Plugins namespace their components (`/plugin-name:skill-name`) to avoid conflicts. Distributed via marketplaces.
-
-> **In bundles-forge:** The project itself is a plugin with manifests for 5 platforms. It's also a toolkit for *building* other plugins — a bundle-plugin that builds bundle-plugins.
-
-**[Subagent](https://code.claude.com/docs/en/sub-agents)** — A specialized AI assistant running in its own context window with a custom system prompt, tool restrictions, and model selection. The main conversation delegates tasks to a subagent and receives only a summary back. Built-in subagents include Explore (read-only, fast), Plan (research for planning), and general-purpose (full tools). Custom subagents are defined as Markdown files in `agents/`.
-
-> **In bundles-forge:** Three read-only subagents — `inspector`, `auditor`, `evaluator` — are dispatched by skills for isolated validation work. See [Agent Dispatch](#agent-dispatch).
->
-> **Design decision:** Users always interact through skills (slash commands), never by invoking agents directly. Skills orchestrate agent dispatch from the main conversation because they need pre/post logic (scope detection, report merging). Subagents cannot spawn other subagents — all orchestration stays in the skill layer.
-
-**[Hook](https://code.claude.com/docs/en/hooks)** — A shell command, HTTP endpoint, or LLM prompt that executes automatically at specific lifecycle events (`SessionStart`, `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStart`, etc.). Hooks can block operations, inject context, or trigger side effects. Defined in `hooks/hooks.json` or settings.
-
-> **In bundles-forge:** The `session-start` hook reads the bootstrap skill and injects it into the agent's context, giving it awareness of all available skills at the start of every session. See [Session Bootstrap](#session-bootstrap).
-
-**[MCP (Model Context Protocol)](https://code.claude.com/docs/en/mcp)** — An open standard for connecting Claude to external tools and data sources (databases, APIs, issue trackers). MCP servers are configured via `.mcp.json` and provide tools, resources, and prompts. Plugins can bundle MCP servers that start automatically when the plugin is enabled.
-
-> **In bundles-forge:** The toolkit doesn't ship its own MCP server, but the `auditing` skill checks target projects for MCP configuration security issues across 5 attack surfaces.
-
-### Supplementary Concepts
-
-**[Command](https://code.claude.com/docs/en/skills)** — Slash commands (`/deploy`, `/audit`) that invoke skills. Commands have been merged into the skill system — a file at `.claude/commands/deploy.md` and a skill at `.claude/skills/deploy/SKILL.md` create the same `/deploy` command. Plugin `commands/` directories are still supported.
-
-> **In bundles-forge:** 6 `/bundles-*` commands serve as thin entry points that redirect to the corresponding skill. See [Command Execution](#command-execution).
-
-**[Marketplace](https://code.claude.com/docs/en/discover-plugins)** — A plugin catalog that hosts installable plugins. Supports GitHub repos, Git URLs, local paths, and remote URLs. The official Anthropic marketplace is available by default; teams can create private marketplaces.
-
-> **In bundles-forge:** Distributed through the official Anthropic marketplace (`claude plugin install bundles-forge`).
-
-**[LSP Server](https://code.claude.com/docs/en/plugins-reference#lsp-servers)** — Language Server Protocol integration that gives Claude real-time code intelligence: diagnostics after edits, go-to-definition, find-references, and hover information. Configured via `.lsp.json` in the plugin.
-
-> **In bundles-forge:** Not used — the toolkit focuses on skill/plugin engineering rather than language-specific code intelligence.
-
-**[Output Style](https://code.claude.com/docs/en/plugins-reference#plugin-directory-structure)** — Custom response formatting directives stored in `output-styles/` that change how Claude presents its output.
-
-> **In bundles-forge:** Not used.
-
-### How They Work Together in bundles-forge
-
-```mermaid
-flowchart LR
-    MP["Official Marketplace"] -->|distributes| BF
-
-    subgraph BF ["bundles-forge Plugin"]
-        HK["session-start Hook"]
-        CMD["6 /bundles-* Commands"]
-        SK["8 Skills"]
-        AG["3 Subagents"]
-    end
-
-    HK -->|"injects bootstrap context"| SK
-    CMD -->|"invokes via bundles-forge:name"| SK
-    SK -->|"dispatches read-only tasks"| AG
-    AG -->|"writes reports to .bundles-forge/"| SK
-    SK -->|"chains via prose instructions"| SK
-```
+> Full explanations, design decisions, and architecture diagrams → [Concepts Guide](docs/concepts-guide.md)
 
 ## Skills
 
@@ -233,90 +148,9 @@ Exit codes: `0` = pass, `1` = warnings, `2` = critical findings. All scripts acc
 ## Architecture
 
 <details>
-<summary>Session bootstrap and skill routing internals</summary>
+<summary>Command execution chains and internal routing</summary>
 
-### Session Bootstrap
-
-When a session starts, the `session-start` hook reads `using-bundles-forge/SKILL.md` and injects it into the agent's context. This gives the agent the full skill inventory and routing logic.
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Platform as AI Platform
-    participant Hook as session-start hook
-    participant Bootstrap as using-bundles-forge/SKILL.md
-
-    User->>Platform: Start session
-    Platform->>Hook: Trigger SessionStart event
-    Hook->>Bootstrap: Read full SKILL.md content
-    Hook->>Hook: Detect platform via env vars
-    alt CURSOR_PLUGIN_ROOT
-        Hook->>Platform: additional_context JSON
-    else CLAUDE_PLUGIN_ROOT
-        Hook->>Platform: hookSpecificOutput JSON
-    end
-    Note over Platform: Agent now knows all bundles-forge skills
-```
-
-### Skill Routing
-
-Once the bootstrap context is loaded, the agent routes requests through three paths:
-
-1. **Slash commands** — `/bundles-blueprint`, `/bundles-audit`, etc. Each command file redirects to a skill via `bundles-forge:<skill-name>`.
-2. **Explicit references** — Other skills or the user directly reference `bundles-forge:<skill-name>`. The agent uses the platform's skill-loading tool.
-3. **Description matching** — The agent matches user intent against each skill's `description` field (which starts with "Use when...") and invokes the best match.
-
-### How Skills Chain
-
-Skills chain through **prose instructions**, not code APIs. When a skill finishes, it tells the agent which skill to invoke next using the `project:skill-name` convention. The host platform handles the actual loading:
-
-| Platform | Skill Loading Tool |
-|----------|-------------------|
-| Claude Code | `Skill` tool |
-| Cursor | `Skill` tool |
-| Gemini CLI | `activate_skill` tool |
-| Codex | Filesystem discovery from `~/.agents/skills/` |
-| OpenCode | `use_skill` via plugin transform |
-
-### Agent Dispatch
-
-Three specialized agents handle tasks that benefit from isolated, read-only execution. They are dispatched as **subagents** — only when the host platform supports subagent dispatch. If subagents are unavailable, the main agent performs the same work inline.
-
-All agents share two constraints: `disallowedTools: Edit` (cannot modify project files) and reports are saved to `.bundles-forge/`.
-
-```mermaid
-flowchart TB
-    subgraph triggers [Trigger Skills]
-        SC["scaffolding"]
-        AU["auditing"]
-        OP["optimizing"]
-    end
-
-    subgraph agents [Agents]
-        RV["inspector"]
-        AD["auditor"]
-        EV1["evaluator A"]
-        EV2["evaluator B"]
-    end
-
-    SC -->|"post-scaffold validation"| RV
-    AU -->|"10-category quality + security audit"| AD
-    OP -->|"A/B test: original skill"| EV1
-    OP -->|"A/B test: optimized skill"| EV2
-
-    RV -->|"PASS / FAIL + issue list"| Report1[".bundles-forge/*-review.md"]
-    AD -->|"score + findings by severity"| Report2[".bundles-forge/*-audit.md"]
-    EV1 -->|"per-prompt results"| Report3[".bundles-forge/*-eval-original.md"]
-    EV2 -->|"per-prompt results"| Report4[".bundles-forge/*-eval-optimized.md"]
-```
-
-| Agent | Dispatched By | When | What It Does | Output |
-|-------|--------------|------|-------------|--------|
-| `inspector` | `scaffolding` | After project structure is generated | Validates directories, manifests, version sync, hooks, and skill frontmatter conventions | PASS/FAIL with issues by severity |
-| `auditor` | `auditing` | During a full or skill-scoped audit | Runs 10-category checklist (structure, manifests, version sync, quality, cross-refs, workflow, hooks, testing, docs, security) | Weighted score + critical/warning/info findings |
-| `evaluator` | `optimizing` | During description A/B test or feedback A/B test | Runs test prompts against a single SKILL.md variant (labelled `original` or `optimized`) and records whether each prompt triggers the skill correctly | Per-prompt trigger/response report |
-
-**Key detail:** `optimizing` dispatches **two evaluators in parallel** — one for the original skill, one for the optimized variant. The parent skill compares their reports to decide which version wins.
+> For concept explanations see [Concepts Guide](docs/concepts-guide.md). For per-skill details see guides in [`docs/`](docs/).
 
 ### Command Execution
 
@@ -343,11 +177,11 @@ flowchart LR
     scaffolding -->|"post-scaffold check"| auditing
     auditing -->|"issues found"| optimizing
     optimizing -->|"verify fixes"| auditing
-    releasing -->|"pre-flight"| auditing
+    releasing -->|"pre-release check"| auditing
     releasing -->|"fix quality"| optimizing
-    blueprinting -.->|"multi-platform"| porting
+    blueprinting -.->|"platform targets"| porting
     scaffolding -.->|"add platform"| porting
-    porting -->|"verify adapter"| auditing
+    porting -->|"post-adaptation"| auditing
 ```
 
 #### `/bundles-blueprint` — Plan a new bundle-plugin

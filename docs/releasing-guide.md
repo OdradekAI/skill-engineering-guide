@@ -1,5 +1,7 @@
 # Releasing Guide
 
+[中文](releasing-guide.zh.md)
+
 Comprehensive guide to releasing bundle-plugins with Bundles Forge. Covers the full pipeline from pre-flight checks through publishing, including documentation consistency verification and change coherence review.
 
 ## Overview
@@ -72,11 +74,11 @@ python scripts/bump_version.py --check
 # Full quality + security audit
 python scripts/audit_project.py .
 
-# Documentation consistency (6 checks)
+# Documentation consistency (7 checks)
 python scripts/check_docs.py .
 ```
 
-**`check_docs.py` checks (D1–D6):**
+**`check_docs.py` checks (D1–D7):**
 
 | Check | What It Verifies |
 |-------|-----------------|
@@ -86,6 +88,7 @@ python scripts/check_docs.py .
 | D4 — Script accuracy | Scripts referenced in CLAUDE.md exist in `scripts/` |
 | D5 — Agent list sync | Agents in CLAUDE.md match `agents/` directory |
 | D6 — README data sync | Hard data (skill names, commands, links) consistent between README.md and README.zh.md |
+| D7 — Guide language sync | Hard data (tables, code blocks, links) consistent between `docs/*.md` and `docs/*.zh.md` |
 
 ### Step 2: Address Findings
 

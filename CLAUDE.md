@@ -28,7 +28,7 @@ python scripts/scan_security.py [project-root]     # 5-surface security scan
 python scripts/audit_project.py [project-root]     # combined audit (calls lint + scan + workflow)
 python scripts/audit_skill.py [skill-dir]          # single skill audit (4 categories)
 python scripts/audit_workflow.py [project-root]    # workflow integration audit (W1-W12)
-python scripts/check_docs.py [project-root]        # documentation consistency (6 checks: D1-D6)
+python scripts/check_docs.py [project-root]        # documentation consistency (7 checks: D1-D7)
 ```
 
 All scripts accept `--json` for machine-readable output. Exit codes: 0 = pass, 1 = warnings, 2 = critical.
@@ -49,6 +49,7 @@ python scripts/bump_version.py <new-version>       # bump all files declared in 
 - `agents/` — 3 subagent definitions (inspector, auditor, evaluator) as `.md` files
 - `commands/` — slash command stubs (`bundles-*.md`) that redirect to skills via `bundles-forge:<skill-name>`
 - `hooks/` — session bootstrap: `session-start` reads `using-bundles-forge/SKILL.md` and injects it as platform-appropriate JSON context. `run-hook.cmd` is a polyglot wrapper (Windows cmd + bash)
+- `docs/` — guides (concepts, blueprinting, auditing, optimizing, releasing) with `*.zh.md` Chinese translations; checked by D7
 - `scripts/` — Python tooling sharing `_cli.py` for common argparse/exit-code patterns
 
 ### Skill Lifecycle Flow

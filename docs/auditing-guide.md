@@ -1,5 +1,7 @@
 # Auditing Guide
 
+[中文](auditing-guide.zh.md)
+
 Comprehensive guide to auditing bundle-plugins with Bundles Forge. Covers all four audit scopes, their tooling, and recommended workflows.
 
 ## Overview

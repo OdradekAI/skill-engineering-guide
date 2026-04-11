@@ -6,13 +6,14 @@ Validates that project documentation (CLAUDE.md, AGENTS.md, README.md,
 README translations, docs/) stays in sync with the actual project state
 (skills/, agents/, scripts/, .version-bump.json).
 
-Six checks:
+Seven checks:
   D1 — Skill list sync across docs vs skills/ directory
   D2 — Cross-reference validity (bundles-forge:<name> → skills/<name>/)
   D3 — Platform manifest sync (CLAUDE.md table vs .version-bump.json)
   D4 — Command/script accuracy (CLAUDE.md scripts vs scripts/ directory)
   D5 — Agent list sync (CLAUDE.md agents vs agents/ directory)
   D6 — README data sync (README.md vs README.zh.md hard data)
+  D7 — Guide language sync (docs/*.md vs docs/*.zh.md hard data)
 
 Usage:
     python scripts/check_docs.py [project-root]
@@ -501,6 +502,109 @@ def check_readme_sync(root, findings):
 # Check docs/ content consistency
 # ---------------------------------------------------------------------------
 
+def check_guide_language_sync(root, findings):
+    """Check that docs/ guide pairs (*.md ↔ *.zh.md) have consistent hard data."""
+    docs_dir = root / "docs"
+    if not docs_dir.is_dir():
+        return
+
+    en_guides = {}
+    for f in docs_dir.iterdir():
+        if f.is_file() and f.suffix == ".md" and not f.stem.endswith(".zh"):
+            zh_counterpart = docs_dir / f"{f.stem}.zh.md"
+            if zh_counterpart.exists():
+                en_guides[f.stem] = (f, zh_counterpart)
+            else:
+                findings.append(dict(
+                    check="D7", severity="warning",
+                    message=f"docs/{f.name} has no Chinese counterpart "
+                            f"(expected docs/{f.stem}.zh.md)"))
+
+    code_block_re = re.compile(r"```(?:bash|json|yaml|markdown)?\n(.*?)```", re.DOTALL)
+    link_re = re.compile(r"\]\(([^)]+)\)")
+    slash_re = re.compile(r"`(/[a-z-]+)`")
+
+    def _extract_commands(text):
+        cmds = set()
+        for m in code_block_re.finditer(text):
+            for line in m.group(1).strip().splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                cmd = re.sub(r"\s+#\s+.*$", "", line).strip()
+                if cmd:
+                    cmds.add(cmd)
+        return cmds
+
+    for guide_name, (en_path, zh_path) in sorted(en_guides.items()):
+        en_content = en_path.read_text(encoding="utf-8", errors="replace")
+        zh_content = zh_path.read_text(encoding="utf-8", errors="replace")
+        rel_en = f"docs/{en_path.name}"
+        rel_zh = f"docs/{zh_path.name}"
+
+        en_tables = set()
+        zh_tables = set()
+        for m in _TABLE_ROW_RE.finditer(en_content):
+            cells = [c.strip() for c in m.group(1).split("|")]
+            for cell in cells:
+                for bt in _AGENT_BACKTICK_NAME_RE.finditer(cell):
+                    en_tables.add(bt.group(1))
+        for m in _TABLE_ROW_RE.finditer(zh_content):
+            cells = [c.strip() for c in m.group(1).split("|")]
+            for cell in cells:
+                for bt in _AGENT_BACKTICK_NAME_RE.finditer(cell):
+                    zh_tables.add(bt.group(1))
+
+        en_code = _extract_commands(en_content)
+        zh_code = _extract_commands(zh_content)
+        if en_code and zh_code:
+            missing_cmds = {c for c in (en_code - zh_code)
+                           if c.startswith("python ") or c.startswith("bash ")
+                           or c.startswith("claude ") or c.startswith("git ")
+                           or c.startswith("gemini ") or c.startswith("cd ")}
+            if missing_cmds:
+                sample = sorted(missing_cmds)[:3]
+                findings.append(dict(
+                    check="D7", severity="info",
+                    message=f"Bash commands in {rel_en} not found in "
+                            f"{rel_zh}: {sample}"))
+
+        en_slash = set()
+        zh_slash = set()
+        for m in slash_re.finditer(en_content):
+            en_slash.add(m.group(1))
+        for m in slash_re.finditer(zh_content):
+            zh_slash.add(m.group(1))
+        if en_slash and zh_slash and en_slash != zh_slash:
+            findings.append(dict(
+                check="D7", severity="warning",
+                message=f"Slash command mismatch between {rel_en} and "
+                        f"{rel_zh} — EN: {sorted(en_slash)}, "
+                        f"ZH: {sorted(zh_slash)}"))
+
+        en_file_links = {m.group(1) for m in link_re.finditer(en_content)
+                         if not m.group(1).startswith("http")
+                         and not m.group(1).startswith("#")}
+        zh_file_links = {m.group(1) for m in link_re.finditer(zh_content)
+                         if not m.group(1).startswith("http")
+                         and not m.group(1).startswith("#")}
+        en_file_links = {l for l in en_file_links
+                         if not l.endswith(".zh.md")}
+        zh_file_links = {l for l in zh_file_links
+                         if not l.endswith(".md") or l.endswith(".zh.md")}
+
+        missing_links = en_file_links - zh_file_links
+        missing_links = {l for l in missing_links
+                         if not any(x in l for x in
+                                    ["concepts-guide", "auditing-guide",
+                                     "releasing-guide"])}
+        if missing_links:
+            findings.append(dict(
+                check="D7", severity="info",
+                message=f"File links in {rel_en} missing from "
+                        f"{rel_zh}: {sorted(missing_links)[:5]}"))
+
+
 def check_docs_content(root, findings):
     """Verify docs/ files reference accurate skill/script/agent names."""
     docs_dir = root / "docs"
@@ -553,6 +657,7 @@ def run_check(project_root):
     check_script_references(root, findings)
     check_agent_sync(root, findings)
     check_readme_sync(root, findings)
+    check_guide_language_sync(root, findings)
     check_docs_content(root, findings)
 
     summary = {"critical": 0, "warning": 0, "info": 0}
