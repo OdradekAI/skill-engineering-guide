@@ -69,7 +69,10 @@ Runs a 10-category quality assessment with security scanning across 7 attack sur
 
 ## Skills
 
-The 7 skills cover the full lifecycle of a bundle-plugin project:
+The 7 skills cover the full lifecycle of a bundle-plugin project, organized into two layers:
+
+- **Orchestrators** (`blueprinting`, `optimizing`, `releasing`) — diagnose, decide, and delegate. They chain multiple skills together to accomplish multi-step goals.
+- **Executors** (`scaffolding`, `authoring`, `auditing`) — single-responsibility workers. They can be invoked directly by users or dispatched by orchestrators.
 
 ```mermaid
 flowchart LR
@@ -84,9 +87,9 @@ flowchart LR
 
 | Phase | Skill | What It Does |
 |-------|-------|-------------|
-| Design | `blueprinting` | Structured interview to determine project scope, platform targets, and skill decomposition. Produces a design document. |
+| Design | `blueprinting` | Structured interview → design document → orchestrates the creation pipeline: scaffolding, authoring, workflow design, and initial audit. |
 | Scaffold | `scaffolding` | Generates project structure from design, adds or removes platform support — manifests, hooks, scripts, bootstrap skill, and per-platform files. |
-| Write | `authoring` | Guides SKILL.md authoring — frontmatter, "Use when..." descriptions, instructions, and progressive disclosure via `references/`. |
+| Write | `authoring` | Guides SKILL.md and agents/*.md authoring — frontmatter, descriptions, instructions, content integration, and progressive disclosure via `references/`. |
 | Audit | `auditing` | 10-category quality assessment including security scanning across 7 attack surfaces. |
 | Optimize | `optimizing` | Engineering improvements — description triggering, token efficiency, workflow restructuring, adding skills to fill gaps, and feedback iteration. |
 | Release | `releasing` | Orchestrates the pre-release pipeline: version drift check, audit, documentation consistency, change coherence review, version bump, CHANGELOG update, and publish guidance. |
@@ -95,13 +98,27 @@ The bootstrap meta-skill `using-bundles-forge` is injected at session start via 
 
 **Standalone use:** `authoring`, `auditing`, and `optimizing` can be invoked independently on any existing project without going through the full lifecycle.
 
+### Guides
+
+Each skill has a companion guide in [`docs/`](docs/) with detailed usage, examples, and design rationale:
+
+| Guide | Covers |
+|-------|--------|
+| [Concepts Guide](docs/concepts-guide.md) | Core terminology, architecture diagrams, and design decisions |
+| [Blueprinting Guide](docs/blueprinting-guide.md) | Interview techniques, design document format, decomposition patterns |
+| [Scaffolding Guide](docs/scaffolding-guide.md) | Project anatomy, platform adapters, template system |
+| [Authoring Guide](docs/authoring-guide.md) | SKILL.md writing patterns, progressive disclosure, agent authoring |
+| [Auditing Guide](docs/auditing-guide.md) | Checklists, report templates, CI integration |
+| [Optimizing Guide](docs/optimizing-guide.md) | Description tuning, token reduction, workflow restructuring |
+| [Releasing Guide](docs/releasing-guide.md) | Version management, CHANGELOG format, publishing workflow |
+
 ### Agents
 
 | Agent | Role |
 |-------|------|
 | `inspector` | Validates scaffolded project structure and platform adaptation |
 | `auditor` | Executes systematic quality audit with security scanning |
-| `evaluator` | Runs one side of an A/B skill evaluation for optimization |
+| `evaluator` | Runs A/B skill evaluation for optimization and workflow chain verification for auditing (W11-W12) |
 
 ### Commands
 
@@ -118,6 +135,8 @@ The bootstrap meta-skill `using-bundles-forge` is injected at session start via 
 Skills without a slash command are invoked **automatically** (the agent matches user intent to the skill's `description` field) or **explicitly** when another skill chains to them via `bundles-forge:<skill-name>` references.
 
 ## Auditing
+
+Both `auditing` and `optimizing` accept local paths, GitHub URLs, and zip/tar.gz archives as input — the agent normalizes the target automatically.
 
 Four audit scopes for different levels of granularity — the agent auto-detects scope from the target path:
 
@@ -136,6 +155,13 @@ python scripts/audit_skill.py skills/authoring                         # single 
 python scripts/audit_workflow.py .                                     # workflow audit
 python scripts/audit_workflow.py --focus-skills new-skill .            # focused workflow audit
 python scripts/scan_security.py .                                      # security-only scan
+```
+
+Via the agent, you can also audit remote projects:
+
+```
+/bundles-audit https://github.com/user/repo
+/bundles-audit https://github.com/user/repo/tree/main/skills/my-skill
 ```
 
 Exit codes: `0` = pass, `1` = warnings, `2` = critical findings. All scripts accept `--json` for CI integration.
@@ -184,6 +210,8 @@ flowchart LR
 
 #### `/bundles-blueprint` — Plan a new bundle-plugin
 
+> Full guide: [`docs/blueprinting-guide.md`](docs/blueprinting-guide.md)
+
 **When to use:** Starting a new project, splitting a monolithic skill into multiple skills, or composing third-party skills into a bundle.
 
 ```
@@ -196,6 +224,8 @@ User runs /bundles-blueprint
 ```
 
 #### `/bundles-scaffold` — Generate or adapt project structure
+
+> Full guide: [`docs/scaffolding-guide.md`](docs/scaffolding-guide.md)
 
 **When to use:** Adding platform support to an existing project, removing a platform, or generating a new project directly (without going through blueprinting first).
 
@@ -210,6 +240,8 @@ User runs /bundles-scaffold
 ```
 
 #### `/bundles-audit` — Quality assessment
+
+> Full guide: [`docs/auditing-guide.md`](docs/auditing-guide.md)
 
 **When to use:** Reviewing a project before release, after significant changes, or when scanning a third-party skill for security risks.
 
@@ -233,6 +265,8 @@ User runs /bundles-audit
 
 #### `/bundles-optimize` — Engineering improvements
 
+> Full guide: [`docs/optimizing-guide.md`](docs/optimizing-guide.md)
+
 **When to use:** Improving description triggering accuracy, reducing token usage, fixing workflow chain gaps, adding skills to fill gaps, restructuring workflows, or iterating on user feedback about a specific skill.
 
 ```
@@ -250,6 +284,8 @@ User runs /bundles-optimize
 ```
 
 #### `/bundles-release` — Version bump and publish
+
+> Full guide: [`docs/releasing-guide.md`](docs/releasing-guide.md)
 
 **When to use:** Preparing a release — version drift check, quality gate, documentation consistency, version bump, CHANGELOG update, and publishing guidance.
 
