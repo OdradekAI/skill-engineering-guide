@@ -39,6 +39,9 @@
 | 技能行为或结构的破坏性变更 | **Major**（X.0.0） | 重命名技能、更改工作流链路、移除技能 |
 | 新技能、新平台支持、重大改进 | **Minor**（0.X.0） | 添加技能、添加 Gemini 支持、新 agent |
 | Bug 修复、描述改进、文档更新 | **Patch**（0.0.X） | 修复描述、更新 README、修正错别字 |
+| 稳定前测试大版本 | **Pre-release**（X.Y.Z-beta.N） | `2.0.0-beta.1`、`2.0.0-rc.1` |
+
+Bump 脚本接受任何合法的 semver 字符串 — pre-release 版本与稳定版本在所有清单中的处理方式相同。
 
 ---
 
@@ -51,7 +54,7 @@
 git status
 
 # 验证目标标签不存在
-git tag -l v1.6.0
+git tag -l v<version>
 
 # 检查当前分支
 git branch --show-current
@@ -74,6 +77,8 @@ python scripts/bump_version.py --check
 # 文档一致性（7 项检查）
 python scripts/check_docs.py .
 ```
+
+**插件验证（仅 Claude Code）：** 在 Claude Code 环境中，运行 `claude plugin validate`（或会话内 `/plugin validate`）以验证 `plugin.json` schema、skill/agent/command frontmatter 和 `hooks.json` 有效性。其他平台通过 inspector agent 覆盖等效的结构检查。
 
 **完整审计：** 调用 `bundles-forge:auditing`（首选 — 通过 auditor 子代理提供 10 类定性评估与评分）。回退：`python scripts/audit_project.py .`（仅自动化检查，无定性评分）。
 
@@ -99,6 +104,8 @@ python scripts/check_docs.py .
 | **Warning** | 建议修复，用户决定 | 文档漂移、缺失的表格条目 |
 | **Info** | 记录待后续处理 | 未文档化的脚本、轻微不一致 |
 
+**安全扫描 confidence 层：** 安全发现分为 `deterministic`（在可执行代码中匹配 — hooks、plugins、scripts）和 `suspicious`（在自然语言内容中匹配 — SKILL.md、references、agent prompts）。Suspicious 发现显示在审计报告的独立 "Needs review" 区域，不计入评分和退出码。仅 deterministic 发现会阻塞发布。
+
 如需质量修复，在本流水线中调用 `bundles-forge:optimizing`。审计只呈现发现，不会自动交给优化 — 由**发布**（或你）编排该步骤。
 
 ### 步骤 3：文档同步
@@ -116,6 +123,8 @@ git diff $(git describe --tags --abbrev=0)..HEAD --stat
 # 完整差异供审查
 git diff $(git describe --tags --abbrev=0)..HEAD
 ```
+
+如果没有历史标签，使用 `git log --oneline` 确定变更范围。
 
 关注：
 
@@ -151,17 +160,16 @@ python scripts/bump_version.py <new-version>
 **CHANGELOG.md** — 使用 [Keep a Changelog](https://keepachangelog.com/) 格式：
 
 ```markdown
-## [1.6.0] - 2026-04-11
+## [X.Y.Z] - YYYY-MM-DD
 
 ### Added
-- New documentation consistency checker (`check_docs.py`)
-- Enhanced releasing pipeline with 8-step verification
+- New skill: `bundles-forge:authoring` for skill authoring guidance
 
 ### Changed
-- Releasing skill now requires clean git status before starting
+- Improved descriptions for better triggering accuracy
 
 ### Fixed
-- Cross-reference validation now excludes CHANGELOG.md historical entries
+- Version drift in Cursor manifest
 ```
 
 **验证清单：**
@@ -212,6 +220,22 @@ gh release create v<version> --title "v<version>" --notes-file CHANGELOG-EXCERPT
 
 ---
 
+## 分发策略
+
+根据目标受众选择用户安装插件的方式：
+
+| 策略 | 适用场景 | 方式 |
+|------|---------|------|
+| Marketplace（Claude Code） | 公开分发，覆盖面最广 | `claude plugin publish` — 用户通过 `claude plugin install` 安装 |
+| Project scope | 通过 git 共享的团队工具 | 使用 `--scope project` 安装 — 配置提交到 `.claude/settings.json` |
+| Local scope | 个人项目专用插件 | 使用 `--scope local` 安装 — 被 gitignore，仅限开发者本地 |
+| Git-based（Codex、OpenCode、Gemini） | 无 marketplace 的平台 | 用户 clone 仓库并按平台文档安装 |
+| Development mode | 发布前迭代 | `claude --plugin-dir .` — 加载当前目录，无缓存 |
+
+Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插件元数据（包括在 `.version-bump.json` 中跟踪的 `plugins.0.version` 条目）。开发迭代时使用 `--plugin-dir .` 绕过缓存 — 更改立即生效，无需升级版本号。
+
+---
+
 ## 热修复发布
 
 对于计划发布之间的紧急修复：
@@ -253,6 +277,14 @@ gh release create v<version> --title "v<version>" --notes-file CHANGELOG-EXCERPT
 | `gh release create` 失败 | `gh` CLI 未安装或未认证 | 通过 `gh auth login` 安装或在 GitHub 网页 UI 手动创建 |
 | CHANGELOG 格式错误 | 缺少日期、版本错误、类别无效 | 严格遵循 Keep a Changelog 格式 |
 | 从错误分支发布 | 功能分支而非 main | 先合并到 main，或与用户确认分支发布是有意的 |
+| 未运行审计就发布 | 跳过流水线步骤 — "只是个小改动" | 始终运行完整流水线；漂移往往发生在小改动中 |
+| 推送了标签但未创建 GitHub Release | 只执行了 `git push --tags` | 使用 `gh release create` — 标签出现在 `/tags` 但不出现在 `/releases` |
+| 修复问题前就升级版本 | 流水线顺序错误 | 先修复再升级 — 避免发布已知有问题的版本 |
+| CHANGELOG 未更新 | 跳过了步骤 5 | 用户需要知道发生了什么变更，尤其是破坏性变更 |
+| 修复后出现新漂移 | 修复引入了新的不一致 | 在步骤 6 发布前重新运行所有检查 |
+| `marketplace.json` 版本过期 | 未在 `.version-bump.json` 中跟踪 | 添加 `plugins.0.version` 字段路径的条目 |
+| 手动编辑清单中的版本号 | 直接编辑 JSON 而未使用脚本 | 始终使用 `bump_version.py` — 它会运行升级后审计 |
+| 意外从非 main 分支发布 | 误选了功能分支 | 先合并到 main，或确认分支发布是有意的 |
 
 ---
 

@@ -39,6 +39,9 @@ The **releasing** skill is the **release pipeline orchestrator** in the hub-and-
 | Breaking changes to skill behavior or structure | **Major** (X.0.0) | Renamed skills, changed workflow chain, removed skills |
 | New skills, new platform support, significant improvements | **Minor** (0.X.0) | Added a skill, added Gemini support, new agent |
 | Bug fixes, description improvements, doc updates | **Patch** (0.0.X) | Fixed description, updated README, typo fixes |
+| Testing a major release before stabilizing | **Pre-release** (X.Y.Z-beta.N) | `2.0.0-beta.1`, `2.0.0-rc.1` |
+
+The bump script accepts any valid semver string — pre-release versions work the same as stable ones across all manifests.
 
 ---
 
@@ -51,7 +54,7 @@ The **releasing** skill is the **release pipeline orchestrator** in the hub-and-
 git status
 
 # Verify target tag doesn't exist
-git tag -l v1.6.0
+git tag -l v<version>
 
 # Check current branch
 git branch --show-current
@@ -74,6 +77,8 @@ python scripts/bump_version.py --check
 # Documentation consistency (7 checks)
 python scripts/check_docs.py .
 ```
+
+**Plugin validation (Claude Code only):** If running in a Claude Code environment, run `claude plugin validate` (or `/plugin validate` in a session) to verify `plugin.json` schema, skill/agent/command frontmatter, and `hooks.json` validity. On other platforms, the inspector agent covers equivalent structural checks.
 
 **Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `python scripts/audit_project.py .` (automated checks only, no qualitative scoring).
 
@@ -99,6 +104,8 @@ All findings from Step 1 are grouped by severity:
 | **Warning** | Recommend fixing, user decides | Documentation drift, missing table entries |
 | **Info** | Note for future | Undocumented scripts, minor inconsistencies |
 
+**Security scan confidence:** Security findings are classified as `deterministic` (matched in executable code — hooks, plugins, scripts) or `suspicious` (matched in natural-language content — SKILL.md, references, agent prompts). Suspicious findings appear in a separate "Needs review" section of the audit report and are excluded from scoring and exit codes. Only deterministic findings block a release.
+
 For quality fixes, invoke `bundles-forge:optimizing` as part of this pipeline. Auditing only surfaces findings; it does not hand off to optimizing automatically — **releasing** (or you) orchestrates that step.
 
 ### Step 3: Documentation Sync
@@ -116,6 +123,8 @@ git diff $(git describe --tags --abbrev=0)..HEAD --stat
 # Full diff for review
 git diff $(git describe --tags --abbrev=0)..HEAD
 ```
+
+If no prior tags exist, use `git log --oneline` to identify the scope of changes.
 
 Look for:
 
@@ -151,17 +160,16 @@ This updates all files declared in `.version-bump.json` and runs a post-bump aud
 **CHANGELOG.md** — Use [Keep a Changelog](https://keepachangelog.com/) format:
 
 ```markdown
-## [1.6.0] - 2026-04-11
+## [X.Y.Z] - YYYY-MM-DD
 
 ### Added
-- New documentation consistency checker (`check_docs.py`)
-- Enhanced releasing pipeline with 8-step verification
+- New skill: `bundles-forge:authoring` for skill authoring guidance
 
 ### Changed
-- Releasing skill now requires clean git status before starting
+- Improved descriptions for better triggering accuracy
 
 ### Fixed
-- Cross-reference validation now excludes CHANGELOG.md historical entries
+- Version drift in Cursor manifest
 ```
 
 **Validation checklist:**
@@ -212,6 +220,22 @@ Generate `CHANGELOG-EXCERPT.md` from the current version's section in CHANGELOG.
 
 ---
 
+## Distribution Strategy
+
+Choose how users will install the plugin based on the target audience:
+
+| Strategy | Best For | How |
+|----------|----------|-----|
+| Marketplace (Claude Code) | Public distribution, widest reach | `claude plugin publish` — users install via `claude plugin install` |
+| Project scope | Team tooling shared via git | Install with `--scope project` — config committed to `.claude/settings.json` |
+| Local scope | Personal project-specific plugins | Install with `--scope local` — gitignored, per-developer |
+| Git-based (Codex, OpenCode, Gemini) | Platforms without marketplaces | Users clone the repo and follow per-platform install docs |
+| Development mode | Iterating before publishing | `claude --plugin-dir .` — loads current directory, no caching |
+
+For marketplace distribution, ensure `.claude-plugin/marketplace.json` exists with plugin metadata (including a `plugins.0.version` entry tracked in `.version-bump.json`). For development iteration, use `--plugin-dir .` to bypass caching — changes take effect immediately without version bumps.
+
+---
+
 ## Hotfix Releases
 
 For urgent fixes between planned releases:
@@ -253,6 +277,14 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 | `gh release create` fails | `gh` CLI not installed or not authenticated | Install with `gh auth login` or create release manually on GitHub web UI |
 | CHANGELOG has wrong format | Missing date, wrong version, invalid category | Follow Keep a Changelog format strictly |
 | Releasing from wrong branch | Feature branch instead of main | Merge to main first, or confirm with user that branch release is intentional |
+| Released without running audit | Skipped pipeline step — "it's just a small change" | Always run the full pipeline; drift happens in small changes too |
+| Tag pushed but no GitHub Release | Only ran `git push --tags` | Use `gh release create` — tags appear on `/tags` but not `/releases` |
+| Version bumped before fixing issues | Wrong pipeline order | Fix first, bump second — avoid releasing a known-broken version |
+| CHANGELOG not updated | Skipped Step 5 | Users need to know what changed, especially for breaking changes |
+| New drift after fixes | Fix introduced new inconsistency | Re-run all checks in Step 6 before publishing |
+| `marketplace.json` version stale | Not tracked in `.version-bump.json` | Add entry with `plugins.0.version` field path |
+| Manual version edit in manifests | Edited JSON directly instead of using script | Always use `bump_version.py` — it runs a post-bump audit |
+| Release from non-main branch unintentionally | Feature branch selected by mistake | Merge to main first, or confirm that branch release is intentional |
 
 ---
 
