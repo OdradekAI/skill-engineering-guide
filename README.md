@@ -61,7 +61,7 @@ Runs a 10-category quality assessment with security scanning across 7 attack sur
 | **Skill** | Atomic capability unit (`SKILL.md`) — discovered by description, loaded on demand |
 | **Plugin** | Packaging/distribution unit — bundles skills, agents, hooks, and more |
 | **Subagent** | Isolated AI assistant for delegated tasks with its own context window |
-| **Hook** | Shell/HTTP/LLM action that fires automatically on lifecycle events |
+| **Hook** | Shell/HTTP/LLM/Agent action that fires automatically on lifecycle events |
 | **Command** | Slash command entry point (`/audit`) that invokes a skill |
 | **MCP** | Open standard connecting Claude to external tools and data sources |
 
@@ -79,10 +79,11 @@ flowchart LR
     Design["blueprinting"] --> Scaffold["scaffolding"]
     Scaffold --> Write["authoring"]
     Write --> Audit["auditing"]
+    Design -->|"initial audit"| Audit
     Audit -->|issues| Optimize["optimizing"]
+    Optimize -->|"delegate changes"| Write
     Optimize --> Audit
     Audit -->|pass| Release["releasing"]
-    Scaffold -.->|"platform adapt"| Audit
 ```
 
 | Phase | Skill | What It Does |
@@ -145,7 +146,7 @@ Four audit scopes for different levels of granularity — the agent auto-detects
 | Full Project | `/bundles-audit` or `audit_project.py` | 10 categories (structure, manifests, version sync, skill quality, cross-refs, workflow, hooks, testing, docs, security) |
 | Single Skill | `/bundles-audit skills/authoring` or `audit_skill.py` | 4 categories (structure, skill quality, cross-refs, security) |
 | Workflow | Explicit request or `audit_workflow.py` | 3 layers: static structure, semantic interface, behavioral verification (W1-W12) |
-| Security Only | `/bundles-scan` or `scan_security.py` | 7 attack surfaces (skill content, hook scripts, HTTP hooks, CLAUDE_ENV_FILE injection, OpenCode plugins, agent prompts, bundled scripts) |
+| Security Only | `/bundles-scan` or `scan_security.py` | 7 attack surfaces (skill content, hook scripts, HTTP hooks, OpenCode plugins, agent prompts, bundled scripts, MCP configs) |
 
 ### Quick Start (Scripts)
 
@@ -197,12 +198,13 @@ flowchart LR
     CMD_AU --> auditing
     CMD_OP --> optimizing
     CMD_RE --> releasing
-    CMD_SC -->|"security focus"| auditing
+    CMD_SC -->|"security only"| auditing
 
     blueprinting -->|"design approved"| scaffolding
+    blueprinting -->|"initial audit"| auditing
     scaffolding -->|"structure generated"| authoring
-    scaffolding -->|"post-scaffold check"| auditing
     auditing -->|"issues found"| optimizing
+    optimizing -->|"delegate changes"| authoring
     optimizing -->|"verify fixes"| auditing
     releasing -->|"pre-release check"| auditing
     releasing -->|"fix quality"| optimizing
@@ -220,7 +222,9 @@ User runs /bundles-blueprint
   → User approves design document
   → scaffolding: generate project structure, manifests, hooks, scripts
     → inspector agent validates scaffold (if subagents available)
-  → authoring: guide SKILL.md content for each skill
+  → authoring: guide SKILL.md and agents/*.md content
+  → blueprinting: workflow design (cross-references, integration sections)
+  → auditing: initial quality check
 ```
 
 #### `/bundles-scaffold` — Generate or adapt project structure
@@ -233,9 +237,9 @@ User runs /bundles-blueprint
 User runs /bundles-scaffold
   → scaffolding: detect context (new project vs existing project)
   → New project: ask mode preference (intelligent/custom), generate structure
-  → Existing project: detect current platforms, add/remove target platform
-    → Generate adapter files from templates
-    → Update .version-bump.json, hooks, README
+  → Existing project:
+    → Add/remove platform: generate adapter files, update .version-bump.json, hooks, README
+    → Add/remove optional components (MCP servers, CLI executables, LSP, userConfig, output-styles)
     → inspector agent validates changes (if subagents available)
 ```
 
@@ -255,13 +259,12 @@ User runs /bundles-audit
   → Single skill: 4 categories (structure, quality, cross-refs, security)
   → Workflow: 3 layers (static structure, semantic interface, behavioral)
   → Score + report with Critical / Warning / Info findings
-  → Critical issues? → Offer to fix → Re-audit once
-  → Warnings? → Suggest optimizing skill
+  → Report delivered to calling context (user or orchestrating skill) for action
 ```
 
 #### `/bundles-scan` — Security-focused audit
 
-**When to use:** Same as `/bundles-audit` but emphasizes security scanning. Maps to the same `auditing` skill — the 7-surface security scan (SKILL.md content, hook scripts, HTTP hooks, CLAUDE_ENV_FILE injection, OpenCode plugins, agent prompts, bundled scripts) runs as Category 10.
+**When to use:** Quick security-only check. Maps to the same `auditing` skill in security-only mode — runs only Category 10 (the 7-surface security scan: skill content, hook scripts, HTTP hooks, OpenCode plugins, agent prompts, bundled scripts, MCP configs), skipping Categories 1-8.
 
 #### `/bundles-optimize` — Engineering improvements
 
@@ -291,7 +294,8 @@ User runs /bundles-optimize
 
 ```
 User runs /bundles-release
-  → releasing: pre-flight checks
+  → releasing: verify prerequisites (clean working tree, branch check)
+  → Pre-flight checks
     → bump_version.py --check (version drift)
     → auditing (full quality + security)
     → check_docs.py (documentation consistency)

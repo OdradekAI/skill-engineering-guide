@@ -61,7 +61,7 @@ cd your-bundle-plugin-project
 | **Skill** | 原子能力单元（`SKILL.md`）— 通过 description 发现，按需加载 |
 | **Plugin** | 打包分发单元 — 捆绑技能、Agent、钩子等组件 |
 | **Subagent** | 拥有独立上下文窗口的隔离 AI 助手，用于委托任务 |
-| **Hook** | 在生命周期事件上自动触发的 Shell/HTTP/LLM 动作 |
+| **Hook** | 在生命周期事件上自动触发的 Shell/HTTP/LLM/Agent 动作 |
 | **Command** | 斜杠命令入口（`/audit`），调用对应的技能 |
 | **MCP** | 连接 Claude 与外部工具和数据源的开放标准 |
 
@@ -79,10 +79,11 @@ flowchart LR
     Design["blueprinting"] --> Scaffold["scaffolding"]
     Scaffold --> Write["authoring"]
     Write --> Audit["auditing"]
+    Design -->|"初始审计"| Audit
     Audit -->|问题| Optimize["optimizing"]
+    Optimize -->|"委派变更"| Write
     Optimize --> Audit
     Audit -->|通过| Release["releasing"]
-    Scaffold -.->|"平台适配"| Audit
 ```
 
 | 阶段 | 技能 | 作用 |
@@ -145,7 +146,7 @@ flowchart LR
 | 完整项目 | `/bundles-audit` 或 `audit_project.py` | 10 大类（结构、清单、版本同步、技能质量、交叉引用、工作流、钩子、测试、文档、安全） |
 | 单个技能 | `/bundles-audit skills/authoring` 或 `audit_skill.py` | 4 类（结构、技能质量、交叉引用、安全） |
 | 工作流 | 显式请求 或 `audit_workflow.py` | 3 层：静态结构、语义接口、行为验证（W1-W12） |
-| 仅安全扫描 | `/bundles-scan` 或 `scan_security.py` | 7 大攻击面（技能内容、Hook 脚本、HTTP hooks、CLAUDE_ENV_FILE 注入、OpenCode 插件、Agent 提示词、打包脚本） |
+| 仅安全扫描 | `/bundles-scan` 或 `scan_security.py` | 7 大攻击面（技能内容、Hook 脚本、HTTP hooks、OpenCode 插件、Agent 提示词、打包脚本、MCP 配置） |
 
 ### 快速开始（脚本）
 
@@ -197,12 +198,13 @@ flowchart LR
     CMD_AU --> auditing
     CMD_OP --> optimizing
     CMD_RE --> releasing
-    CMD_SC -->|"安全侧重"| auditing
+    CMD_SC -->|"仅安全扫描"| auditing
 
     blueprinting -->|"设计批准后"| scaffolding
+    blueprinting -->|"初始审计"| auditing
     scaffolding -->|"结构生成后"| authoring
-    scaffolding -->|"脚手架后检查"| auditing
     auditing -->|"发现问题"| optimizing
+    optimizing -->|"委派变更"| authoring
     optimizing -->|"验证修复"| auditing
     releasing -->|"发布前检查"| auditing
     releasing -->|"修复质量"| optimizing
@@ -220,7 +222,9 @@ flowchart LR
   → 用户批准设计文档
   → scaffolding：生成项目结构、清单、钩子、脚本
     → inspector agent 验证脚手架（如子代理可用）
-  → authoring：指导每个 skill 的 SKILL.md 编写
+  → authoring：指导 SKILL.md 和 agents/*.md 内容编写
+  → blueprinting：工作流设计（交叉引用、集成章节）
+  → auditing：初始质量检查
 ```
 
 #### `/bundles-scaffold` — 生成或适配项目结构
@@ -233,9 +237,9 @@ flowchart LR
 用户执行 /bundles-scaffold
   → scaffolding：检测上下文（新项目 vs 现有项目）
   → 新项目：询问模式偏好（intelligent/custom），生成结构
-  → 现有项目：检测当前平台，添加/移除目标平台
-    → 从模板生成适配器文件
-    → 更新 .version-bump.json、钩子、README
+  → 现有项目：
+    → 添加/移除平台：生成适配器文件、更新 .version-bump.json、钩子、README
+    → 添加/移除可选组件（MCP 服务器、CLI 可执行文件、LSP、userConfig、output-styles）
     → inspector agent 验证变更（如子代理可用）
 ```
 
@@ -255,13 +259,12 @@ flowchart LR
   → 单个技能：4 类检查（结构、质量、交叉引用、安全）
   → 工作流：3 层检查（静态结构、语义接口、行为验证）
   → 评分 + 报告（严重 / 警告 / 信息）
-  → 发现严重问题？ → 提供修复 → 重审一次
-  → 发现警告？ → 建议使用 optimizing 技能
+  → 报告交付给调用方（用户或编排技能）决定后续操作
 ```
 
 #### `/bundles-scan` — 安全侧重审计
 
-**适用场景：** 与 `/bundles-audit` 相同但强调安全扫描。映射到同一个 `auditing` 技能 — 7 大攻击面安全扫描（SKILL.md 内容、Hook 脚本、HTTP hooks、CLAUDE_ENV_FILE 注入、OpenCode 插件、Agent 提示词、打包脚本）作为第 10 类检查执行。
+**适用场景：** 快速安全扫描。映射到同一个 `auditing` 技能的 security-only 模式 — 仅运行第 10 类检查（7 大攻击面安全扫描：技能内容、Hook 脚本、HTTP hooks、OpenCode 插件、Agent 提示词、打包脚本、MCP 配置），跳过第 1-8 类。
 
 #### `/bundles-optimize` — 工程改进
 
@@ -290,7 +293,8 @@ flowchart LR
 
 ```
 用户执行 /bundles-release
-  → releasing：预检
+  → releasing：验证前置条件（工作树干净、分支检查）
+  → 预检
     → bump_version.py --check（版本漂移检查）
     → auditing（完整质量 + 安全审计）
     → check_docs.py（文档一致性检查）
