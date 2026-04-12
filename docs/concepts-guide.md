@@ -26,6 +26,8 @@ graph TB
         MCPServer["MCP Server"]
         LSPServer["LSP Server"]
         Command["Command"]
+        Bin["bin/ Executables"]
+        SettingsFile["settings.json"]
     end
 
     Marketplace -->|hosts| Plugin
@@ -35,6 +37,8 @@ graph TB
     Plugin -->|bundles| MCPServer
     Plugin -->|bundles| LSPServer
     Plugin -->|bundles| Command
+    Plugin -->|bundles| Bin
+    Plugin -->|bundles| SettingsFile
 
     Skill -->|"runs in via context:fork"| Subagent
     Subagent -->|"preloads via skills field"| Skill
@@ -52,7 +56,9 @@ graph TB
 
 **[Official docs](https://code.claude.com/docs/en/skills)** — The atomic capability unit.
 
-A `SKILL.md` file with YAML frontmatter (`name`, `description`, `allowed-tools`, etc.) that the agent discovers by its `description` and loads on demand. Skills can run inline in the main conversation or in an isolated subagent via `context: fork`. Skills chain to each other through prose instructions, not code APIs.
+A `SKILL.md` file with YAML frontmatter that the agent discovers by its `description` and loads on demand. Key frontmatter fields include `name`, `description`, `allowed-tools`, `model`, `effort`, `context`, `agent`, `hooks`, `paths`, `user-invocable`, and `disable-model-invocation`. Skills can run inline in the main conversation or in an isolated subagent via `context: fork` (optionally specifying which `agent` type to use). Skills chain to each other through prose instructions, not code APIs.
+
+Skills support string substitutions (`$ARGUMENTS`, `$ARGUMENTS[N]`, `${CLAUDE_SKILL_DIR}`) and bash injection (`` !`command` ``) for dynamic context — shell commands execute before the skill content reaches the agent, and their output replaces the placeholder. Once invoked, a skill's content persists in the conversation until auto-compaction summarizes it.
 
 **Example file:** `.claude/skills/auditing/SKILL.md`
 
@@ -60,7 +66,7 @@ A `SKILL.md` file with YAML frontmatter (`name`, `description`, `allowed-tools`,
 ---
 name: auditing
 description: "Use when the user wants to audit a bundle-plugin project for quality and security issues."
-allowed-tools: Read, Grep, Glob, Shell
+allowed-tools: Read Grep Glob Bash
 ---
 ```
 
@@ -70,14 +76,14 @@ allowed-tools: Read, Grep, Glob, Shell
 
 **[Official docs](https://code.claude.com/docs/en/plugins)** — The packaging and distribution unit.
 
-A directory containing `.claude-plugin/plugin.json` (manifest) plus any combination of skills, agents, hooks, MCP servers, LSP servers, commands, and output styles. Plugins namespace their components (`/plugin-name:skill-name`) to avoid conflicts. Distributed via marketplaces.
+A directory containing `.claude-plugin/plugin.json` (manifest) plus any combination of skills, agents, hooks, MCP servers, LSP servers, commands, output styles, `bin/` executables (added to the Shell tool's PATH while the plugin is enabled), and a root-level `settings.json` for default configuration (currently supports the `agent` key to activate a custom subagent as the main thread). Plugins namespace their components (`/plugin-name:skill-name`) to avoid conflicts. Distributed via marketplaces.
 
 **Example file:** `.claude-plugin/plugin.json`
 
 ```json
 {
   "name": "bundles-forge",
-  "version": "1.5.3",
+  "version": "1.6.2",
   "description": "Bundle-plugin engineering toolkit"
 }
 ```
@@ -88,19 +94,23 @@ A directory containing `.claude-plugin/plugin.json` (manifest) plus any combinat
 
 **[Official docs](https://code.claude.com/docs/en/sub-agents)** — A specialized AI assistant running in its own context window.
 
-Subagents have a custom system prompt, tool restrictions, and model selection. The main conversation delegates tasks to a subagent and receives only a summary back. Built-in subagents include Explore (read-only, fast), Plan (research for planning), and general-purpose (full tools). Custom subagents are defined as Markdown files in `agents/`.
+Subagents have a custom system prompt, tool restrictions, model selection, permission modes, scoped hooks, and scoped MCP servers. The main conversation delegates tasks to a subagent and receives only a summary back. Built-in subagents include Explore (read-only, Haiku), Plan (research for planning), and general-purpose (full tools). Custom subagents are defined as Markdown files in `agents/` with frontmatter fields like `tools`, `disallowedTools`, `model`, `permissionMode`, `memory`, `background`, `isolation`, `skills`, `mcpServers`, `hooks`, and `maxTurns`.
+
+Subagents support persistent memory (`memory` field with `user`/`project`/`local` scopes), background execution, git worktree isolation (`isolation: worktree`), and can be resumed after completion. Users can invoke subagents via `@-mention` or run an entire session as a subagent with the `--agent` flag. For parallel multi-agent workflows across separate sessions, see [Agent Teams](https://code.claude.com/docs/en/agent-teams).
 
 **Example file:** `agents/auditor.md`
 
-> **In bundles-forge:** Three read-only subagents — `inspector`, `auditor`, `evaluator` — are dispatched by skills for isolated validation work.
+> **In bundles-forge:** Three non-editing subagents — `inspector`, `auditor`, `evaluator` — are dispatched by skills for isolated validation work. They have `disallowedTools: Edit` so they cannot modify existing project files, but they do write new report files to `.bundles-forge/`.
 >
 > **Design decision:** Users always interact through skills (slash commands), never by invoking agents directly. Skills orchestrate agent dispatch from the main conversation because they need pre/post logic (scope detection, report merging). Subagents cannot spawn other subagents — all orchestration stays in the skill layer.
 
 ### Hook
 
-**[Official docs](https://code.claude.com/docs/en/hooks)** — A shell command, HTTP endpoint, or LLM prompt that executes automatically at specific lifecycle events.
+**[Official docs](https://code.claude.com/docs/en/hooks)** | **[Hooks guide](https://code.claude.com/docs/en/hooks-guide)** — A shell command, HTTP endpoint, or LLM prompt that executes automatically at specific lifecycle events.
 
-Events include `SessionStart`, `PreToolUse`, `PostToolUse`, `Stop`, `SubagentStart`, `FileChanged`, `CwdChanged`, and 20+ others. Four handler types are available: `command` (shell), `http` (POST to URL), `prompt` (LLM evaluation), and `agent` (agentic verifier with tools). Hooks can block operations, inject context, or trigger side effects. Defined in `hooks/hooks.json`, settings files, or skill/agent frontmatter.
+26 lifecycle events span three cadences: once per session (`SessionStart`, `SessionEnd`), once per turn (`UserPromptSubmit`, `Stop`, `StopFailure`), and on every tool call inside the agentic loop (`PreToolUse`, `PostToolUse`, `PostToolUseFailure`). Additional events cover subagent lifecycle (`SubagentStart`, `SubagentStop`), task management (`TaskCreated`, `TaskCompleted`), permissions (`PermissionRequest`, `PermissionDenied`), file/config changes (`FileChanged`, `CwdChanged`, `ConfigChange`, `InstructionsLoaded`), context management (`PreCompact`, `PostCompact`), worktrees (`WorktreeCreate`, `WorktreeRemove`), MCP elicitation (`Elicitation`, `ElicitationResult`), agent teams (`TeammateIdle`), and notifications (`Notification`).
+
+Four handler types are available: `command` (shell), `http` (POST to URL), `prompt` (LLM evaluation), and `agent` (agentic verifier with tools). Matcher groups filter events by tool name or regex, and an optional `if` field provides fine-grained conditional matching (e.g., `"if": "Bash(rm *)"` to match only specific commands). Hooks can block operations, inject context, or trigger side effects. Defined in `hooks/hooks.json`, settings files, or skill/agent frontmatter.
 
 **Example file:** `hooks/hooks.json`
 
@@ -127,7 +137,7 @@ Events include `SessionStart`, `PreToolUse`, `PostToolUse`, `Stop`, `SubagentSta
 
 **[Official docs](https://code.claude.com/docs/en/mcp)** — An open standard for connecting Claude to external tools and data sources.
 
-MCP servers provide tools, resources, and prompts. They are configured via `.mcp.json` and can be bundled inside plugins to start automatically. Common use cases include databases, APIs, and issue trackers.
+MCP servers provide tools, resources, and prompts via four transport types: `stdio`, `http`, `sse`, and `ws`. They are configured via `.mcp.json` and can be bundled inside plugins to start automatically. MCP servers can also be scoped to individual subagents via the `mcpServers` frontmatter field — the server connects when the subagent starts and disconnects when it finishes, keeping its tools out of the main conversation's context. Common use cases include databases, APIs, and issue trackers.
 
 Not every external integration needs MCP — stateless, single-shot tools are better served by CLI executables in `bin/`. The `scaffolding` skill's `references/external-integration.md` provides a decision tree for choosing between CLI and MCP, covering both Claude Code and Cursor platforms.
 
@@ -160,6 +170,22 @@ Supports GitHub repos, Git URLs, local paths, and remote URLs. The official Anth
 Provides diagnostics after edits, go-to-definition, find-references, and hover information. Configured via `.lsp.json` in the plugin.
 
 > **In bundles-forge:** Not used — the toolkit focuses on skill/plugin engineering rather than language-specific code intelligence.
+
+### bin/ Directory
+
+**[Official docs](https://code.claude.com/docs/en/plugins-reference#plugin-directory-structure)** — Plugin executables added to the Bash tool's `PATH` while the plugin is enabled.
+
+Useful for shipping CLI helpers, formatters, or validators that skills and hooks can call without absolute paths.
+
+> **In bundles-forge:** Not used — the toolkit relies on Python scripts in `scripts/` and inline shell commands.
+
+### Plugin Settings (settings.json)
+
+**[Official docs](https://code.claude.com/docs/en/plugins-reference#plugin-directory-structure)** — Default settings applied when the plugin is enabled.
+
+A `settings.json` at the plugin root. Currently only the `agent` key is supported, which activates one of the plugin's custom subagents as the main thread (applying its system prompt, tool restrictions, and model).
+
+> **In bundles-forge:** Not used — skills are invoked on demand, not through a session-wide default agent.
 
 ### Output Style
 
@@ -204,7 +230,7 @@ Concepts in the plugin ecosystem can be confusing at first. This section clarifi
 | **Triggered by** | Lifecycle events (automatic) | Explicit dispatch from a skill or the agent |
 | **Execution model** | Shell command / HTTP call / LLM prompt | Full AI agent with its own context window |
 | **Duration** | Short — runs and returns | Can be long — performs multi-step reasoning |
-| **Can reason?** | Only if `type: prompt` | Yes — it's a full AI agent |
+| **Can reason?** | If `type: prompt` or `type: agent` | Yes — it's a full AI agent |
 | **Output** | stdout/stderr injected into context | Summary message returned to parent |
 
 **Key insight:** Hooks are reactive automation (fire-and-forget on events), while subagents are delegated intelligence (given a task, reason through it, report back).
@@ -236,13 +262,13 @@ This is not a limitation — it's the fundamental architecture of the plugin eco
 - **Platform portable** — the same dispatch works across Claude Code, Cursor, Codex, etc., each using its own skill-loading mechanism
 - **Human readable** — anyone can read a SKILL.md and understand the full workflow without tracing code
 
-### Why are subagents read-only?
+### Why are subagents non-editing?
 
-The three bundles-forge subagents (`inspector`, `auditor`, `evaluator`) all have `disallowedTools: Edit`. This is deliberate:
+The three bundles-forge subagents (`inspector`, `auditor`, `evaluator`) all have `disallowedTools: Edit`. They can write new report files to `.bundles-forge/`, but they cannot modify any existing project file. This is deliberate:
 
 - **Separation of concerns** — agents assess, skills act. An auditor that can fix what it finds would conflate the roles.
-- **Trust boundary** — audit reports should be objective. If the auditor could modify files, its findings could be questioned ("did it just pass because it silently fixed the issue?").
-- **Predictability** — users invoke `/bundles-audit` expecting a report, not surprise file changes.
+- **Trust boundary** — audit reports should be objective. If the auditor could modify project files, its findings could be questioned ("did it just pass because it silently fixed the issue?").
+- **Predictability** — users invoke `/bundles-audit` expecting a report, not surprise changes to their code.
 
 The skill or user that dispatches the agent is responsible for acting on the report — offering to fix issues, re-running the audit, or invoking the appropriate orchestrator.
 
@@ -254,14 +280,16 @@ Subagents can't spawn other subagents. If users invoked agents directly:
 - There would be no pre-processing (scope detection, target path resolution)
 - There would be no post-processing (report merging, re-audit offers, workflow routing)
 
-Skills handle the interaction lifecycle: detect what the user wants → dispatch the right agent → collect results → present findings → offer next steps. Within skills, **orchestrators** (`blueprinting`, `optimizing`, `releasing`) manage multi-step pipelines, while **executors** (`scaffolding`, `authoring`, `auditing`) perform focused tasks. Subagents are **diagnostic tools** — they do one read-only job and return a report.
+Skills handle the interaction lifecycle: detect what the user wants → dispatch the right agent → collect results → present findings → offer next steps. Within skills, **orchestrators** (`blueprinting`, `optimizing`, `releasing`) manage multi-step pipelines, while **executors** (`scaffolding`, `authoring`, `auditing`) perform focused tasks. Subagents are **diagnostic tools** — they do one non-editing job (writing reports to `.bundles-forge/`, never modifying existing files) and return a summary.
+
+**Concrete example — two-phase workflow audit:** The `auditing` skill needs both the `auditor` (static checks W1-W10) and the `evaluator` (behavioral verification W11-W12). Since subagents cannot spawn other subagents, the `auditing` skill dispatches them sequentially from the main conversation: Phase 1 sends the `auditor`, waits for its report, then Phase 2 sends the `evaluator` with context from Phase 1. This two-phase orchestration is only possible because a skill — not a subagent — owns the workflow.
 
 ### Why does session-start inject the full skill inventory?
 
 The `session-start` hook reads `using-bundles-forge/SKILL.md` and injects it into the agent's context at the start of every session. An alternative would be lazy loading — only load skills when needed. But:
 
 - **Routing accuracy** — the agent needs to know *all* available skills to match user intent correctly. Without the full inventory, it couldn't route to the appropriate orchestrator or executor.
-- **Cost is low** — the bootstrap skill is compact (~2KB of context). The per-skill SKILL.md files are only loaded when actually invoked.
+- **Cost is low** — the bootstrap skill is compact (~6KB of context). The per-skill SKILL.md files are only loaded when actually invoked.
 - **Fail-safe** — if the hook fails, the agent still works (users can invoke skills manually). If lazy loading failed, the agent would be blind to all skills.
 
 ---
@@ -303,7 +331,8 @@ flowchart LR
 | Skills | [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills) |
 | Plugins | [code.claude.com/docs/en/plugins](https://code.claude.com/docs/en/plugins) |
 | Subagents | [code.claude.com/docs/en/sub-agents](https://code.claude.com/docs/en/sub-agents) |
-| Hooks | [code.claude.com/docs/en/hooks](https://code.claude.com/docs/en/hooks) |
+| Hooks Reference | [code.claude.com/docs/en/hooks](https://code.claude.com/docs/en/hooks) |
+| Hooks Guide | [code.claude.com/docs/en/hooks-guide](https://code.claude.com/docs/en/hooks-guide) |
 | MCP | [code.claude.com/docs/en/mcp](https://code.claude.com/docs/en/mcp) |
 | Plugin Reference | [code.claude.com/docs/en/plugins-reference](https://code.claude.com/docs/en/plugins-reference) |
 | Discover Plugins | [code.claude.com/docs/en/discover-plugins](https://code.claude.com/docs/en/discover-plugins) |
