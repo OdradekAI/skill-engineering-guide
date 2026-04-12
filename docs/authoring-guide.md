@@ -1,0 +1,239 @@
+# Authoring Guide
+
+[中文](authoring-guide.zh.md)
+
+User-oriented guide to writing, completing, improving, and adapting SKILL.md and agent definitions in a bundle-plugin with Bundles Forge. Covers path selection, writing conventions, agent authoring, validation, and common pitfalls.
+
+## Overview
+
+Authoring handles the content layer of a bundle-plugin: writing SKILL.md files, agent definitions (`agents/*.md`), and supporting resources (`references/`). It is an **executor** in the execution layer — a single-responsibility worker for content creation and improvement. Orchestrators (`blueprinting`, `optimizing`) dispatch it as part of a pipeline, or you can invoke it directly for standalone content work.
+
+**Why it matters:** A well-authored skill is the difference between agents that consistently find, load, and follow your instructions — and ones that get ignored or misinterpreted. The description determines discoverability; the body determines execution quality.
+
+> **Canonical source:** The full execution protocol (entry detection, path steps, validation checklist) lives in `skills/authoring/SKILL.md`. This guide helps you decide *which path applies* and *what to expect* — the skill itself handles execution.
+
+---
+
+## Choosing a Path
+
+Authoring supports four paths. The right one depends on your starting point:
+
+| Context | Path | When to Use |
+|---------|------|-------------|
+| Skill inventory from blueprinting, or writing from scratch | **Path 1: New Content** | You need a brand-new SKILL.md or agent definition |
+| External/existing skill to bring into a project | **Path 2: Integrate Content** | Adapting a third-party or standalone skill to match project conventions |
+| Scaffolded directories with empty stubs | **Path 3: Complete Content** | Filling in SKILL.md files that scaffolding created but left mostly blank |
+| Existing in-project skill needing improvement | **Path 4: Improve Content** | Rewriting descriptions, reducing tokens, fixing structure, or applying optimization specs |
+
+### Decision Flowchart
+
+```
+Are you coming from blueprinting with a skill inventory?
+  ├─ Yes → Path 1: New Content (write all skills + agents)
+  └─ No  → Does a SKILL.md already exist?
+            ├─ No  → Is there a scaffolded stub directory?
+            │         ├─ Yes → Path 3: Complete Content
+            │         └─ No  → Path 1: New Content
+            ├─ Yes, from outside this project → Path 2: Integrate Content
+            └─ Yes, in this project → Path 4: Improve Content
+```
+
+---
+
+## Path 1: New Content
+
+Best for: writing skills or agent definitions from scratch, either as part of a blueprinting pipeline or standalone.
+
+**What you provide:** A description of what the skill should do — its purpose, triggering scenarios, expected inputs/outputs, and relationship to other skills.
+
+**What you get:** A complete SKILL.md with frontmatter, description, execution flow, common mistakes, and Integration section — all following the project's conventions (or default conventions if standalone).
+
+**Key steps the agent follows:**
+1. Gathers requirements from your description or the blueprinting skill inventory
+2. Reads existing project skills (if any) to match conventions
+3. Writes frontmatter with a "Use when..." description under 250 characters
+4. Writes the full body: Overview, process steps, Common Mistakes, Inputs/Outputs/Integration
+5. Evaluates token budget — extracts to `references/` if over 300 lines
+6. Runs `lint_skills.py` validation
+
+**For agent definitions:** The same path applies, but the agent follows conventions from `references/agent-authoring-guide.md` instead — different frontmatter fields (`maxTurns`, `disallowedTools`), report-oriented body, and `.bundles-forge/` output format.
+
+---
+
+## Path 2: Integrate Content
+
+Best for: adapting an external or third-party skill to fit your project's conventions and workflow graph.
+
+**What you provide:** The skill to integrate (a file path, URL, or pasted content) and optionally which project to integrate it into.
+
+**What you get:** The skill rewritten to match your project's description style, section structure, cross-reference format, and Integration wiring.
+
+**Key steps the agent follows:**
+1. Reads the incoming skill and your project's existing conventions
+2. Rewrites frontmatter (description style, name convention)
+3. Restructures body to match project patterns
+4. Wires the Integration section with cross-references to existing skills
+5. Evaluates token budget
+6. Runs validation
+
+**When to use this vs Path 4:** Use Path 2 when the skill comes from *outside* the project. Use Path 4 when improving a skill that's already *inside* the project.
+
+---
+
+## Path 3: Complete Content
+
+Best for: filling in scaffolded stub directories that have the right structure but minimal content.
+
+**What you provide:** A scaffolded project (from `bundles-forge:scaffolding`) with skill directories containing near-empty SKILL.md files.
+
+**What you get:** Fully authored SKILL.md files for each stub, following the project's conventions and the design document's intended purpose for each skill.
+
+**Key steps the agent follows:**
+1. Reads scaffold structure to identify stubs (< 10 non-empty lines)
+2. Matches the style of already-completed skills in the project
+3. Writes full content for each stub
+4. Creates supporting resources (`references/`) if needed
+5. Runs validation
+
+---
+
+## Path 4: Improve Content
+
+Best for: targeted improvements to existing in-project skills based on user feedback or optimization specs from `bundles-forge:optimizing`.
+
+**What you provide:** The skill to improve and either a specific request ("rewrite the description") or an `optimization-spec` from the optimizing skill.
+
+**What you get:** Targeted changes that preserve what works and fix what doesn't — not a full rewrite.
+
+**Common improvement targets:**
+- Description not triggering reliably → rewrite following description rules
+- Token budget exceeded → extract heavy sections to `references/`
+- Missing sections → add Overview, Common Mistakes, Inputs/Outputs
+- Instruction style issues → reframe directives as reasoning, add examples
+
+**Key steps the agent follows:**
+1. Reads and understands the existing content
+2. Identifies specific improvement targets
+3. Makes targeted changes (preserves working content)
+4. Verifies Integration section still resolves
+5. Runs validation
+
+---
+
+## Writing Conventions at a Glance
+
+These are the key conventions the authoring skill enforces. For the full reference, see `skills/authoring/references/skill-writing-guide.md`.
+
+### Description Rules
+
+- Start with "Use when..." — describe triggering conditions, not workflow steps
+- Stay under 250 characters
+- Be pushy — list related scenarios, edge cases, alternative phrasings
+- Scope appropriately (e.g., "bundle-plugins" not just "any project")
+
+### Body Structure
+
+A well-structured SKILL.md follows this pattern:
+
+1. **Frontmatter** — `name`, `description`, optional fields (`allowed-tools`, etc.)
+2. **Overview** — 1-3 sentences: what the skill does, core principle, skill type
+3. **Process** — step-by-step execution flow in imperative form
+4. **Common Mistakes** — table of pitfalls and fixes (at least 3 entries)
+5. **Inputs / Outputs** — artifact IDs with descriptions
+6. **Integration** — Called by / Calls / Pairs with
+
+### Token Efficiency
+
+- Keep SKILL.md body under 300 lines
+- Extract heavy reference content to `references/` subdirectory
+- Use progressive disclosure: keep the main file scannable, details in references
+
+### Instruction Style
+
+- Use imperative form ("Read the file", not "You should read the file")
+- Explain *why*, not just *what* — understanding beats compliance
+- Include at least one concrete example per key instruction
+- Avoid piling on MUST/ALWAYS/NEVER without reasoning
+
+---
+
+## Agent Authoring
+
+When authoring agent definitions (`agents/*.md`), the same four paths apply, but with different conventions:
+
+| Aspect | SKILL.md | agents/*.md |
+|--------|----------|-------------|
+| Frontmatter | `name`, `description` | `name`, `description`, `maxTurns`, `disallowedTools` |
+| Body | Execution flow for interactive use | Execution protocol for autonomous inspection |
+| Output | Direct file changes or guidance | Reports to `.bundles-forge/` |
+| Can chain | Yes (Calls other skills) | No (subagents cannot invoke skills) |
+
+For the full agent authoring reference, see `skills/authoring/references/agent-authoring-guide.md`.
+
+---
+
+## Validation
+
+After authoring, the skill always runs `python scripts/lint_skills.py` to validate the result.
+
+### What Gets Checked
+
+| Severity | Checks | Action |
+|----------|--------|--------|
+| **Critical** | Q1-Q3: missing frontmatter, name, description | Fix immediately |
+| **Warning** | Q5-Q9, X1-X2: description conventions, token budget, broken references | Fix if straightforward |
+| **Info** | Q10-Q17, X3: missing sections, heavy inline content | Report as suggestions |
+
+For the full check-by-check reference, see `skills/authoring/references/quality-checklist.md`.
+
+---
+
+## Common Mistakes
+
+| Mistake | Why It Happens | Fix |
+|---------|---------------|-----|
+| Description summarizes workflow | Writing for humans, not agents | Describe triggering conditions only — agents shortcut to description |
+| Piling on MUST/ALWAYS/NEVER | Wanting to be thorough | Explain why the rule exists — understanding beats compliance |
+| Putting everything in SKILL.md | Not knowing about `references/` | Extract heavy content when over 300 lines |
+| No examples, only abstract rules | Rushing through authoring | Add at least one concrete example per key instruction |
+| Skipping project conventions | Working in isolation | Always read 2-3 existing skills first when in an established project |
+| Not wiring Integration section | Treating skills as standalone | Every skill needs Called by / Calls / Pairs with for the workflow graph |
+| Forgetting validation | Assuming content is correct | Always run `lint_skills.py` — catches issues before they propagate |
+| Description too narrow | Being too specific | Be pushy — list related scenarios and edge cases |
+| Description too broad | Being too vague | Scope to the right context (e.g., "bundle-plugins" not "any project") |
+
+---
+
+## FAQ
+
+**Q: I have a standalone skill not in any project. Can I still use authoring?**
+
+Yes. Invoke authoring directly — it detects there's no project root and uses default conventions from the writing guide. You'll get a well-structured SKILL.md following best practices.
+
+**Q: What's the difference between authoring and optimizing?**
+
+Authoring is the *content writer* — it creates and improves SKILL.md files. Optimizing is the *orchestrator* — it diagnoses issues, decides what to fix, and delegates content changes to authoring. If you know exactly what to write or fix, use authoring directly. If you need diagnosis first, use optimizing.
+
+**Q: How do I write an agent definition instead of a skill?**
+
+Use the same authoring paths. When the target is `agents/*.md`, the agent automatically switches to agent conventions — different frontmatter fields, report-oriented body, and read-only constraints. See `references/agent-authoring-guide.md` for details.
+
+**Q: My skill is over 300 lines. Is that a problem?**
+
+Not necessarily — orchestrators with complex flows (like `blueprinting` or `releasing`) may legitimately exceed 300 lines. But if your skill has heavy reference content (tables, templates, examples), extract it to `references/` to keep the main file scannable. The lint check (Q12) flags this as info, not a blocker.
+
+**Q: Can I run authoring as part of a pipeline?**
+
+Yes. Blueprinting dispatches authoring as Phase 2 (after scaffolding). Optimizing dispatches authoring for content changes. In both cases, authoring receives context from the orchestrator and returns authored content for the next phase.
+
+---
+
+## Related Skills
+
+| Skill | When to Use Instead |
+|-------|-------------------|
+| `bundles-forge:blueprinting` | You need to *plan* a new project before writing content |
+| `bundles-forge:scaffolding` | You need directory structure generated before filling it with content |
+| `bundles-forge:optimizing` | You need *diagnosis* of what to improve, not just content writing |
+| `bundles-forge:auditing` | To validate authored content for quality and security |
+| `bundles-forge:releasing` | To publish — includes audit, optimization, and version sync |

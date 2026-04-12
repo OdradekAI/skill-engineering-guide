@@ -349,7 +349,9 @@ For marketplace distribution, ensure `.claude-plugin/marketplace.json` exists wi
 
 **Calls:**
 - **bundles-forge:auditing** — pre-release quality and security diagnostics
+  - Artifact: `project-directory` → `project-directory` (direct match — releasing passes the project root for audit)
 - **bundles-forge:optimizing** — orchestrate fixes for quality findings
+  - Artifact: `project-directory` → `audit-report` (indirect — releasing passes audit findings, optimizing consumes them as `audit-report`)
 
 **Pairs with:**
 - **bundles-forge:scaffolding** — version infrastructure setup and platform sync

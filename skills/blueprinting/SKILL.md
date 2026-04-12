@@ -318,5 +318,8 @@ Invoke `bundles-forge:auditing` on the project root for a baseline quality check
 
 **Calls:**
 - **bundles-forge:scaffolding** — Phase 1: generate project structure and platform adapters
+  - Artifact: `design-document` → `design-document` (direct match)
 - **bundles-forge:authoring** — Phase 2: write SKILL.md and agents/*.md content
+  - Artifact: `design-document` → `skill-inventory` (indirect — skill inventory extracted from design document)
 - **bundles-forge:auditing** — Phase 4: initial quality check on the new project
+  - Artifact: `design-document` → `project-directory` (indirect — auditing targets the scaffolded project, not the design document)

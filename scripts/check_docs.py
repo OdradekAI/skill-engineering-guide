@@ -593,11 +593,13 @@ def check_guide_language_sync(root, findings):
         zh_file_links = {l for l in zh_file_links
                          if not l.endswith(".md") or l.endswith(".zh.md")}
 
-        missing_links = en_file_links - zh_file_links
-        missing_links = {l for l in missing_links
-                         if not any(x in l for x in
-                                    ["concepts-guide", "auditing-guide",
-                                     "releasing-guide"])}
+        def _en_to_zh(link):
+            if link.endswith(".md") and not link.endswith(".zh.md"):
+                return link[:-3] + ".zh.md"
+            return link
+
+        en_normalized = {_en_to_zh(l) for l in en_file_links}
+        missing_links = en_normalized - zh_file_links
         if missing_links:
             findings.append(dict(
                 check="D7", severity="info",

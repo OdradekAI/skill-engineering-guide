@@ -391,8 +391,11 @@ After applying changes to the copy, verify with a parallel comparison:
 
 **Calls:**
 - **bundles-forge:authoring** — all content changes (descriptions, token optimization, restructuring, third-party adaptation)
+  - Artifact: `optimized-skill` → `optimization-spec` (indirect — optimizing formulates the spec, authoring receives it as targeted change instructions)
 - **bundles-forge:scaffolding** — Target 5 (platform coverage) for adding new platforms; Target 8 (optional components) for adding MCP/LSP/userConfig/output-styles
+  - Artifact: `optimized-skill` → `project-directory` (indirect — scaffolding operates on the project directory, not the optimization output)
 - **bundles-forge:auditing** — post-change verification (one pass, no loops)
+  - Artifact: `optimized-skill` → `project-directory` (indirect — auditing targets the project containing the optimized skill)
 
 **Pairs with:**
 - **bundles-forge:releasing** — after optimization, versions may need sync

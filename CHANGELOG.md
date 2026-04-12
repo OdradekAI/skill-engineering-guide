@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.1] - 2026-04-12
+
+### Added
+
+- **`docs/authoring-guide.md`** and **`docs/authoring-guide.zh.md`** — user-oriented bilingual guide for the authoring skill covering path selection, writing conventions, agent authoring, validation, and common pitfalls.
+- **`examples/bundles-forge-v1.6.0-audit.zh.md`** — v1.6.0 audit report (Chinese).
+- **Artifact mapping annotations** in `blueprinting`, `optimizing`, and `releasing` Integration sections — documents how artifact IDs translate between orchestrators and executors (direct match vs indirect mapping).
+
+### Changed
+
+- **`scripts/check_docs.py` D7 check** — replaced hardcoded guide-name exceptions with proper EN→ZH link normalization (`*.md` → `*.zh.md`) for bilingual link comparison.
+
+### Removed
+
+- **`examples/bundles-forge-v1.4.3-audit.zh.md`** — superseded by v1.6.0 audit report.
+
 ## [1.6.0] - 2026-04-12
 
 ### Removed
