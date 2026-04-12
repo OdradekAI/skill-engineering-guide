@@ -53,8 +53,9 @@
 2. 读取现有项目技能（如有）以匹配规范
 3. 编写 frontmatter，描述以"Use when..."开头，不超过 250 字符
 4. 编写完整正文：概述、流程步骤、常见错误、Inputs/Outputs/Integration
-5. 评估 token 预算 — 超过 300 行时提取到 `references/`
-6. 运行 `lint_skills.py` 验证
+5. 检查外部依赖 — 如果技能引用了 MCP 工具或 CLI 命令，遵循编写指南中的声明语法和回退模式
+6. 评估 token 预算 — 正文超过 500 行或重内容段超过 100 行时提取到 `references/`
+7. 运行 `lint_skills.py` 验证
 
 **代理定义：** 同样的路径适用，但 Agent 会遵循 `references/agent-authoring-guide.md` 中的规范 — 不同的 frontmatter 字段（`maxTurns`、`disallowedTools`）、面向报告的正文和 `.bundles-forge/` 输出格式。
 
@@ -137,16 +138,22 @@
 
 1. **Frontmatter** — `name`、`description`、可选字段（`allowed-tools` 等）
 2. **Overview** — 1-3 句话：技能做什么、核心原则、技能类型
-3. **Process** — 祈使句式的逐步执行流程
-4. **Common Mistakes** — 陷阱和修复的表格（至少 3 条）
-5. **Inputs / Outputs** — 带描述的 artifact ID
-6. **Integration** — Called by / Calls / Pairs with
+3. **Entry Detection**（多路径时）— 上下文到执行路径的映射表
+4. **Process** — 祈使句式的逐步执行流程
+5. **Common Mistakes** — 陷阱和修复的表格（至少 3 条）
+6. **Inputs / Outputs** — 带描述的 artifact ID
+7. **Integration** — Called by / Calls / Pairs with
 
 ### Token 效率
 
-- SKILL.md 正文保持在 300 行以下
-- 将重内容提取到 `references/` 子目录
-- 使用渐进披露：主文件保持可扫描，细节放在 references 中
+| 目标 | 预算 |
+|------|------|
+| Bootstrap 技能（始终加载） | < 200 行 |
+| 常规技能正文 | < 500 行 |
+| 描述（始终在上下文中） | < 250 字符 |
+| Frontmatter 总量 | < 1024 字符 |
+
+在 300+ 行时，lint（Q12）建议将重内容段提取到 `references/` — 这是软阈值而非硬限制。将参考内容（100+ 行）提取出来以保持主文件可扫描。使用渐进披露：核心指令放在 SKILL.md 中，细节放在 references 中。
 
 ### 指令风格
 
@@ -154,6 +161,17 @@
 - 解释*为什么*，而不仅仅是*做什么* — 理解胜过遵从
 - 每个关键指令至少包含一个具体示例
 - 避免堆砌 MUST/ALWAYS/NEVER 而不解释原因
+
+### 高级特性
+
+编写指南涵盖了多项高级能力。详细说明见 `skills/authoring/references/skill-writing-guide.md`：
+
+- **字符串替换** — 使用 `$ARGUMENTS`、`$0`/`$1`、`${CLAUDE_SKILL_DIR}` 和 `${CLAUDE_SESSION_ID}` 在技能调用时注入动态值
+- **动态上下文注入** — `` !` `` 语法在技能加载前运行 shell 命令；Agent 接收的是命令输出而非命令本身（适用于注入 git 状态、API 响应或环境数据）
+- **技能内容生命周期** — 技能加载一次后持续存在于对话中；上下文满时自动压缩保留每个技能的前 5,000 token。将关键指令前置以提高压缩存活率
+- **Frontmatter Hooks**（仅 Claude Code）— 在 YAML frontmatter 中定义作用于技能调用的生命周期钩子（`PreToolUse`、`Stop` 等）
+- **用户配置**（`userConfig`）— 通过 `${user_config.KEY}` 在技能内容中引用非敏感的插件配置值；敏感值仅限于 MCP/hook/script 环境
+- **外部工具引用** — 通过 `allowed-tools: Bash(...)` 或 `Python(...)` 声明 CLI 工具，通过 `mcp__server__tool` 声明 MCP 工具；当 MCP 服务器可能不可用时包含回退块
 
 ---
 
@@ -163,10 +181,18 @@
 
 | 方面 | SKILL.md | agents/*.md |
 |------|----------|-------------|
-| Frontmatter | `name`、`description` | `name`、`description`、`maxTurns`、`disallowedTools` |
+| Frontmatter | `name`、`description`、可选字段 | `name`、`description`、`model`、`maxTurns`、`disallowedTools`，+ 高级：`effort`、`tools`、`skills`、`memory`、`background`、`isolation` |
 | 正文 | 交互式使用的执行流程 | 自主检查的执行协议 |
 | 输出 | 直接文件修改或指导 | 报告输出到 `.bundles-forge/` |
-| 可链接 | 是（调用其他技能） | 否（子代理不能调用技能） |
+| 可链接 | 是（调用其他技能） | 默认否；可通过 `skills` frontmatter 字段启用 agent-to-skill 委托 |
+
+### 代理类型
+
+| 类型 | 关键 Frontmatter | 用途 |
+|------|-----------------|------|
+| **只读**（默认） | `disallowedTools: Edit` | 检查、审计、报告 — 不能修改文件 |
+| **可写** | 省略 `disallowedTools`，设置 `isolation: "worktree"` | 在隔离的 git worktree 中修改文件以防止冲突 |
+| **带技能委托** | 添加 `skills` 字段 | 代理可调用列出的技能，实现 agent-to-skill 分派 |
 
 完整的代理编写参考见 `skills/authoring/references/agent-authoring-guide.md`。
 
@@ -181,8 +207,8 @@
 | 严重性 | 检查项 | 操作 |
 |--------|--------|------|
 | **Critical** | Q1-Q3：缺少 frontmatter、name、description | 立即修复 |
-| **Warning** | Q5-Q9、X1-X2：描述规范、token 预算、断裂引用 | 可简单修复则修复 |
-| **Info** | Q10-Q17、X3：缺少章节、重内联内容 | 报告为建议 |
+| **Warning** | Q4-Q9、Q14、X1-X3：命名规范、描述规则、token 预算、工具路径、断裂引用 | 可简单修复则修复 |
+| **Info** | Q10-Q13、Q15-Q17、S9：缺少章节、重内联内容、目录名不匹配 | 报告为建议 |
 
 完整的逐项检查参考见 `skills/authoring/references/quality-checklist.md`。
 
@@ -194,7 +220,7 @@
 |------|------|------|
 | 描述总结工作流 | 为人类而非 Agent 编写 | 只描述触发条件 — Agent 会直接读取描述 |
 | 堆砌 MUST/ALWAYS/NEVER | 想要面面俱到 | 解释规则存在的原因 — 理解胜过遵从 |
-| 所有内容塞进 SKILL.md | 不了解 `references/` | 超过 300 行时提取重内容 |
+| 所有内容塞进 SKILL.md | 不了解 `references/` | 将重内容（100+ 行）提取到 `references/`；正文保持在 500 行以下 |
 | 只有抽象规则没有示例 | 匆忙编写 | 每个关键指令至少一个具体示例 |
 | 跳过项目规范 | 孤立工作 | 在已有项目中先读 2-3 个现有技能 |
 | 不接线 Integration 章节 | 把技能当独立体 | 每个技能都需要 Called by / Calls / Pairs with |
@@ -218,9 +244,9 @@ authoring 是*内容编写者* — 创建和改进 SKILL.md 文件。optimizing 
 
 使用相同的 authoring 路径。当目标是 `agents/*.md` 时，Agent 会自动切换到代理规范 — 不同的 frontmatter 字段、面向报告的正文和只读约束。详见 `references/agent-authoring-guide.md`。
 
-**问：我的技能超过 300 行。这有问题吗？**
+**问：我的技能接近行数预算了。这有问题吗？**
 
-不一定 — 具有复杂流程的编排技能（如 `blueprinting` 或 `releasing`）可能合理地超过 300 行。但如果你的技能有大量参考内容（表格、模板、示例），请提取到 `references/` 以保持主文件可扫描。lint 检查（Q12）将此标记为 info 而非阻断。
+硬限制是 500 行（Q9 警告）。在 300+ 行时，lint（Q12）建议提取到 `references/` — 这是软建议而非阻断。具有复杂流程的编排技能（如 `blueprinting` 或 `releasing`）可能合理地更长。但如果你的技能有大量参考内容（表格、模板、示例），请将超过 100 行的章节提取到 `references/` 以保持主文件可扫描。Bootstrap 技能（`using-*`）有更严格的 200 行预算。
 
 **问：可以在流水线中运行 authoring 吗？**
 

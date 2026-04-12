@@ -45,7 +45,7 @@ After normalization, determine the audit scope from the resolved local path:
 
 | Target | How to Detect | Mode |
 |--------|--------------|------|
-| Project root | Has `skills/` directory and `package.json` | **Full audit** — all 10 categories |
+| Project root | Has `skills/` directory | **Full audit** — all 10 categories |
 | Project root + workflow request | User explicitly requests workflow audit, or specifies `--focus-skills` | **Workflow audit** — 3-layer workflow checks (W1-W12) |
 | Single skill directory | Contains `SKILL.md` but no `skills/` subdirectory | **Skill audit** — 4 applicable categories |
 | Single SKILL.md file | Path ends in `SKILL.md` | **Skill audit** — 4 applicable categories |
@@ -121,9 +121,11 @@ Scans 7 attack surfaces. See `references/security-checklist.md` for the full pat
 |--------|-----------|
 | SKILL.md content | High |
 | Hook scripts | High |
+| Hook configs (HTTP hooks) | High |
 | OpenCode plugins | High |
 | Agent prompts | Medium |
 | Bundled scripts | Medium |
+| MCP configs | Medium |
 
 **Third-party skill scanning:** When scanning skills from external sources, clone/download without executing hooks, run the audit, and review critical findings with the user before installation. Never auto-install without scanning.
 

@@ -53,8 +53,9 @@ Best for: writing skills or agent definitions from scratch, either as part of a 
 2. Reads existing project skills (if any) to match conventions
 3. Writes frontmatter with a "Use when..." description under 250 characters
 4. Writes the full body: Overview, process steps, Common Mistakes, Inputs/Outputs/Integration
-5. Evaluates token budget — extracts to `references/` if over 300 lines
-6. Runs `lint_skills.py` validation
+5. Checks external dependencies — if the skill references MCP tools or CLI commands, follows declaration syntax and fallback patterns from the writing guide
+6. Evaluates token budget — extracts to `references/` if body exceeds 500 lines or heavy sections pass 100 lines
+7. Runs `lint_skills.py` validation
 
 **For agent definitions:** The same path applies, but the agent follows conventions from `references/agent-authoring-guide.md` instead — different frontmatter fields (`maxTurns`, `disallowedTools`), report-oriented body, and `.bundles-forge/` output format.
 
@@ -137,16 +138,22 @@ A well-structured SKILL.md follows this pattern:
 
 1. **Frontmatter** — `name`, `description`, optional fields (`allowed-tools`, etc.)
 2. **Overview** — 1-3 sentences: what the skill does, core principle, skill type
-3. **Process** — step-by-step execution flow in imperative form
-4. **Common Mistakes** — table of pitfalls and fixes (at least 3 entries)
-5. **Inputs / Outputs** — artifact IDs with descriptions
-6. **Integration** — Called by / Calls / Pairs with
+3. **Entry Detection** (if multiple paths) — table mapping context to execution path
+4. **Process** — step-by-step execution flow in imperative form
+5. **Common Mistakes** — table of pitfalls and fixes (at least 3 entries)
+6. **Inputs / Outputs** — artifact IDs with descriptions
+7. **Integration** — Called by / Calls / Pairs with
 
 ### Token Efficiency
 
-- Keep SKILL.md body under 300 lines
-- Extract heavy reference content to `references/` subdirectory
-- Use progressive disclosure: keep the main file scannable, details in references
+| Target | Budget |
+|--------|--------|
+| Bootstrap skill (always loaded) | < 200 lines |
+| Regular skill body | < 500 lines |
+| Description (always in context) | < 250 characters |
+| Total frontmatter | < 1024 characters |
+
+At 300+ lines, lint (Q12) suggests extracting heavy sections to `references/` — this is a soft threshold, not a hard limit. Extract reference content (100+ lines) to keep the main file scannable. Use progressive disclosure: core instructions in SKILL.md, details in references.
 
 ### Instruction Style
 
@@ -154,6 +161,17 @@ A well-structured SKILL.md follows this pattern:
 - Explain *why*, not just *what* — understanding beats compliance
 - Include at least one concrete example per key instruction
 - Avoid piling on MUST/ALWAYS/NEVER without reasoning
+
+### Advanced Features
+
+The writing guide covers several advanced capabilities. Each is detailed in `skills/authoring/references/skill-writing-guide.md`:
+
+- **String Substitutions** — use `$ARGUMENTS`, `$0`/`$1`, `${CLAUDE_SKILL_DIR}`, and `${CLAUDE_SESSION_ID}` to inject dynamic values into the skill body at invocation time
+- **Dynamic Context Injection** — the `` !` `` syntax runs shell commands before the skill loads; the agent receives the command output, not the command itself (useful for injecting git state, API responses, or environment data)
+- **Skill Content Lifecycle** — skills load once into conversation and persist; auto-compaction keeps the first 5,000 tokens per skill when context fills up. Front-load critical instructions for compaction survivability
+- **Frontmatter Hooks** (Claude Code only) — define lifecycle hooks (`PreToolUse`, `Stop`, etc.) scoped to a skill's invocation directly in YAML frontmatter
+- **User Configuration** (`userConfig`) — reference non-sensitive plugin config values via `${user_config.KEY}` in skill content; sensitive values are restricted to MCP/hook/script environments only
+- **External Tool References** — declare CLI tools via `allowed-tools: Bash(...)` or `Python(...)`, MCP tools via `mcp__server__tool`; include a fallback block when an MCP server may not be available
 
 ---
 
@@ -163,10 +181,18 @@ When authoring agent definitions (`agents/*.md`), the same four paths apply, but
 
 | Aspect | SKILL.md | agents/*.md |
 |--------|----------|-------------|
-| Frontmatter | `name`, `description` | `name`, `description`, `maxTurns`, `disallowedTools` |
+| Frontmatter | `name`, `description`, optional fields | `name`, `description`, `model`, `maxTurns`, `disallowedTools`, + advanced: `effort`, `tools`, `skills`, `memory`, `background`, `isolation` |
 | Body | Execution flow for interactive use | Execution protocol for autonomous inspection |
 | Output | Direct file changes or guidance | Reports to `.bundles-forge/` |
-| Can chain | Yes (Calls other skills) | No (subagents cannot invoke skills) |
+| Can chain | Yes (Calls other skills) | Default no; enable via `skills` frontmatter field for agent-to-skill delegation |
+
+### Agent Types
+
+| Type | Key Frontmatter | Use Case |
+|------|----------------|----------|
+| **Read-only** (default) | `disallowedTools: Edit` | Inspection, auditing, reporting — cannot modify files |
+| **Writable** | omit `disallowedTools`, set `isolation: "worktree"` | File modifications in an isolated git worktree to prevent conflicts |
+| **With skill delegation** | add `skills` field | Agent can invoke listed skills, enabling agent-to-skill dispatch |
 
 For the full agent authoring reference, see `skills/authoring/references/agent-authoring-guide.md`.
 
@@ -181,8 +207,8 @@ After authoring, the skill always runs `python scripts/lint_skills.py` to valida
 | Severity | Checks | Action |
 |----------|--------|--------|
 | **Critical** | Q1-Q3: missing frontmatter, name, description | Fix immediately |
-| **Warning** | Q5-Q9, X1-X2: description conventions, token budget, broken references | Fix if straightforward |
-| **Info** | Q10-Q17, X3: missing sections, heavy inline content | Report as suggestions |
+| **Warning** | Q4-Q9, Q14, X1-X3: naming conventions, description rules, token budget, tool paths, broken references | Fix if straightforward |
+| **Info** | Q10-Q13, Q15-Q17, S9: missing sections, heavy inline content, directory name mismatch | Report as suggestions |
 
 For the full check-by-check reference, see `skills/authoring/references/quality-checklist.md`.
 
@@ -194,7 +220,7 @@ For the full check-by-check reference, see `skills/authoring/references/quality-
 |---------|---------------|-----|
 | Description summarizes workflow | Writing for humans, not agents | Describe triggering conditions only — agents shortcut to description |
 | Piling on MUST/ALWAYS/NEVER | Wanting to be thorough | Explain why the rule exists — understanding beats compliance |
-| Putting everything in SKILL.md | Not knowing about `references/` | Extract heavy content when over 300 lines |
+| Putting everything in SKILL.md | Not knowing about `references/` | Extract heavy content (100+ lines) to `references/`; keep body under 500 lines |
 | No examples, only abstract rules | Rushing through authoring | Add at least one concrete example per key instruction |
 | Skipping project conventions | Working in isolation | Always read 2-3 existing skills first when in an established project |
 | Not wiring Integration section | Treating skills as standalone | Every skill needs Called by / Calls / Pairs with for the workflow graph |
@@ -218,9 +244,9 @@ Authoring is the *content writer* — it creates and improves SKILL.md files. Op
 
 Use the same authoring paths. When the target is `agents/*.md`, the agent automatically switches to agent conventions — different frontmatter fields, report-oriented body, and read-only constraints. See `references/agent-authoring-guide.md` for details.
 
-**Q: My skill is over 300 lines. Is that a problem?**
+**Q: My skill is approaching the line budget. Is that a problem?**
 
-Not necessarily — orchestrators with complex flows (like `blueprinting` or `releasing`) may legitimately exceed 300 lines. But if your skill has heavy reference content (tables, templates, examples), extract it to `references/` to keep the main file scannable. The lint check (Q12) flags this as info, not a blocker.
+The hard limit is 500 lines (Q9 warning). At 300+ lines, lint (Q12) suggests extracting to `references/` — this is a soft recommendation, not a blocker. Orchestrators with complex flows (like `blueprinting` or `releasing`) may legitimately be longer. But if your skill has heavy reference content (tables, templates, examples), extract sections over 100 lines to `references/` to keep the main file scannable. Bootstrap skills (`using-*`) have a stricter budget of 200 lines.
 
 **Q: Can I run authoring as part of a pipeline?**
 

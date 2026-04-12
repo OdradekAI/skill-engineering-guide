@@ -79,7 +79,7 @@ All scripts accept `--json` for machine-readable output.
 /bundles-audit
 ```
 
-The agent detects the project root (has `skills/` + `package.json`) and runs all 10 categories. If subagents are available, it dispatches the `auditor` agent for automated assessment.
+The agent detects the project root (has `skills/` directory) and runs all 10 categories. If subagents are available, it dispatches the `auditor` agent for automated assessment.
 
 ### Via Script
 
@@ -108,13 +108,13 @@ Then adds its own checks for structure, manifests, version sync, hooks, testing,
 | 7 | Hooks | Medium (2) | Bootstrap injection, platform detection |
 | 8 | Testing | Medium (2) | Test directory, prompts, A/B eval results |
 | 9 | Documentation | Low (1) | README, install docs, CHANGELOG |
-| 10 | Security | High (3) | 7 attack surfaces — skill content, hook scripts, HTTP hooks, CLAUDE_ENV_FILE injection, OpenCode plugins, agent prompts, bundled scripts |
+| 10 | Security | High (3) | 7 attack surfaces — skill content, hook scripts, hook configs (HTTP hooks), OpenCode plugins, agent prompts, bundled scripts, MCP configs |
 
 Total weight = 23. Overall score = `sum(score_i × weight_i) / 23`.
 
 ### Report Template
 
-Full project audits use `skills/auditing/references/report-template.md` — six-layer structure: Decision Brief → Risk Matrix → Findings by Category → Methodology → Appendix.
+Full project audits use `skills/auditing/references/report-template.md` — six-layer structure: Decision Brief → Risk Matrix → Findings by Category → Methodology → Appendix. For annotated report examples, see `skills/auditing/references/report-examples.md`.
 
 ### Checklists
 
@@ -274,15 +274,13 @@ python scripts/scan_security.py --json <project-root>     # JSON output
 |---------|-----------|---------|
 | SKILL.md content | High | Sensitive file access, destructive commands, safety overrides, encoding tricks |
 | Hook scripts | High | Network calls, env-var leakage, system config modification |
-| HTTP hooks | High | Data exfiltration via `type: "http"` hooks sending tool input/output to external URLs |
-| `CLAUDE_ENV_FILE` injection | High | Hook scripts writing to `CLAUDE_ENV_FILE` to inject env vars (including PATH modification) into all subsequent Bash commands |
+| Hook configs (HTTP hooks) | High | Data exfiltration via `type: "http"` hooks sending tool input/output to external URLs |
 | OpenCode plugins | High | Dynamic code execution, network access, message manipulation |
 | Agent prompts | Medium | Privilege escalation, scope expansion, safety overrides |
 | Bundled scripts | Medium | Network calls, system modifications, unsanitized inputs |
+| MCP configs | Medium | Path traversal in plugin.json, userConfig sensitive fields, persistent data in plugin root |
 
-**Enterprise controls:** Administrators can set `allowManagedHooksOnly` in managed policy to disable all user/project/plugin hooks, permitting only organization-approved hooks distributed via `enabledPlugins`.
-
-**Cost awareness:** `prompt` and `agent` hook types invoke LLM calls on every matched event. A `PreToolUse` prompt hook matching all tools can generate significant token costs during intensive sessions.
+> **Platform note:** Claude Code administrators can restrict hooks via `allowManagedHooksOnly` managed policy. Additionally, `prompt` and `agent` hook types invoke LLM calls on every matched event, which may incur significant token costs in intensive sessions.
 
 ### Checklist
 
@@ -311,9 +309,10 @@ Auditing is a **pure diagnostic** scope: it records findings, scores, and go/no-
 ### Script Composition
 
 ```bash
-# Full pipeline: lint → security → full audit
+# Full pipeline: lint → security → docs → full audit
 python scripts/lint_skills.py --json . > lint.json
 python scripts/scan_security.py --json . > security.json
+python scripts/check_docs.py --json . > docs.json
 python scripts/audit_project.py --json . > audit.json
 
 # Single skill in CI

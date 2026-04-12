@@ -141,7 +141,7 @@ MCP servers provide tools, resources, and prompts via four transport types: `std
 
 Not every external integration needs MCP — stateless, single-shot tools are better served by CLI executables in `bin/`. The `scaffolding` skill's `references/external-integration.md` provides a decision tree for choosing between CLI and MCP, covering both Claude Code and Cursor platforms.
 
-> **In bundles-forge:** The toolkit doesn't ship its own MCP server, but the `auditing` skill checks target projects for MCP configuration security issues across 7 attack surfaces (skill content, hook scripts, HTTP hooks, CLAUDE_ENV_FILE injection, OpenCode plugins, agent prompts, and bundled scripts).
+> **In bundles-forge:** The toolkit doesn't ship its own MCP server, but the `auditing` skill checks target projects for MCP configuration security issues across 7 attack surfaces (skill content, hook scripts, hook configs (HTTP hooks), OpenCode plugins, agent prompts, bundled scripts, and MCP configs).
 
 ---
 

@@ -233,7 +233,7 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
     body_lines = len(body.splitlines())
     estimated_tokens = estimate_tokens(body)
     if is_bootstrap and body_lines > 200:
-        findings.append(dict(check="Q13", severity="warning",
+        findings.append(dict(check="Q13", severity="info",
                              message=f"Bootstrap skill body is {body_lines} lines "
                                      f"(~{estimated_tokens} tokens, estimated); "
                                      f"budget is 200 lines"))

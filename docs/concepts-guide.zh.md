@@ -141,7 +141,7 @@ MCP 服务器通过四种传输协议（`stdio`、`http`、`sse`、`ws`）提供
 
 并非所有外部集成都需要 MCP — 无状态的单次执行工具更适合用 `bin/` 中的 CLI 可执行文件。`scaffolding` 技能的 `references/external-integration.md` 提供了 CLI 与 MCP 的选择决策树，覆盖 Claude Code 和 Cursor 双平台。
 
-> **在 bundles-forge 中：** 工具包本身不自带 MCP 服务器，但 `auditing` 技能会检查目标项目的 MCP 配置安全性，覆盖 7 大攻击面（技能内容、Hook 脚本、HTTP hooks、CLAUDE_ENV_FILE 注入、OpenCode 插件、Agent 提示词、打包脚本）。
+> **在 bundles-forge 中：** 工具包本身不自带 MCP 服务器，但 `auditing` 技能会检查目标项目的 MCP 配置安全性，覆盖 7 大攻击面（技能内容、Hook 脚本、Hook 配置（HTTP hooks）、OpenCode 插件、Agent 提示词、打包脚本、MCP 配置）。
 
 ---
 

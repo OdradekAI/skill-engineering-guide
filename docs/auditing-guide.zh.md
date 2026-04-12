@@ -79,7 +79,7 @@ baseline = max(0, 10 - (critical_count × 3 + warning_count × 1))
 /bundles-audit
 ```
 
-Agent 检测项目根目录（包含 `skills/` + `package.json`）并运行全部 10 个类别。如果子代理可用，会派遣 `auditor` agent 进行自动化评估。
+Agent 检测项目根目录（包含 `skills/` 目录）并运行全部 10 个类别。如果子代理可用，会派遣 `auditor` agent 进行自动化评估。
 
 ### 通过脚本
 
@@ -108,13 +108,13 @@ python scripts/audit_project.py --json <project-root>  # JSON 输出
 | 7 | 钩子 | 中 (2) | 引导注入、平台检测 |
 | 8 | 测试 | 中 (2) | 测试目录、提示词、A/B 评估结果 |
 | 9 | 文档 | 低 (1) | README、安装文档、CHANGELOG |
-| 10 | 安全 | 高 (3) | 7 大攻击面 — 技能内容、Hook 脚本、HTTP hooks、CLAUDE_ENV_FILE 注入、OpenCode 插件、Agent 提示词、打包脚本 |
+| 10 | 安全 | 高 (3) | 7 大攻击面 — 技能内容、Hook 脚本、Hook 配置（HTTP hooks）、OpenCode 插件、Agent 提示词、打包脚本、MCP 配置 |
 
 总权重 = 23。总分 = `sum(score_i × weight_i) / 23`。
 
 ### 报告模板
 
-完整项目审计使用 `skills/auditing/references/report-template.md` — 六层结构：决策摘要 → 风险矩阵 → 按类别分组的发现 → 方法论 → 附录。
+完整项目审计使用 `skills/auditing/references/report-template.md` — 六层结构：决策摘要 → 风险矩阵 → 按类别分组的发现 → 方法论 → 附录。带注释的报告示例参见 `skills/auditing/references/report-examples.md`。
 
 ### 检查清单
 
@@ -274,15 +274,13 @@ python scripts/scan_security.py --json <project-root>     # JSON 输出
 |--------|---------|------|
 | SKILL.md 内容 | 高 | 敏感文件访问、破坏性命令、安全覆盖、编码欺骗 |
 | Hook 脚本 | 高 | 网络调用、环境变量泄露、系统配置修改 |
-| HTTP hooks | 高 | 通过 `type: "http"` 钩子将工具输入/输出发送到外部 URL 进行数据泄露 |
-| `CLAUDE_ENV_FILE` 注入 | 高 | Hook 脚本写入 `CLAUDE_ENV_FILE` 向所有后续 Bash 命令注入环境变量（包括 PATH 修改） |
+| Hook 配置（HTTP hooks） | 高 | 通过 `type: "http"` 钩子将工具输入/输出发送到外部 URL 进行数据泄露 |
 | OpenCode 插件 | 高 | 动态代码执行、网络访问、消息操纵 |
 | Agent 提示词 | 中 | 权限提升、范围扩展、安全覆盖 |
 | 打包脚本 | 中 | 网络调用、系统修改、未消毒的输入 |
+| MCP 配置 | 中 | plugin.json 中的路径遍历、userConfig 敏感字段、插件根目录的持久数据 |
 
-**企业管控：** 管理员可在托管策略中设置 `allowManagedHooksOnly`，禁用所有用户/项目/插件钩子，仅允许通过 `enabledPlugins` 分发的组织审批钩子。
-
-**成本提示：** `prompt` 和 `agent` 类型的钩子在每次匹配事件时调用 LLM。匹配所有工具的 `PreToolUse` prompt 钩子在高强度会话中可能产生显著的 token 费用。
+> **平台说明：** Claude Code 管理员可通过 `allowManagedHooksOnly` 托管策略限制钩子。此外，`prompt` 和 `agent` 类型的钩子在每次匹配事件时调用 LLM，高强度会话中可能产生显著的 token 费用。
 
 ### 检查清单
 
@@ -311,9 +309,10 @@ python scripts/scan_security.py --json <project-root>     # JSON 输出
 ### 脚本组合
 
 ```bash
-# 完整流水线：lint → 安全 → 完整审计
+# 完整流水线：lint → 安全 → 文档 → 完整审计
 python scripts/lint_skills.py --json . > lint.json
 python scripts/scan_security.py --json . > security.json
+python scripts/check_docs.py --json . > docs.json
 python scripts/audit_project.py --json . > audit.json
 
 # CI 中的单技能审计

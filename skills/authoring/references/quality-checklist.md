@@ -1,6 +1,6 @@
 # Authoring Quality Checklist
 
-Self-review checklist aligned with `scripts/lint_skills.py` checks. Use during authoring to catch issues before running the linter, or to investigate specific lint findings.
+Definitive quality specification for SKILL.md files. `scripts/lint_skills.py` automates these checks. Use during authoring to catch issues before running the linter, or to investigate specific lint findings.
 
 ## Frontmatter Checks
 

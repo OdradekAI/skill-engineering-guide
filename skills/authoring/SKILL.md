@@ -106,8 +106,8 @@ After completing any path, validate the authored content:
 1. **Run lint** — `python scripts/lint_skills.py <skill-directory>` on each authored/modified skill
 2. **Review findings:**
    - **Critical** (Q1-Q3: missing frontmatter/name/description) — fix immediately before delivering
-   - **Warning** (Q5-Q9, X1-X2: description conventions, token budget, broken references) — fix if straightforward, otherwise report to the user/caller
-   - **Info** (Q10-Q17, X3: missing sections, heavy inline content) — report as improvement suggestions
+   - **Warning** (Q4-Q9, Q14, X1-X3: naming conventions, description rules, token budget, tool paths, broken references) — fix if straightforward, otherwise report to the user/caller
+   - **Info** (Q10-Q13, Q15-Q17, S9: missing sections, heavy inline content, directory name mismatch) — report as improvement suggestions
 3. **Report results** — tell the user/calling skill what was validated and any remaining warnings
 
 Read `references/quality-checklist.md` for the full check-by-check reference when investigating specific findings.
@@ -118,7 +118,7 @@ Read `references/quality-checklist.md` for the full check-by-check reference whe
 |---------|-----|
 | Description summarizes workflow | Describe triggering conditions only — agents shortcut to description |
 | Piling on MUST/ALWAYS/NEVER | Explain why the rule exists — understanding beats compliance |
-| Putting everything in SKILL.md | Extract heavy content to `references/` when over 300 lines |
+| Putting everything in SKILL.md | Extract heavy content (100+ lines) to `references/`; keep body under 500 lines |
 | No examples, only abstract rules | Add at least one concrete example per key instruction |
 | Writing for humans, not agents | Use imperative form, clear structure, explicit output formats |
 | Description too narrow | Be pushy — list related scenarios, edge cases, alternative phrasings |
