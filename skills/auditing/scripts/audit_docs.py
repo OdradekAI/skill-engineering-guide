@@ -18,8 +18,8 @@ Nine checks:
   D9 — Numeric cross-validation (docs/*.md numbers vs canonical source)
 
 Usage:
-    python check_docs.py [project-root]
-    python check_docs.py --json [project-root]
+    python audit_docs.py [project-root]
+    python audit_docs.py --json [project-root]
 
 Exit codes: 0 = all pass, 1 = warnings, 2 = critical
 """

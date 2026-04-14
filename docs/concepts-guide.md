@@ -124,7 +124,7 @@ Four handler types are available: `command` (shell), `http` (POST to URL), `prom
       "matcher": "startup|clear|compact",
       "hooks": [{
         "type": "command",
-        "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
+        "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
         "timeout": 10,
         "async": false
       }]
@@ -133,7 +133,7 @@ Four handler types are available: `command` (shell), `http` (POST to URL), `prom
 }
 ```
 
-> **In bundles-forge:** The `session-start` hook reads the bootstrap skill and injects it into the agent's context, giving it awareness of all available skills at the start of every session.
+> **In bundles-forge:** The `session-start.py` hook reads the bootstrap skill and injects it into the agent's context, giving it awareness of all available skills at the start of every session. Written in Python for cross-platform compatibility.
 
 ### MCP (Model Context Protocol)
 
@@ -286,9 +286,9 @@ Skills handle the interaction lifecycle: detect what the user wants → dispatch
 
 **Concrete example — two-phase workflow audit:** The `auditing` skill needs both the `auditor` (static checks W1-W9) and the `evaluator` (behavioral verification W10-W11). Since subagents cannot spawn other subagents, the `auditing` skill dispatches them sequentially from the main conversation: Phase 1 sends the `auditor`, waits for its report, then Phase 2 sends the `evaluator` with context from Phase 1. This two-phase orchestration is only possible because a skill — not a subagent — owns the workflow.
 
-### Why does session-start inject the full skill inventory?
+### Why does session-start.py inject the full skill inventory?
 
-The `session-start` hook reads `using-bundles-forge/SKILL.md` and injects it into the agent's context at the start of every session. An alternative would be lazy loading — only load skills when needed. But:
+The `session-start.py` hook reads `using-bundles-forge/SKILL.md` and injects it into the agent's context at the start of every session. An alternative would be lazy loading — only load skills when needed. But:
 
 - **Routing accuracy** — the agent needs to know *all* available skills to match user intent correctly. Without the full inventory, it couldn't route to the appropriate orchestrator or executor.
 - **Cost is low** — the bootstrap skill is compact (~6KB of context). The per-skill SKILL.md files are only loaded when actually invoked.
@@ -303,7 +303,7 @@ flowchart LR
     MP["Official Marketplace"] -->|distributes| BF
 
     subgraph BF ["bundles-forge Plugin"]
-        HK["session-start Hook"]
+        HK["session-start.py Hook"]
         CMD["7 /bundles-* Commands"]
         SK["7 Skills: 3 Orchestrators + 3 Executors + 1 Meta"]
         AG["3 Subagents"]
@@ -345,6 +345,7 @@ flowchart LR
 |-------|---------|
 | [Blueprinting Guide](blueprinting-guide.md) | Scenario selection, interview walkthrough, design decisions |
 | [Scaffolding Guide](scaffolding-guide.md) | Project generation, platform adaptation, inspector validation |
+| [Authoring Guide](authoring-guide.md) | Skill writing, agent authoring, quality checklists |
 | [Auditing Guide](auditing-guide.md) | Audit scopes, checklists, report templates, CI integration |
 | [Optimizing Guide](optimizing-guide.md) | 8 optimization targets, A/B evaluation, feedback iteration |
 | [Releasing Guide](releasing-guide.md) | Release pipeline, version management, publishing |

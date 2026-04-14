@@ -41,34 +41,34 @@ Scan every `SKILL.md` and every markdown file in `references/` directories.
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| SC1 | Critical | Instructions to read `.env`, `.ssh/`, `credentials`, `secrets`, `tokens`, `api_key` files | `scan_security.py` (suspicious) |
-| SC2 | Critical | Instructions to include file contents in responses or outputs sent externally | `scan_security.py` (suspicious) |
-| SC3 | Warning | References to reading `~/.config/`, `~/.aws/`, `~/.kube/` or similar config directories | `scan_security.py` (suspicious) |
-| SC4 | Warning | Instructions to access `process.env`, `$ENV`, or environment variables beyond documented needs | `scan_security.py` (suspicious) |
+| SC1 | Critical | Instructions to read `.env`, `.ssh/`, `credentials`, `secrets`, `tokens`, `api_key` files | `audit_security.py` (suspicious) |
+| SC2 | Critical | Instructions to include file contents in responses or outputs sent externally | `audit_security.py` (suspicious) |
+| SC3 | Warning | References to reading `~/.config/`, `~/.aws/`, `~/.kube/` or similar config directories | `audit_security.py` (suspicious) |
+| SC4 | Warning | Instructions to access `process.env`, `$ENV`, or environment variables beyond documented needs | `audit_security.py` (suspicious) |
 
 ### Destructive Operation Patterns
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| SC5 | Critical | Instructions containing `rm -rf`, `rmdir /s`, `del /f` on broad paths | `scan_security.py` |
-| SC6 | Critical | Instructions for `git push --force`, `git reset --hard` on main/master | `scan_security.py` |
-| SC7 | Critical | Instructions containing `DROP TABLE`, `DELETE FROM` without WHERE clause | `scan_security.py` |
-| SC8 | Warning | Instructions to modify or overwrite files outside the project directory | `scan_security.py` |
+| SC5 | Critical | Instructions containing `rm -rf`, `rmdir /s`, `del /f` on broad paths | `audit_security.py` |
+| SC6 | Critical | Instructions for `git push --force`, `git reset --hard` on main/master | `audit_security.py` |
+| SC7 | Critical | Instructions containing `DROP TABLE`, `DELETE FROM` without WHERE clause | `audit_security.py` |
+| SC8 | Warning | Instructions to modify or overwrite files outside the project directory | `audit_security.py` |
 
 ### Safety Override Patterns
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| SC9 | Critical | Phrases like "ignore previous instructions", "override safety", "disable verification" | `scan_security.py` |
-| SC10 | Critical | Instructions to skip git hooks (`--no-verify`), bypass linters, or disable tests | `scan_security.py` |
-| SC11 | Warning | Instructions that conflict with `using-<project>` instruction priority (claiming higher priority than user instructions) | `scan_security.py` (suspicious) |
+| SC9 | Critical | Phrases like "ignore previous instructions", "override safety", "disable verification" | `audit_security.py` |
+| SC10 | Critical | Instructions to skip git hooks (`--no-verify`), bypass linters, or disable tests | `audit_security.py` |
+| SC11 | Warning | Instructions that conflict with `using-<project>` instruction priority (claiming higher priority than user instructions) | `audit_security.py` (suspicious) |
 
 ### Encoding and Obfuscation
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| SC12 | Warning | Use of `<EXTREMELY_IMPORTANT>` or similar emphasis tags outside the bootstrap skill | `scan_security.py` |
-| SC13 | Critical | Unicode homoglyphs, zero-width characters, right-to-left override characters | `scan_security.py` |
+| SC12 | Warning | Use of `<EXTREMELY_IMPORTANT>` or similar emphasis tags outside the bootstrap skill | `audit_security.py` |
+| SC13 | Critical | Unicode homoglyphs, zero-width characters, right-to-left override characters | `audit_security.py` |
 | SC14 | Warning | Base64-encoded content that decodes to instructions or commands | `agent-only` |
 <!-- END:security/skill_content -->
 
@@ -76,7 +76,7 @@ Scan every `SKILL.md` and every markdown file in `references/` directories.
 
 ## Category 2: Hook Script Safety (Weight: High)
 
-Scan `hooks/session-start`, `hooks/run-hook.cmd`, and any other executable in `hooks/`.
+Scan `hooks/session-start.py` and any other hook scripts or configs in `hooks/`.
 
 <!-- BEGIN:security/hook_scripts -->
 
@@ -84,46 +84,46 @@ Scan `hooks/session-start`, `hooks/run-hook.cmd`, and any other executable in `h
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| HK1 | Critical | `curl`, `wget`, `nc`, `ncat`, `telnet`, `ssh` calls to external hosts | `scan_security.py` |
-| HK2 | Critical | Any URL or IP address that is not localhost/127.0.0.1 | `scan_security.py` |
-| HK3 | Critical | Piping environment variables or file contents to network commands | `scan_security.py` |
-| HK4 | Warning | DNS lookups (`dig`, `nslookup`, `host`) that could encode data in queries | `scan_security.py` |
+| HK1 | Critical | `curl`, `wget`, `nc`, `ncat`, `telnet`, `ssh` calls to external hosts | `audit_security.py` |
+| HK2 | Critical | Any URL or IP address that is not localhost/127.0.0.1 | `audit_security.py` |
+| HK3 | Critical | Piping environment variables or file contents to network commands | `audit_security.py` |
+| HK4 | Warning | DNS lookups (`dig`, `nslookup`, `host`) that could encode data in queries | `audit_security.py` |
 
 ### Environment Variable Access
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| HK5 | Critical | Reading `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GITHUB_TOKEN`, or similar secrets | `scan_security.py` |
-| HK6 | Warning | Reading environment variables beyond `CLAUDE_PLUGIN_ROOT`, `CURSOR_PLUGIN_ROOT` | `scan_security.py` |
-| HK7 | Info | Not using `set -euo pipefail` (missing error handling) | `scan_security.py` |
+| HK5 | Critical | Reading `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GITHUB_TOKEN`, or similar secrets | `audit_security.py` |
+| HK6 | Warning | Reading environment variables beyond `CLAUDE_PLUGIN_ROOT`, `CURSOR_PLUGIN_ROOT` | `audit_security.py` |
+| HK7 | Info | Shell hook scripts not using `set -euo pipefail` (missing error handling); not reported for Python-only hooks | `audit_security.py` |
 
 ### System Modification
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| HK8 | Critical | Writing to `.bashrc`, `.zshrc`, `.profile`, `.bash_profile`, or shell config files | `scan_security.py` |
-| HK9 | Critical | Creating cron jobs, systemd services, or launchd agents | `scan_security.py` |
-| HK10 | Critical | Modifying PATH, installing global packages (`npm -g`, `pip install --user`) | `scan_security.py` |
-| HK11 | Warning | Creating files outside the project directory or `~/.config/<project>/` | `scan_security.py` |
-| HK12 | Warning | Running `chmod` with setuid/setgid bits | `scan_security.py` |
+| HK8 | Critical | Writing to `.bashrc`, `.zshrc`, `.profile`, `.bash_profile`, or shell config files | `audit_security.py` |
+| HK9 | Critical | Creating cron jobs, systemd services, or launchd agents | `audit_security.py` |
+| HK10 | Critical | Modifying PATH, installing global packages (`npm -g`, `pip install --user`) | `audit_security.py` |
+| HK11 | Warning | Creating files outside the project directory or `~/.config/<project>/` | `audit_security.py` |
+| HK12 | Warning | Running `chmod` with setuid/setgid bits | `audit_security.py` |
 
 ### HTTP Hook Exfiltration
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| HK13 | Critical | `type: "http"` in hooks.json — HTTP hooks send tool input/output to external URLs | `scan_security.py` |
-| HK14 | Critical | External URLs in hook config (not localhost/127.0.0.1) | `scan_security.py` |
+| HK13 | Critical | `type: "http"` in hooks.json — HTTP hooks send tool input/output to external URLs | `audit_security.py` |
+| HK14 | Critical | External URLs in hook config (not localhost/127.0.0.1) | `audit_security.py` |
 
 ### Environment Variable Injection
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| HK15 | Warning | Writing to `CLAUDE_ENV_FILE` — injects env vars (including PATH) into all subsequent Bash commands | `scan_security.py` |
+| HK15 | Warning | Writing to `CLAUDE_ENV_FILE` — injects env vars (including PATH) into all subsequent Bash commands | `audit_security.py` |
 <!-- END:security/hook_scripts -->
 
 ### Legitimate Hook Baseline
 
-A legitimate `session-start` hook should only:
+A legitimate `session-start.py` hook should only:
 1. Determine plugin root path
 2. Read a single SKILL.md file
 3. JSON-escape the content
@@ -144,25 +144,25 @@ Scan `.opencode/plugins/*.js` files.
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| OC1 | Critical | `eval()`, `new Function()`, `vm.runInNewContext()` | `scan_security.py` |
-| OC2 | Critical | `child_process.exec()`, `child_process.spawn()`, `execSync()` | `scan_security.py` |
-| OC3 | Critical | `require('child_process')` or dynamic `import()` of system modules | `scan_security.py` |
-| OC4 | Warning | Dynamic `require()` or `import()` with variable paths | `scan_security.py` |
+| OC1 | Critical | `eval()`, `new Function()`, `vm.runInNewContext()` | `audit_security.py` |
+| OC2 | Critical | `child_process.exec()`, `child_process.spawn()`, `execSync()` | `audit_security.py` |
+| OC3 | Critical | `require('child_process')` or dynamic `import()` of system modules | `audit_security.py` |
+| OC4 | Warning | Dynamic `require()` or `import()` with variable paths | `audit_security.py` |
 
 ### Network Access
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| OC5 | Critical | `fetch()`, `http.request()`, `https.request()`, `net.connect()` to external hosts | `scan_security.py` |
-| OC6 | Critical | WebSocket connections to external servers | `scan_security.py` |
-| OC7 | Warning | Any network-related imports (`http`, `https`, `net`, `dgram`, `dns`) | `scan_security.py` |
+| OC5 | Critical | `fetch()`, `http.request()`, `https.request()`, `net.connect()` to external hosts | `audit_security.py` |
+| OC6 | Critical | WebSocket connections to external servers | `audit_security.py` |
+| OC7 | Warning | Any network-related imports (`http`, `https`, `net`, `dgram`, `dns`) | `audit_security.py` |
 
 ### Sensitive Data Access
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| OC8 | Critical | `process.env.ANTHROPIC_API_KEY` or similar secret access | `scan_security.py` |
-| OC9 | Warning | Broad `process.env` access beyond documented needs | `scan_security.py` |
+| OC8 | Critical | `process.env.ANTHROPIC_API_KEY` or similar secret access | `audit_security.py` |
+| OC9 | Warning | Broad `process.env` access beyond documented needs | `audit_security.py` |
 | OC10 | Warning | Reading files outside the plugin's own directory tree | `agent-only` |
 
 ### Message Manipulation
@@ -191,11 +191,11 @@ Scan `agents/*.md` and any `*-prompt.md` files within skill directories.
 <!-- BEGIN:security/agent_prompts -->
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| AG1 | Critical | Instructions to "ignore", "override", or "bypass" safety guidelines or user instructions | `scan_security.py` (suspicious) |
-| AG2 | Critical | Instructions to access credentials, secrets, or API keys | `scan_security.py` (suspicious) |
-| AG3 | Critical | Instructions to make network requests or exfiltrate data | `scan_security.py` (suspicious) |
-| AG4 | Warning | Instructions that expand scope beyond the agent's stated role | `scan_security.py` (suspicious) |
-| AG5 | Warning | Instructions that claim elevated permissions ("you have full system access") | `scan_security.py` (suspicious) |
+| AG1 | Critical | Instructions to "ignore", "override", or "bypass" safety guidelines or user instructions | `audit_security.py` (suspicious) |
+| AG2 | Critical | Instructions to access credentials, secrets, or API keys | `audit_security.py` (suspicious) |
+| AG3 | Critical | Instructions to make network requests or exfiltrate data | `audit_security.py` (suspicious) |
+| AG4 | Warning | Instructions that expand scope beyond the agent's stated role | `audit_security.py` (suspicious) |
+| AG5 | Warning | Instructions that claim elevated permissions ("you have full system access") | `audit_security.py` (suspicious) |
 | AG6 | Info | Missing scope constraints (agent prompt doesn't limit what files/actions are in scope) | `agent-only` |
 | AG7 | Warning | Agent prompt instructs dispatching other agents/subagents — subagents cannot nest; orchestration must stay in the parent skill | `agent-only` |
 <!-- END:security/agent_prompts -->
@@ -209,12 +209,12 @@ Scan `skills/auditing/scripts/`, `skills/releasing/scripts/`, and any `scripts/`
 <!-- BEGIN:security/bundled_scripts -->
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| BS1 | Critical | Network calls (`curl`, `wget`, `fetch`) in scripts not documented as needing network | `scan_security.py` |
-| BS2 | Critical | System modification patterns (same as HK8-HK12) | `scan_security.py` |
-| BS3 | Critical | Reading or transmitting sensitive files or environment variables | `scan_security.py` |
-| BS4 | Warning | Scripts that accept unsanitized user input passed to `eval` or command execution | `scan_security.py` |
-| BS5 | Warning | Scripts that download and execute remote code | `scan_security.py` |
-| BS6 | Info | Scripts missing `set -euo pipefail` or equivalent error handling | `scan_security.py` |
+| BS1 | Critical | Network calls (`curl`, `wget`, `fetch`) in scripts not documented as needing network | `audit_security.py` |
+| BS2 | Critical | System modification patterns (same as HK8-HK12) | `audit_security.py` |
+| BS3 | Critical | Reading or transmitting sensitive files or environment variables | `audit_security.py` |
+| BS4 | Warning | Scripts that accept unsanitized user input passed to `eval` or command execution | `audit_security.py` |
+| BS5 | Warning | Scripts that download and execute remote code | `audit_security.py` |
+| BS6 | Info | Scripts missing `set -euo pipefail` or equivalent error handling | `audit_security.py` |
 <!-- END:security/bundled_scripts -->
 
 ### Legitimate Script Baseline
@@ -234,11 +234,11 @@ Scan `.mcp.json`, `.lsp.json`, and MCP server definitions for credential leaks, 
 <!-- BEGIN:security/mcp_config -->
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| MC1 | Critical | Hardcoded credential in MCP server config (Authorization, api_key, token, secret, password) | `scan_security.py` |
-| MC2 | Critical | `headersHelper` field executes arbitrary shell commands | `scan_security.py` |
-| MC3 | Warning | Env var value embedded directly instead of using `${VAR}` expansion | `scan_security.py` |
-| MC4 | Warning | MCP server URL uses plain HTTP instead of HTTPS | `scan_security.py` |
-| MC5 | Info | Absolute path in command field (may not be portable) | `scan_security.py` |
+| MC1 | Critical | Hardcoded credential in MCP server config (Authorization, api_key, token, secret, password) | `audit_security.py` |
+| MC2 | Critical | `headersHelper` field executes arbitrary shell commands | `audit_security.py` |
+| MC3 | Warning | Env var value embedded directly instead of using `${VAR}` expansion | `audit_security.py` |
+| MC4 | Warning | MCP server URL uses plain HTTP instead of HTTPS | `audit_security.py` |
+| MC5 | Info | Absolute path in command field (may not be portable) | `audit_security.py` |
 <!-- END:security/mcp_config -->
 
 ---
@@ -253,8 +253,8 @@ Scan `plugin.json` manifests and hook commands for path and configuration issues
 
 | Check | Risk | Pattern | Automation |
 |-------|------|---------|------------|
-| PC1 | Warning | `../` path references in `plugin.json` component paths, hook commands, or MCP/LSP configs — after marketplace install, the plugin is cached and `../` paths break | `scan_security.py` |
-| PC2 | Warning | Absolute paths in plugin configs — installed plugins should use `${CLAUDE_PLUGIN_ROOT}` or relative `./` paths | `scan_security.py` |
+| PC1 | Warning | `../` path references in `plugin.json` component paths, hook commands, or MCP/LSP configs — after marketplace install, the plugin is cached and `../` paths break | `audit_security.py` |
+| PC2 | Warning | Absolute paths in plugin configs — installed plugins should use `${CLAUDE_PLUGIN_ROOT}` or relative `./` paths | `audit_security.py` |
 | PC3 | Info | Symlinks to external directories — legitimate but should be documented in README | `agent-only` |
 
 ### User Configuration
@@ -297,7 +297,7 @@ Scan `plugin.json` manifests and hook commands for path and configuration issues
 ### Files Scanned
 | File | Type | Critical | Warning | Info |
 |------|------|----------|---------|------|
-| hooks/session-start | Hook script | 0 | 0 | 0 |
+| hooks/session-start.py | Hook script | 0 | 0 | 0 |
 | .opencode/plugins/example.js | OpenCode plugin | 0 | 0 | 1 |
 | skills/my-skill/SKILL.md | Skill content | 0 | 0 | 0 |
 | agents/inspector.md | Agent prompt | 0 | 0 | 0 |

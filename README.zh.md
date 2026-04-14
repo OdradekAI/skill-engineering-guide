@@ -52,7 +52,7 @@ cd your-bundle-plugin-project
 /bundles-audit
 ```
 
-执行 10 大类质量评估，含 7 大攻击面安全扫描。
+执行 10 大类质量评估，含基于模式的安全检查，覆盖 7 类文件。
 
 ## 概念
 
@@ -91,7 +91,7 @@ flowchart LR
 | 设计 | `blueprinting` | 结构化访谈 → 设计文档 → 编排创建流水线：脚手架生成、内容编写、工作流设计和初始审计。 |
 | 搭建 | `scaffolding` | 根据设计方案生成项目结构，添加或移除平台支持 — 清单、钩子、脚本、引导 skill 和各平台文件。 |
 | 编写 | `authoring` | 指导 SKILL.md 和 agents/*.md 编写 — frontmatter、描述、指令、内容集成和通过 `references/` 实现的渐进式加载。 |
-| 审计 | `auditing` | 10 大类质量评估，含 7 大攻击面安全扫描。 |
+| 审计 | `auditing` | 10 大类质量评估，含基于模式的安全检查，覆盖 7 类文件。 |
 | 优化 | `optimizing` | 工程改进 — 描述触发准确性、token 效率、工作流重构、添加技能填补缺口、反馈迭代。 |
 | 发布 | `releasing` | 编排发布前流水线：版本漂移检查、审计、文档一致性检查、变更一致性审查、版本升级、CHANGELOG 更新和发布指引。 |
 
@@ -143,19 +143,19 @@ flowchart LR
 
 | 范围 | 命令 / 脚本 | 检查内容 |
 |------|------------|---------|
-| 完整项目 | `/bundles-audit` 或 `audit_project.py` | 10 大类（结构、清单、版本同步、技能质量、交叉引用、工作流、钩子、测试、文档、安全） |
+| 完整项目 | `/bundles-audit` 或 `audit_plugin.py` | 10 大类（结构、清单、版本同步、技能质量、交叉引用、工作流、钩子、测试、文档、安全） |
 | 单个技能 | `/bundles-audit skills/authoring` 或 `audit_skill.py` | 4 类（结构、技能质量、交叉引用、安全） |
 | 工作流 | 显式请求 或 `audit_workflow.py` | 3 层：静态结构、语义接口、行为验证（W1-W11） |
-| 仅安全扫描 | `/bundles-scan` 或 `scan_security.py` | 7 大攻击面（技能内容、Hook 脚本、HTTP hooks、OpenCode 插件、Agent 提示词、打包脚本、MCP 配置） |
+| 仅安全扫描 | `/bundles-scan` 或 `audit_security.py` | 基于模式的检测，覆盖 7 类文件（技能内容、Hook 脚本、HTTP hooks、OpenCode 插件、Agent 提示词、打包脚本、MCP 配置） |
 
 ### 快速开始（脚本）
 
 ```bash
-python skills/auditing/scripts/audit_project.py .                                      # 完整项目审计
+python skills/auditing/scripts/audit_plugin.py .                                      # 完整项目审计
 python skills/auditing/scripts/audit_skill.py skills/authoring                         # 单技能审计
 python skills/auditing/scripts/audit_workflow.py .                                     # 工作流审计
 python skills/auditing/scripts/audit_workflow.py --focus-skills new-skill .            # 聚焦式工作流审计
-python skills/auditing/scripts/scan_security.py .                                      # 仅安全扫描
+python skills/auditing/scripts/audit_security.py .                                      # 仅安全扫描
 ```
 
 通过 Agent 还可以审计远程项目：
@@ -255,7 +255,7 @@ flowchart LR
   → 完整项目：10 大类检查（结构、清单、版本同步、
     质量、交叉引用、工作流、钩子、测试、文档、安全）
     → auditor agent 运行检查清单（如子代理可用）
-    → 脚本：audit_project.py, audit_workflow.py, scan_security.py, audit_skill.py
+    → 脚本：audit_plugin.py, audit_workflow.py, audit_security.py, audit_skill.py
   → 单个技能：4 类检查（结构、质量、交叉引用、安全）
   → 工作流：3 层检查（静态结构、语义接口、行为验证）
   → 评分 + 报告（严重 / 警告 / 信息）
@@ -297,12 +297,12 @@ flowchart LR
   → 预检
     → bump_version.py --check（版本漂移检查）
     → auditing（完整质量 + 安全审计）
-    → check_docs.py（文档一致性检查）
+    → audit_docs.py（文档一致性检查）
   → 处理严重发现（解决前阻止发布）
   → 文档同步（变更一致性审查 + 文档更新）
   → bump_version.py <new-version>（更新所有清单）
   → 更新 CHANGELOG.md 和 README.md
-  → 最终验证（--check + --audit + check_docs.py）
+  → 最终验证（--check + --audit + audit_docs.py）
   → 提交、打标签、推送、gh release create
 ```
 
@@ -334,7 +334,7 @@ gemini extensions install https://github.com/odradekai/bundles-forge.git
 
 - **为每个主要生命周期阶段开启新会话**（blueprinting、authoring、auditing）
 - **使用斜杠命令**（`/bundles-audit`、`/bundles-optimize`）将 Agent 重新锚定到当前任务
-- **优先使用脚本输出而非内联检查** — `python skills/auditing/scripts/audit_project.py .` 产出紧凑摘要，避免 Agent 逐项推理占用上下文
+- **优先使用脚本输出而非内联检查** — `python skills/auditing/scripts/audit_plugin.py .` 产出紧凑摘要，避免 Agent 逐项推理占用上下文
 
 ## 贡献
 

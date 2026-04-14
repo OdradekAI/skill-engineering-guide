@@ -13,7 +13,7 @@ This is a bundle-plugin engineering toolkit supporting 5 platforms. It contains 
 - Run `python skills/releasing/scripts/bump_version.py --check` before committing
 - Run `python skills/auditing/scripts/generate_checklists.py --check` before committing
 - Run `bundles-forge:auditing` before releases
-- Run `python skills/auditing/scripts/check_docs.py` before releases (documentation consistency)
+- Run `python skills/auditing/scripts/audit_docs.py` before releases (documentation consistency)
 
 ## Available Skills
 

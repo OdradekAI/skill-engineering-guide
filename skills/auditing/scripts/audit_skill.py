@@ -27,7 +27,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-import scan_security
+import audit_security
 
 # ---------------------------------------------------------------------------
 # Frontmatter parsing (pure-stdlib, zero external dependencies)
@@ -311,7 +311,7 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
 def run_lint(project_root):
     """Run project-level lint across all skills.
 
-    Returns a dict consumed by audit_project.py and audit_workflow.py:
+    Returns a dict consumed by audit_plugin.py and audit_workflow.py:
     {"skills": [...], "summary": {...}, "graph": [...], ...}
     """
     project_root = Path(project_root).resolve()
@@ -421,41 +421,13 @@ def run_lint(project_root):
     # Graph analysis (G1-G5) — workflow DAG checks
     # -------------------------------------------------------------------
     if len(results["skills"]) >= 2:
+        import _graph
+
         graph_findings = []
 
         graph_valid_prefixes = {project_name}
         if project_abbreviation:
             graph_valid_prefixes.add(project_abbreviation)
-
-        _CALLS_HEADER_RE = re.compile(r"\*\*Calls?:?\*\*", re.IGNORECASE)
-        _BOLD_REF_RE = re.compile(r"\*\*([a-z0-9-]+):([a-z0-9-]+)\*\*")
-
-        def _extract_calls(content):
-            """Extract outgoing skill refs from the Integration Calls block."""
-            calls = set()
-            lines = content.splitlines()
-            in_calls = False
-            for line in lines:
-                if _CALLS_HEADER_RE.search(line):
-                    in_calls = True
-                    for m in _BOLD_REF_RE.finditer(line):
-                        if m.group(1) in graph_valid_prefixes:
-                            calls.add(m.group(2))
-                    for m in CROSS_REF_RE.finditer(line):
-                        if m.group(1) in graph_valid_prefixes:
-                            calls.add(m.group(2))
-                    continue
-                if in_calls:
-                    if line.startswith("- ") or line.startswith("  "):
-                        for m in _BOLD_REF_RE.finditer(line):
-                            if m.group(1) in graph_valid_prefixes:
-                                calls.add(m.group(2))
-                        for m in CROSS_REF_RE.finditer(line):
-                            if m.group(1) in graph_valid_prefixes:
-                                calls.add(m.group(2))
-                    elif line.strip() and not line.startswith("-"):
-                        in_calls = False
-            return calls
 
         graph = {}
         skill_contents = {}
@@ -467,7 +439,7 @@ def run_lint(project_root):
                 continue
             scontent = smd.read_text(encoding="utf-8", errors="replace")
             skill_contents[sname] = scontent
-            refs = _extract_calls(scontent)
+            refs = _graph.extract_calls(scontent, graph_valid_prefixes)
             refs.discard(sname)
             existing_refs = {r for r in refs
                             if (skills_dir / r).is_dir()}
@@ -476,48 +448,12 @@ def run_lint(project_root):
         all_skill_names = set(graph.keys())
 
         # G1: Cycle detection
-        CYCLE_DECL_RE = re.compile(r"<!--\s*cycle:([\w,-]+)\s*-->")
-
-        def _get_declared_cycle_sets(content):
-            """Return all declared cycle sets from a skill's content."""
-            result = []
-            for m in CYCLE_DECL_RE.finditer(content):
-                result.append(set(m.group(1).split(",")))
-            return result
-
-        def _find_minimal_cycles(g):
-            """Find shortest elementary cycles (no redundant sub-paths)."""
-            seen_cycle_sets = set()
-            cycles = []
-            for start in sorted(g):
-                from collections import deque
-                for neighbor in g.get(start, set()):
-                    queue = deque([(neighbor, [start, neighbor])])
-                    visited_in_search = {start, neighbor}
-                    while queue:
-                        node, path = queue.popleft()
-                        for nxt in g.get(node, set()):
-                            if nxt == start:
-                                canon = tuple(sorted(path))
-                                if canon not in seen_cycle_sets:
-                                    seen_cycle_sets.add(canon)
-                                    cycles.append(tuple(path))
-                                break
-                            if nxt not in visited_in_search \
-                                    and nxt in g:
-                                visited_in_search.add(nxt)
-                                queue.append((nxt, path + [nxt]))
-                        else:
-                            continue
-                        break
-            return cycles
-
-        for cycle in _find_minimal_cycles(graph):
+        for cycle in _graph.find_minimal_cycles(graph):
             cycle_set = set(cycle)
             declared = True
             for node in cycle_set:
                 content = skill_contents.get(node, "")
-                decl_sets = _get_declared_cycle_sets(content)
+                decl_sets = _graph.get_declared_cycle_sets(content)
                 if any(cycle_set.issubset(ds) for ds in decl_sets):
                     continue
                 declared = False
@@ -582,32 +518,13 @@ def run_lint(project_root):
                             "but has no ## Inputs section"))
 
         # G5: Artifact identifier matching (experimental)
-        _ARTIFACT_ID_RE = re.compile(r"`([a-z][a-z0-9-]*)`")
-
-        def _extract_artifact_ids(content, section_name):
-            """Extract backtick-wrapped artifact IDs from a named section."""
-            ids = set()
-            lines = content.splitlines()
-            in_section = False
-            for line in lines:
-                if line.strip() == f"## {section_name}":
-                    in_section = True
-                    continue
-                if in_section:
-                    if line.startswith("## "):
-                        break
-                    for m in _ARTIFACT_ID_RE.finditer(line):
-                        candidate = m.group(1)
-                        if candidate not in graph_valid_prefixes \
-                                and ":" not in candidate:
-                            ids.add(candidate)
-            return ids
-
         skill_outputs = {}
         skill_inputs = {}
         for sname, scontent in skill_contents.items():
-            skill_outputs[sname] = _extract_artifact_ids(scontent, "Outputs")
-            skill_inputs[sname] = _extract_artifact_ids(scontent, "Inputs")
+            skill_outputs[sname] = _graph.extract_artifact_ids(
+                scontent, "Outputs", graph_valid_prefixes)
+            skill_inputs[sname] = _graph.extract_artifact_ids(
+                scontent, "Inputs", graph_valid_prefixes)
 
         for src, targets in graph.items():
             src_out = skill_outputs.get(src, set())
@@ -693,32 +610,14 @@ def run_lint(project_root):
 # Scoring (shared by both modes)
 # ---------------------------------------------------------------------------
 
+from _scoring import compute_baseline_score, compute_weighted_average
+
 SKILL_CATEGORY_WEIGHTS = {
     "structure": 3,
     "skill_quality": 2,
     "cross_references": 2,
     "security": 3,
 }
-
-
-def compute_baseline_score(findings):
-    critical = sum(1 for f in findings
-                   if f.get("severity", f.get("risk", "info")) == "critical")
-    warning = sum(1 for f in findings
-                  if f.get("severity", f.get("risk", "info")) == "warning")
-    return max(0, 10 - (critical * 3 + warning * 1))
-
-
-def compute_weighted_average(scores, weights=None):
-    if weights is None:
-        weights = SKILL_CATEGORY_WEIGHTS
-    total_weight = 0
-    weighted_sum = 0.0
-    for cat, score in scores.items():
-        w = weights.get(cat, 1)
-        weighted_sum += score * w
-        total_weight += w
-    return round(weighted_sum / total_weight, 1) if total_weight else 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -801,15 +700,15 @@ def run_skill_audit(skill_path):
     lint_findings = lint_skill(
         skill_dir, project_root, project_name, project_abbreviation)
 
-    # Security checks via scan_security
+    # Security checks via audit_security
     sec_findings_raw = []
-    scannable = scan_security.collect_scannable_files(skill_dir)
+    scannable = audit_security.collect_scannable_files(skill_dir)
     self_path = Path(__file__).resolve()
     for f in scannable:
         if f.resolve() == self_path:
             continue
         rel = f.relative_to(skill_dir) if f.is_relative_to(skill_dir) else f
-        file_type = scan_security.classify_file(
+        file_type = audit_security.classify_file(
             f.relative_to(project_root) if f.is_relative_to(project_root) else rel)
         if file_type is None:
             skill_md = skill_dir / "SKILL.md"
@@ -817,7 +716,7 @@ def run_skill_audit(skill_path):
                 file_type = "skill_content"
             else:
                 continue
-        findings = scan_security.scan_file(f, rel, file_type)
+        findings = audit_security.scan_file(f, rel, file_type)
         for finding in findings:
             sec_findings_raw.append({
                 "check": finding.get("check_id", ""),
@@ -831,7 +730,7 @@ def run_skill_audit(skill_path):
         already_scanned = any(
             f.resolve() == skill_md.resolve() for f in scannable)
         if not already_scanned:
-            findings = scan_security.scan_file(
+            findings = audit_security.scan_file(
                 skill_md, Path("SKILL.md"), "skill_content")
             for finding in findings:
                 sec_findings_raw.append({
@@ -859,10 +758,11 @@ def run_skill_audit(skill_path):
 
     scores = {}
     for cat_name, cat_data in categories.items():
-        scores[cat_name] = compute_baseline_score(cat_data["findings"])
+        scores[cat_name] = compute_baseline_score(cat_data["findings"],
+                                                    cap_per_id=False)
         cat_data["baseline_score"] = scores[cat_name]
 
-    overall_score = compute_weighted_average(scores)
+    overall_score = compute_weighted_average(scores, SKILL_CATEGORY_WEIGHTS)
 
     total_critical = sum(d["counts"]["critical"] for d in categories.values())
     total_warning = sum(d["counts"]["warning"] for d in categories.values())
@@ -968,7 +868,7 @@ def format_project_markdown(results):
     out.append("|-------|-------|----------|----------|------|")
     for sr in results["skills"]:
         c = sr["counts"]
-        score = compute_baseline_score(sr["findings"])
+        score = compute_baseline_score(sr["findings"], cap_per_id=False)
         out.append(f"| {sr['skill']} | {score}/10 | {c['critical']} | {c['warning']} | {c['info']} |")
     return "\n".join(out)
 

@@ -443,7 +443,7 @@ python skills/auditing/scripts/audit_skill.py <path>                        # Qu
 python skills/auditing/scripts/audit_skill.py <skill-dir>                   # Single skill audit (4 categories)
 python skills/auditing/scripts/audit_workflow.py <path>                      # Workflow audit (W1-W9, script-automated)
 python skills/auditing/scripts/audit_workflow.py --focus-skills a,b <path>   # Focused workflow audit
-python skills/auditing/scripts/scan_security.py <path>                       # Security scan (7 surfaces)
+python skills/auditing/scripts/audit_security.py <path>                       # Security scan (7 surfaces)
 ```
 
 W10-W11 (chain evaluation and behavioral verification) require `evaluator` agent dispatch and are not produced by the script.

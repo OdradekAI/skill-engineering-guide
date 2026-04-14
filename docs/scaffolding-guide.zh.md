@@ -201,7 +201,7 @@
 | OpenCode | `.opencode/plugins/<name>.js` | —（JS 插件处理引导） | `.opencode/INSTALL.md` | 否 |
 | Gemini CLI | `gemini-extension.json` | — | `GEMINI.md` | 是 |
 
-**共享钩子：** `hooks/session-start` 和 `hooks/run-hook.cmd` 在 Claude Code 和 Cursor 之间共享。当任一平台被选为目标时都会创建。
+**共享钩子：** `hooks/session-start.py` 在 Claude Code 和 Cursor 之间共享。当任一平台被选为目标时都会创建。使用 Python 实现以确保跨平台兼容性。
 
 **`marketplace.json`：** 仅在插件目标为市场发布时生成。它声明市场索引的插件元数据，并通过 `.version-bump.json` 进行版本追踪。
 
@@ -258,10 +258,9 @@
 | 不管需要与否生成所有平台 | 想要面面俱到 | 只为你实际使用的平台生成 |
 | 忘记 `.version-bump.json` 条目 | 手动添加了新清单 | 每个版本承载清单都需要 bump 配置条目 |
 | 钩子大小写错误 | 从一个平台复制到另一个 | Claude Code: `SessionStart`，Cursor: `sessionStart` |
-| 缺少 `run-hook.cmd` | 在 macOS/Linux 上开发 | 只要有任何基于钩子的平台就要包含 — Windows 用户需要它 |
 | 引导技能超过 200 行 | 路由表塞了太多内容 | 保持精简 — 重内容提取到 `references/` |
 | 对简单打包使用 intelligent 模式 | 想为 1-2 个技能搭建完整基础设施 | Minimal 模式就是为了避免过度工程化 |
-| 忘记 `chmod +x` session-start | 在 Windows 上创建文件 | 在脚手架后检查清单中注明 — git 可以保留执行位 |
+| PATH 中缺少 `python` | 钩子无法运行 | 确保 `session-start.py` 可被 `python` 调用 — 记录前置要求 |
 | CLI 就够时使用 MCP | 想为简单工具搭建丰富集成 | 参考 `references/external-integration.md` 决策树 — 无状态单次工具优先用 CLI |
 | 使用 `../` 路径引用插件外的文件 | 想跨项目共享文件 | 市场安装后插件被缓存 — `../` 路径会失效。所有文件保持在插件根目录内 |
 | 向 `${CLAUDE_PLUGIN_ROOT}` 写入持久化数据 | 把插件根目录当作稳定存储 | `PLUGIN_ROOT` 每次更新会变。使用 `${CLAUDE_PLUGIN_DATA}` 存放缓存和生成状态 |

@@ -18,7 +18,7 @@ Systematically evaluate a bundle-plugin project or a single skill across applica
 
 ### Security-Only Mode
 
-When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 10 (Security) and the `scan_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 10-category audit.
+When invoked via `bundles-scan` or when the user explicitly requests a security-only scan, run only Category 10 (Security) and the `audit_security.py` script. Skip Categories 1-8. Report in the same format but with only the Security category scored. This provides a quick security check without the overhead of a full 10-category audit.
 
 ## Step 1: Resolve Input & Detect Scope
 
@@ -57,48 +57,26 @@ After normalization, determine the audit scope from the resolved local path:
 
 ## Full Project Audit
 
-### The Process
-
-```
-Scan project root
-  → Run 10-category checks (including security scan)
-  → Score each category
-  → Compile report
-  → Present findings (grouped by severity)
-```
-
-### Script Shortcuts
+### Script Shortcut
 
 ```bash
-python skills/auditing/scripts/audit_project.py <project-root>        # full audit with status
-python skills/auditing/scripts/audit_project.py --json <project-root>  # machine-readable
-
-python skills/auditing/scripts/audit_workflow.py <project-root>                          # workflow-only audit
-python skills/auditing/scripts/audit_workflow.py --focus-skills skill-a,skill-b <root>   # focused workflow audit
-python skills/auditing/scripts/audit_workflow.py --json <project-root>                   # workflow JSON output
-
-python skills/auditing/scripts/scan_security.py <project-root>         # security-only scan
-python skills/auditing/scripts/scan_security.py --json <project-root>  # security JSON output
+python skills/auditing/scripts/audit_plugin.py <project-root>        # full audit with status
+python skills/auditing/scripts/audit_plugin.py --json <project-root>  # machine-readable
 ```
 
-`audit_project.py` orchestrates `scan_security.py` (security), `audit_skill.py` (skill quality), `audit_workflow.py` (workflow integration), and `check_docs.py` (documentation consistency D1-D9), then adds structure, manifest, version-sync, hook, and testing checks.
+`audit_plugin.py` orchestrates `audit_security.py` (security), `audit_skill.py` (skill quality), `audit_workflow.py` (workflow integration), and `audit_docs.py` (documentation consistency D1-D9), then adds structure, manifest, version-sync, hook, and testing checks.
 
-Dispatch the `auditor` agent (`agents/auditor.md`) for automated assessment if subagents are available. The auditor runs read-only, executes all 10-category checks, scores them, compiles the report, and saves it to `.bundles-forge/`. The auditor is the single source of truth for execution details (scoring formula, report format, qualitative assessment criteria).
+### Step 2: Run Script Baseline
 
-**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline. Proceed inline?" If confirmed, read `agents/auditor.md` and follow its execution instructions within this conversation context. The agent file contains the complete audit protocol — 10-category checks, scoring rules, report compilation, and file-saving conventions.
+Run `python skills/auditing/scripts/audit_plugin.py --json <project-root>` to collect the deterministic baseline. This ensures script-checkable items (structure, manifests, version sync, skill quality, cross-references, hooks, documentation, security patterns) are verified with reproducible results regardless of agent behavior.
 
-### Step 2: Scan
+### Step 3: Dispatch Auditor
 
-Read the project root. Identify:
-- Which platforms are targeted (by manifest presence)
-- How many skills exist
-- Whether hooks, version sync, and bootstrap are present
+Pass the JSON script output to the `auditor` agent (`agents/auditor.md`) as input context. The auditor uses these results as its baseline scores and adds qualitative assessment (±2 score adjustments, narrative evaluation, report compilation). The auditor is the single source of truth for scoring formula, report format, and qualitative assessment criteria.
 
-### Step 3: Check & Score & Report
+The auditor executes all 10 categories, scores each on a 0-10 scale, and compiles a layered report. Full execution details — category weights, scoring formula, report format, Go/No-Go logic — are defined in `agents/auditor.md` and supported by checklists in `references/`.
 
-The auditor executes all 10 categories (Structure, Platform Manifests, Version Sync, Skill Quality, Cross-References, Workflow, Hooks, Testing, Documentation, Security), scores each on a 0-10 scale, and compiles a layered report. Full execution details — category weights, scoring formula, report format, Go/No-Go logic, and qualitative assessment criteria — are defined in `agents/auditor.md` (the single source of truth) and supported by checklists in `references/`.
-
-**Categories at a glance** (see `references/audit-checklist.md` for 60+ individual checks):
+**Categories at a glance** (see `references/plugin-checklist.md` for 60+ individual checks):
 
 | Category | Weight |
 |----------|--------|
@@ -113,9 +91,7 @@ The auditor executes all 10 categories (Structure, Platform Manifests, Version S
 | Documentation | Low |
 | Security | High |
 
-### Security Scan (Category 10)
-
-Scans 7 attack surfaces. See `references/security-checklist.md` for the full pattern list.
+**Security Scan (Category 10):** Scans 7 attack surfaces. See `references/security-checklist.md` for the full pattern list.
 
 | Target | Risk Level |
 |--------|-----------|
@@ -127,9 +103,11 @@ Scans 7 attack surfaces. See `references/security-checklist.md` for the full pat
 | Bundled scripts | Medium |
 | MCP configs | Medium |
 
+**If subagent dispatch is unavailable:** Ask the user — "Subagents are not available. I can run the audit checks inline. Proceed inline?" If confirmed, read `agents/auditor.md` and follow its execution instructions within this conversation context, using the script JSON output as baseline. The agent file contains the complete audit protocol — scoring rules, report compilation, and file-saving conventions.
+
 **Third-party skill scanning:** When scanning skills from external sources, clone/download without executing hooks, run the audit, and review critical findings with the user before installation. Never auto-install without scanning.
 
-### Step 5b: Behavioral Verification (Optional)
+### Step 4: Behavioral Verification (Optional)
 
 If subagents are available, dispatch the `evaluator` agent (`agents/evaluator.md`) with label "chain" to run behavioral verification (W10-W11) on workflow chains. This validates that skill handoffs work end-to-end, not just structurally. Append evaluator results to the Workflow category in the audit report.
 
@@ -137,15 +115,7 @@ If subagents are available, dispatch the `evaluator` agent (`agents/evaluator.md
 
 **When to skip:** Quick post-change checks, when evaluator dispatch is unavailable, or when static and semantic layers show no issues. Score skipped behavioral layer as **N/A** (excluded from weighted average).
 
-### Step 6: Report Findings
-
-Present all findings grouped by severity:
-
-- **Critical** — skill/project will not work correctly, or contains active security threats
-- **Warning** — works but has quality issues or suspicious patterns needing review
-- **Info** — improvement opportunities
-
-The audit report is the final output. The calling context (orchestrating skill or user) decides what to fix and how.
+Present all findings grouped by severity (Critical / Warning / Info). The audit report is the final output — the calling context decides what to fix and how.
 
 ---
 
@@ -164,15 +134,12 @@ When the target is a single skill directory or SKILL.md file, run only the 4 cat
 
 **Skipped categories:** Platform Manifests, Version Sync, Hooks, Testing, Documentation — these require project-level context.
 
-### Script Shortcuts
+### Script Shortcut
 
 ```bash
 python skills/auditing/scripts/audit_skill.py <skill-directory>          # combined 4-category skill audit
 python skills/auditing/scripts/audit_skill.py <path>/SKILL.md            # also accepts SKILL.md path
 python skills/auditing/scripts/audit_skill.py --json <skill-directory>   # JSON output
-
-python skills/auditing/scripts/audit_skill.py <skill-directory>          # skill quality only
-python skills/auditing/scripts/scan_security.py <skill-directory>        # security scan on skill files
 ```
 
 ### Process & Report
@@ -202,7 +169,7 @@ When the user explicitly requests a workflow audit, or when the Full audit's Cro
 - After modifying Integration sections, Inputs/Outputs, or adding new skills to a chain
 - When the Full audit's Workflow category shows warnings — suggest: "Workflow issues detected. Run a focused workflow audit with `--focus-skills` for detailed diagnostics."
 
-### Script Shortcuts
+### Script Shortcut
 
 ```bash
 python skills/auditing/scripts/audit_workflow.py <project-root>                          # full workflow audit

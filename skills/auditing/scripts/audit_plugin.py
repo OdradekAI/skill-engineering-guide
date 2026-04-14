@@ -2,15 +2,15 @@
 """
 Comprehensive audit for bundle-plugins.
 
-Orchestrates scan_security.py and audit_skill.py, then runs additional
-structural, version-sync, hook, and documentation checks to produce a
-combined project health report.
+Orchestrates audit_security.py, audit_skill.py, audit_workflow.py, and
+audit_docs.py, then runs additional structural, version-sync, hook, and
+testing checks to produce a combined plugin health report.
 
-For agent-authored rich reports, see skills/auditing/references/report-template.md.
+For agent-authored rich reports, see skills/auditing/references/plugin-report-template.md.
 
 Usage:
-    python audit_project.py [project-root]
-    python audit_project.py --json [project-root]
+    python audit_plugin.py [project-root]
+    python audit_plugin.py --json [project-root]
 
 Exit codes: 0 = pass, 1 = warnings, 2 = critical findings
 """
@@ -28,13 +28,15 @@ if str(_RELEASING_DIR) not in sys.path:
 
 import audit_workflow
 import bump_version
-import check_docs
-import scan_security
+import audit_docs
+import audit_security
 import audit_skill
 
 # ---------------------------------------------------------------------------
 # Scoring
 # ---------------------------------------------------------------------------
+
+from _scoring import compute_baseline_score, compute_weighted_average
 
 CATEGORY_WEIGHTS = {
     "structure": 3,
@@ -48,39 +50,6 @@ CATEGORY_WEIGHTS = {
     "documentation": 1,
     "security": 3,
 }
-
-
-def compute_baseline_score(findings):
-    """Deterministic baseline: 10 minus penalties for critical/warning findings.
-
-    Both deterministic and suspicious findings affect scoring. Suspicious
-    findings include a confidence field in JSON for CI to make fine-grained
-    decisions.
-
-    Warnings from the same check-ID are capped at -3 penalty per ID to prevent
-    a single conceptual gap (e.g. missing prompt files for N skills) from
-    producing N × -1 multiplicative punishment.
-    """
-    from collections import Counter
-    critical = sum(1 for f in findings
-                   if f.get("severity", f.get("risk", "info")) == "critical")
-    warning_checks = Counter(
-        f.get("check", "?") for f in findings
-        if f.get("severity", f.get("risk", "info")) == "warning"
-    )
-    warning_penalty = sum(min(count, 3) for count in warning_checks.values())
-    return max(0, 10 - (critical * 3 + warning_penalty))
-
-
-def compute_weighted_average(scores):
-    """Weighted average across categories using CATEGORY_WEIGHTS."""
-    total_weight = 0
-    weighted_sum = 0.0
-    for cat, score in scores.items():
-        w = CATEGORY_WEIGHTS.get(cat, 1)
-        weighted_sum += score * w
-        total_weight += w
-    return round(weighted_sum / total_weight, 1) if total_weight else 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +172,34 @@ def check_version_sync(root):
         findings.append(dict(check="V4", severity="info",
                              message="Missing scripts/bump-version.sh"))
 
+    canonical = root / "skills" / "releasing" / "scripts" / "bump_version.py"
+    template = root / "skills" / "scaffolding" / "assets" / "scripts" / "bump_version.py"
+    if canonical.exists() and template.exists():
+        c_lines = canonical.read_text(encoding="utf-8", errors="replace").splitlines()
+        t_lines = template.read_text(encoding="utf-8", errors="replace").splitlines()
+        def _skip_docstring(lines):
+            """Return lines after the module docstring."""
+            in_doc = False
+            result = []
+            for line in lines:
+                if not in_doc and line.strip().startswith('"""'):
+                    in_doc = True
+                    if line.strip().count('"""') >= 2:
+                        in_doc = False
+                    continue
+                if in_doc:
+                    if '"""' in line:
+                        in_doc = False
+                    continue
+                result.append(line)
+            return result
+        c_body = _skip_docstring(c_lines)
+        t_body = _skip_docstring(t_lines)
+        if c_body != t_body:
+            findings.append(dict(check="V8", severity="warning",
+                                 message="bump_version.py template drift: "
+                                         "scaffolding/assets copy differs from releasing source"))
+
     return findings
 
 
@@ -214,23 +211,15 @@ def check_hooks(root):
         findings.append(dict(check="H1", severity="warning", message="Missing hooks/ directory"))
         return findings
 
-    session_start = hooks_dir / "session-start"
+    session_start = hooks_dir / "session-start.py"
     if not session_start.exists():
         findings.append(dict(check="H2", severity="warning",
-                             message="Missing hooks/session-start"))
+                             message="Missing hooks/session-start.py"))
     else:
         content = session_start.read_text(encoding="utf-8", errors="replace")
         if "SKILL.md" not in content:
             findings.append(dict(check="H3", severity="warning",
-                                 message="session-start doesn't reference any SKILL.md"))
-        if "#!/" not in content.splitlines()[0] if content.splitlines() else "":
-            findings.append(dict(check="H4", severity="info",
-                                 message="session-start missing shebang line"))
-
-    run_hook = hooks_dir / "run-hook.cmd"
-    if not run_hook.exists():
-        findings.append(dict(check="H5", severity="info",
-                             message="Missing hooks/run-hook.cmd (Windows support)"))
+                                 message="session-start.py doesn't reference any SKILL.md"))
 
     hooks_json = hooks_dir / "hooks.json"
     if hooks_json.exists():
@@ -254,8 +243,8 @@ def check_hooks(root):
 
 
 def check_documentation(root):
-    """Documentation consistency via check_docs.py (D1-D9)."""
-    result = check_docs.run_check(root)
+    """Documentation consistency via audit_docs.py (D1-D9)."""
+    result = audit_docs.run_check(root)
     return result.get("findings", [])
 
 
@@ -306,7 +295,7 @@ def check_testing(root):
 def run_audit(project_root):
     root = Path(project_root).resolve()
 
-    sec_results = scan_security.run_scan(root)
+    sec_results = audit_security.run_scan(root)
     lint_results = audit_skill.run_lint(root)
     workflow_results = audit_workflow.run_workflow_audit(root)
     structure = check_structure(root)
@@ -382,7 +371,7 @@ def run_audit(project_root):
             scores[cat_name] = 10
         cat_data["baseline_score"] = scores[cat_name]
 
-    overall_score = compute_weighted_average(scores)
+    overall_score = compute_weighted_average(scores, CATEGORY_WEIGHTS)
 
     total_critical = sum(
         d["counts"].get("critical", 0) for d in categories.values())

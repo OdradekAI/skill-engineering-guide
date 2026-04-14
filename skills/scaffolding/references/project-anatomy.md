@@ -202,9 +202,9 @@ The plugin uses OpenCode's hook API: `config` for path registration, `experiment
 
 ## `hooks/` — Session Bootstrap
 
-### `session-start`
+### `session-start.py`
 
-Bash script that injects the bootstrap skill content as session context. Platform-aware: checks `CURSOR_PLUGIN_ROOT` first, then `CLAUDE_PLUGIN_ROOT`, with a plain-text fallback for unknown platforms.
+Python script that injects the bootstrap skill content as session context. Written in Python for cross-platform compatibility (Windows/Mac/Linux). Platform-aware: checks `CURSOR_PLUGIN_ROOT` first, then `CLAUDE_PLUGIN_ROOT`, with a plain-text fallback for unknown platforms.
 
 | Platform | Env Variable | JSON Output |
 |----------|-------------|-------------|
@@ -212,11 +212,7 @@ Bash script that injects the bootstrap skill content as session context. Platfor
 | Claude Code | `CLAUDE_PLUGIN_ROOT` | `{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "..."}}` |
 | Unknown | Neither set | Plain text on stdout |
 
-The script reads the bootstrap SKILL.md, JSON-escapes it, and wraps it in `<EXTREMELY_IMPORTANT>` tags. Uses `printf` instead of heredoc to avoid bash 5.3+ heredoc hang issues. On read failure, emits a warning to stderr and exits 0 (no-op) rather than blocking the session.
-
-### `run-hook.cmd`
-
-Windows polyglot — a file that is valid both as a Windows `.cmd` batch script and as a bash script. On Windows, it detects Git Bash and delegates to it. If Git Bash is unavailable, exits 0 gracefully so the plugin still loads without bootstrap injection.
+The script reads the bootstrap SKILL.md, JSON-escapes it, and wraps it in `<EXTREMELY_IMPORTANT>` tags. On read failure, emits a warning to stderr and exits 0 (no-op) rather than blocking the session.
 
 ### `hooks.json`
 
@@ -232,7 +228,7 @@ Claude Code hook descriptor. The top-level `description` is shown in the `/hooks
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
+            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
             "timeout": 10,
             "async": false
           }
@@ -253,7 +249,7 @@ Cursor hook descriptor (simpler format):
   "hooks": {
     "sessionStart": [
       {
-        "command": "./hooks/session-start"
+        "command": "python ./hooks/session-start.py"
       }
     ]
   }
@@ -317,7 +313,7 @@ Version synchronization tool. Reads `.version-bump.json` and provides:
 
 Requires Python 3.
 
-Audit and documentation scripts live under `skills/auditing/scripts/` (for example `audit_project.py`, `audit_skill.py`, `scan_security.py`).
+Audit and documentation scripts live under `skills/auditing/scripts/` (for example `audit_plugin.py`, `audit_skill.py`, `audit_security.py`).
 
 ## `tests/` — Integration Tests
 

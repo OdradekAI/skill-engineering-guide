@@ -1,8 +1,8 @@
 # Skill Audit Checklist
 
-Structured criteria for evaluating a single skill. Subset of the full project checklist (`audit-checklist.md`) — 4 categories applicable at skill scope. Use this when running a skill audit on a standalone skill directory or SKILL.md file.
+Structured criteria for evaluating a single skill. Subset of the full project checklist (`plugin-checklist.md`) — 4 categories applicable at skill scope. Use this when running a skill audit on a standalone skill directory or SKILL.md file.
 
-For full project audits (10 categories), see `audit-checklist.md`. For workflow integration checks, see `workflow-checklist.md`.
+For full project audits (10 categories), see `plugin-checklist.md`. For workflow integration checks, see `workflow-checklist.md`.
 
 ## Scoring
 
@@ -37,7 +37,7 @@ The auditor agent (or inline auditor) may adjust the baseline by **±2 points** 
 <!-- BEGIN:skill/structure -->
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
-| S2 | Warning | At least one platform manifest directory present | `audit_project.py` |
+| S2 | Warning | At least one platform manifest directory present | `audit_plugin.py` |
 | S9 | Info | Skill directory names match `name` field in SKILL.md frontmatter | `audit_skill.py` |
 <!-- END:skill/structure -->
 
@@ -102,10 +102,10 @@ Security checks scoped to the skill's content and references. Uses IDs from `sec
 <!-- BEGIN:skill/security -->
 | Check | Risk | Criteria | Automation |
 |-------|------|----------|------------|
-| SC1 | Critical | Instructions to read `.env`, `.ssh/`, `credentials`, `secrets`, `tokens`, `api_key` files | `scan_security.py` (suspicious) |
-| SC9 | Critical | Phrases like "ignore previous instructions", "override safety", "disable verification" | `scan_security.py` |
-| SC13 | Critical | Unicode homoglyphs, zero-width characters, right-to-left override characters | `scan_security.py` |
-| AG1 | Critical | Instructions to "ignore", "override", or "bypass" safety guidelines or user instructions | `scan_security.py` (suspicious) |
+| SC1 | Critical | Instructions to read `.env`, `.ssh/`, `credentials`, `secrets`, `tokens`, `api_key` files | `audit_security.py` (suspicious) |
+| SC9 | Critical | Phrases like "ignore previous instructions", "override safety", "disable verification" | `audit_security.py` |
+| SC13 | Critical | Unicode homoglyphs, zero-width characters, right-to-left override characters | `audit_security.py` |
+| AG1 | Critical | Instructions to "ignore", "override", or "bypass" safety guidelines or user instructions | `audit_security.py` (suspicious) |
 | AG6 | Info | Missing scope constraints (agent prompt doesn't limit what files/actions are in scope) | `agent-only` |
 <!-- END:skill/security -->
 

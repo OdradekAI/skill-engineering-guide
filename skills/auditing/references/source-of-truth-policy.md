@@ -75,14 +75,14 @@ README provides project orientation for new users. It must not make behavioral c
 ## Scoring Formula Note
 
 The project-level and single-skill scoring formulas intentionally differ:
-- **Project-level** (`audit-checklist.md`): capped warning penalty per check ID — `capped_warning_penalty = sum(min(count_per_check_id, 3))`
+- **Project-level** (`plugin-checklist.md`): capped warning penalty per check ID — `capped_warning_penalty = sum(min(count_per_check_id, 3))`
 - **Single-skill** (`skill-checklist.md`): uncapped — `critical × 3 + warning × 1`
 
 This is by design, not a contradiction. Project audits encounter many findings per check ID across multiple skills, so capping prevents a single repetitive issue from dominating the score. Single-skill audits have fewer findings, making capping unnecessary.
 
 ## Automated Enforcement
 
-Two checks in `check_docs.py` support this policy:
+Two checks in `audit_docs.py` support this policy:
 
 - **D8** — Canonical source declaration: each `docs/*.md` guide must have a `> **Canonical source:**` line pointing to an existing skill or agent file
 - **D9** — Numeric cross-validation: key numbers extracted from skills/agents and their corresponding guides must match (e.g., "N attack surfaces", "N categories", "N targets")

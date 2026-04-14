@@ -10,7 +10,7 @@ All templates use `<project-name>` as a placeholder — replace with the actual 
 
 **Template files:** `assets/platforms/claude-code/plugin.json`, `assets/platforms/claude-code/hooks.json`
 
-**Additional shared files:** `hooks/session-start`, `hooks/run-hook.cmd` (see scaffolding assets for templates)
+**Additional shared files:** `hooks/session-start.py` (see `assets/hooks/session-start.py` template)
 
 Claude Code discovers `skills/`, `commands/`, `agents/`, and `hooks/hooks.json` by convention — no path declarations needed in plugin.json. Optional components (`bin/`, `output-styles/`, `.mcp.json`, `.lsp.json`, `settings.json`) are also auto-discovered at their default locations.
 
@@ -35,7 +35,7 @@ Claude Code discovers `skills/`, `commands/`, `agents/`, and `hooks/hooks.json` 
 
 **Template files:** `assets/platforms/cursor/plugin.json`, `assets/platforms/cursor/hooks-cursor.json`
 
-**Additional shared files:** `hooks/session-start`, `hooks/run-hook.cmd`
+**Additional shared files:** `hooks/session-start.py`
 
 Unlike Claude Code, Cursor requires explicit `skills`, `agents`, `commands`, and `hooks` path declarations in plugin.json.
 
@@ -243,18 +243,16 @@ All hook events are supported. For subagents, `Stop` hooks are automatically con
 
 ## Windows Support: `shell: "powershell"` Alternative
 
-The `shell: "powershell"` field on command hooks provides native Windows execution without requiring Git Bash. This is an alternative to the `run-hook.cmd` polyglot wrapper approach:
+The `shell: "powershell"` field on command hooks runs the hook command in PowerShell on Windows. Scaffolded projects use a **Python** `session-start.py` invoked via `python .../hooks/session-start.py`, which avoids Git Bash and does not require a separate `.cmd` shim.
 
 | Approach | Pros | Cons |
 |----------|------|------|
-| `run-hook.cmd` (current default) | Works on older Claude Code versions; reuses existing bash scripts | Extra file; depends on Git Bash on Windows |
-| `shell: "powershell"` | Native Windows; no Git Bash dependency | Requires rewriting hook scripts in PowerShell; needs recent Claude Code |
+| `python hooks/session-start.py` (current default) | Cross-platform; single script; standard library | Requires `python` on PATH |
+| `shell: "powershell"` + PowerShell script | Native Windows shell | Hook logic must be maintained in PowerShell; platform-specific |
 
-Scaffolded projects use `run-hook.cmd` by default for maximum compatibility. Advanced users targeting Windows-only environments can use `shell: "powershell"` instead.
+## Shared Hook: `session-start.py`
 
-## Shared Hook: `session-start`
-
-The `session-start` script is shared across Claude Code and Cursor. It:
+The `session-start.py` script is shared across Claude Code and Cursor. It:
 
 1. Determines the plugin root from its own location
 2. Reads the bootstrap SKILL.md
@@ -263,13 +261,7 @@ The `session-start` script is shared across Claude Code and Cursor. It:
 5. Detects platform via environment variables
 6. Emits the correct JSON shape
 
-Use `printf` instead of heredoc to avoid bash 5.3+ hanging issues.
-
-## Shared Hook: `run-hook.cmd`
-
-Windows polyglot wrapper. A file that is simultaneously valid as a Windows `.cmd` batch script and a bash script. The Windows path detects Git Bash and delegates; if Git Bash is unavailable, exits 0 so the plugin loads without bootstrap injection.
-
-Template available at: `assets/hooks/run-hook.cmd`
+Implementation is Python for portability (Windows, macOS, Linux) without bash or polyglot wrappers.
 
 ## Platform Detection Summary
 
@@ -279,7 +271,7 @@ Template available at: `assets/hooks/run-hook.cmd`
 | `CLAUDE_PLUGIN_ROOT` | Claude Code | `{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "..."}}` |
 | Neither set | Unknown/fallback | Plain text context on stdout |
 
-The `session-start` script checks `CURSOR_PLUGIN_ROOT` first, then `CLAUDE_PLUGIN_ROOT`, with a plain-text fallback for unknown platforms.
+The `session-start.py` script checks `CURSOR_PLUGIN_ROOT` first, then `CLAUDE_PLUGIN_ROOT`, with a plain-text fallback for unknown platforms.
 
 ## Claude vs Cursor Hook Format Comparison
 
@@ -392,7 +384,7 @@ Run `claude --debug` to see detailed plugin loading information:
 |-------|-------|----------|
 | Plugin not loading | Invalid `plugin.json` | Run `claude plugin validate` to identify syntax/schema errors |
 | Skills not appearing | Wrong directory structure | Components must be at plugin root, not inside `.claude-plugin/` |
-| Hooks not firing | Script not executable | Run `chmod +x ./hooks/session-start` |
+| Hooks not firing | `python` not on PATH or wrong `command` in hooks config | Ensure `python` runs `hooks/session-start.py` as in platform templates; on Unix, `chmod +x` is not required when using `python path/to/script` |
 | MCP server fails | Missing `${CLAUDE_PLUGIN_ROOT}` | Use the variable for all plugin paths — hardcoded paths break after install |
 | Path errors after install | Absolute or `../` paths | All paths must be relative, starting with `./` |
 | LSP `Executable not found` | Language server not installed | Install the binary separately (e.g., `npm install -g typescript-language-server`) |

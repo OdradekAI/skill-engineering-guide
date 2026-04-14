@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 """
-Integration tests for bundles-forge — cross-platform replacements for shell tests.
+Integration tests for bundles-forge — structure, platform integration, and hook behavior.
 
-Replaces:
-  - test-bootstrap-injection.sh
-  - test-version-sync.sh
-  - test-skill-discovery.sh
+Covers: hooks JSON schema, bootstrap injection (bash + pure-Python simulation),
+version sync, and skill discovery/frontmatter validation.
 
 Run: python tests/test_integration.py -v
 Or:  python -m pytest tests/test_integration.py -v
@@ -19,7 +17,8 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-HOOK_PATH = REPO_ROOT / "hooks" / "session-start"
+HOOKS_DIR = REPO_ROOT / "hooks"
+HOOK_PATH = HOOKS_DIR / "session-start.py"
 SKILLS_DIR = REPO_ROOT / "skills"
 RELEASING_SCRIPTS = REPO_ROOT / "skills" / "releasing" / "scripts"
 VERSION_CONFIG = REPO_ROOT / ".version-bump.json"
@@ -35,8 +34,9 @@ EXPECTED_SKILLS = [
 ]
 
 
+
 def _run_hook(env_overrides=None):
-    """Run the session-start hook and return (stdout, stderr, returncode)."""
+    """Run the session-start.py hook via Python and return (stdout, stderr, returncode)."""
     env = os.environ.copy()
     env.pop("CURSOR_PLUGIN_ROOT", None)
     env.pop("CLAUDE_PLUGIN_ROOT", None)
@@ -44,10 +44,35 @@ def _run_hook(env_overrides=None):
         env.update(env_overrides)
 
     result = subprocess.run(
-        ["bash", str(HOOK_PATH)],
+        [sys.executable, str(HOOK_PATH)],
         capture_output=True, text=True, env=env, timeout=15,
     )
     return result.stdout, result.stderr, result.returncode
+
+
+def _simulate_hook(platform=None):
+    """Pure-Python simulation of hooks/session-start logic (no bash required)."""
+    skill_path = REPO_ROOT / "skills" / "using-bundles-forge" / "SKILL.md"
+    content = skill_path.read_text(encoding="utf-8")
+    escaped = (content.replace("\\", "\\\\")
+                      .replace('"', '\\"')
+                      .replace("\n", "\\n")
+                      .replace("\r", "\\r")
+                      .replace("\t", "\\t"))
+    session_ctx = (
+        "<EXTREMELY_IMPORTANT>\\nYou have bundles-forge skills loaded."
+        "\\n\\n**Below is the full content of your "
+        "'bundles-forge:using-bundles-forge' skill. For all other skills, "
+        "use the 'Skill' tool:**\\n\\n"
+        f"{escaped}\\n</EXTREMELY_IMPORTANT>")
+    if platform == "cursor":
+        return json.dumps({"additional_context": session_ctx})
+    elif platform == "claude":
+        return json.dumps({"hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": session_ctx}})
+    else:
+        return session_ctx
 
 
 def _parse_frontmatter(content):
@@ -76,7 +101,8 @@ def _parse_frontmatter(content):
 
 
 class TestBootstrapInjection(unittest.TestCase):
-    """Replaces test-bootstrap-injection.sh — runtime behavior tests."""
+    """Bootstrap injection tests — pure-Python simulation always runs;
+    bash subprocess tests run as additional validation when bash is available."""
 
     def test_hook_script_exists(self):
         self.assertTrue(HOOK_PATH.exists(), "hooks/session-start missing")
@@ -85,64 +111,71 @@ class TestBootstrapInjection(unittest.TestCase):
         content = HOOK_PATH.read_text(encoding="utf-8")
         self.assertIn("using-bundles-forge/SKILL.md", content)
 
-    @unittest.skipUnless(
-        subprocess.run(["bash", "--version"], capture_output=True).returncode == 0,
-        "bash not available"
-    )
-    def test_claude_code_output_is_valid_json(self):
-        stdout, _, rc = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
-        self.assertEqual(rc, 0, f"Hook exited {rc}")
-        data = json.loads(stdout)
-        self.assertIn("hookSpecificOutput", data,
-                       "Claude Code mode should produce hookSpecificOutput")
-
-    @unittest.skipUnless(
-        subprocess.run(["bash", "--version"], capture_output=True).returncode == 0,
-        "bash not available"
-    )
-    def test_fallback_output_is_plain_text(self):
-        """When neither platform env var is set, output is plain text (not JSON)."""
-        stdout, _, rc = _run_hook()
-        self.assertEqual(rc, 0, f"Hook exited {rc}")
-        self.assertIn("EXTREMELY_IMPORTANT", stdout,
-                       "Fallback mode should still output bootstrap content")
-        self.assertNotIn("hookSpecificOutput", stdout,
-                         "Fallback mode should not use Claude Code JSON format")
-        self.assertNotIn("additional_context", stdout,
-                         "Fallback mode should not use Cursor JSON format")
-
-    @unittest.skipUnless(
-        subprocess.run(["bash", "--version"], capture_output=True).returncode == 0,
-        "bash not available"
-    )
-    def test_cursor_output_is_valid_json(self):
-        stdout, _, rc = _run_hook({"CURSOR_PLUGIN_ROOT": str(REPO_ROOT)})
-        self.assertEqual(rc, 0, f"Hook exited {rc}")
-        data = json.loads(stdout)
-        self.assertIn("additional_context", data,
-                       "Cursor mode should produce additional_context")
-
-    @unittest.skipUnless(
-        subprocess.run(["bash", "--version"], capture_output=True).returncode == 0,
-        "bash not available"
-    )
-    def test_output_contains_bootstrap_markers(self):
-        stdout, _, _ = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
-        self.assertIn("EXTREMELY_IMPORTANT", stdout)
-        self.assertIn("bundles-forge", stdout)
-
     def test_hook_detects_cursor_platform(self):
         content = HOOK_PATH.read_text(encoding="utf-8")
         self.assertIn("CURSOR_PLUGIN_ROOT", content,
                        "Hook should check CURSOR_PLUGIN_ROOT for platform detection")
 
-    def test_claude_code_uses_explicit_detection(self):
-        """Claude Code output uses CLAUDE_PLUGIN_ROOT for explicit platform detection."""
+    def test_hook_detects_claude_platform(self):
         content = HOOK_PATH.read_text(encoding="utf-8")
         self.assertIn("CLAUDE_PLUGIN_ROOT", content,
                        "Hook should check CLAUDE_PLUGIN_ROOT for Claude Code detection")
         self.assertIn("hookSpecificOutput", content,
                        "Hook should emit hookSpecificOutput for Claude Code")
+
+    # -- Pure-Python simulation (always runs, no bash dependency) --
+
+    def test_sim_claude_output_is_valid_json(self):
+        output = _simulate_hook(platform="claude")
+        data = json.loads(output)
+        self.assertIn("hookSpecificOutput", data)
+
+    def test_sim_cursor_output_is_valid_json(self):
+        output = _simulate_hook(platform="cursor")
+        data = json.loads(output)
+        self.assertIn("additional_context", data)
+
+    def test_sim_fallback_is_plain_text(self):
+        output = _simulate_hook()
+        self.assertIn("EXTREMELY_IMPORTANT", output)
+        self.assertNotIn("hookSpecificOutput", output)
+        self.assertNotIn("additional_context", output)
+
+    def test_sim_claude_output_contains_bootstrap_content(self):
+        output = _simulate_hook(platform="claude")
+        self.assertIn("bundles-forge", output)
+
+    def test_sim_platform_appropriate_json_structure(self):
+        cursor_output = _simulate_hook(platform="cursor")
+        self.assertIn("additional_context", cursor_output)
+        claude_output = _simulate_hook(platform="claude")
+        self.assertIn("hookSpecificOutput", claude_output)
+
+    # -- Subprocess tests (run the actual hook script via Python) --
+
+    def test_subprocess_claude_output_is_valid_json(self):
+        stdout, _, rc = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
+        self.assertEqual(rc, 0, f"Hook exited {rc}")
+        data = json.loads(stdout)
+        self.assertIn("hookSpecificOutput", data)
+
+    def test_subprocess_cursor_output_is_valid_json(self):
+        stdout, _, rc = _run_hook({"CURSOR_PLUGIN_ROOT": str(REPO_ROOT)})
+        self.assertEqual(rc, 0, f"Hook exited {rc}")
+        data = json.loads(stdout)
+        self.assertIn("additional_context", data)
+
+    def test_subprocess_fallback_is_plain_text(self):
+        stdout, _, rc = _run_hook()
+        self.assertEqual(rc, 0, f"Hook exited {rc}")
+        self.assertIn("EXTREMELY_IMPORTANT", stdout)
+        self.assertNotIn("hookSpecificOutput", stdout)
+        self.assertNotIn("additional_context", stdout)
+
+    def test_subprocess_output_contains_bootstrap_markers(self):
+        stdout, _, _ = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
+        self.assertIn("EXTREMELY_IMPORTANT", stdout)
+        self.assertIn("bundles-forge", stdout)
 
 
 class TestHooksJsonSchema(unittest.TestCase):

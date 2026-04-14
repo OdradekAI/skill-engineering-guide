@@ -52,34 +52,10 @@ _BACKTICK_REF_RE = re.compile(r"`([a-z0-9-]+):([a-z0-9-]+)`")
 
 
 # ---------------------------------------------------------------------------
-# Scoring (shared formula with audit_project)
+# Scoring
 # ---------------------------------------------------------------------------
 
-def compute_baseline_score(findings):
-    """Deterministic baseline: 10 minus capped penalties.
-
-    Warnings from the same check-ID are capped at -3 per ID.
-    """
-    from collections import Counter
-    critical = sum(1 for f in findings if f.get("severity") == "critical")
-    warning_checks = Counter(
-        f.get("check", "?") for f in findings
-        if f.get("severity") == "warning"
-    )
-    warning_penalty = sum(min(count, 3) for count in warning_checks.values())
-    return max(0, 10 - (critical * 3 + warning_penalty))
-
-
-def compute_weighted_average(scores):
-    total_weight = 0
-    weighted_sum = 0.0
-    for layer, score in scores.items():
-        if score is None:
-            continue
-        w = LAYER_WEIGHTS.get(layer, 1)
-        weighted_sum += score * w
-        total_weight += w
-    return round(weighted_sum / total_weight, 1) if total_weight else 0.0
+from _scoring import compute_baseline_score, compute_weighted_average
 
 
 # ---------------------------------------------------------------------------
@@ -352,7 +328,7 @@ def run_workflow_audit(project_root, focus_skills=None):
             scores[layer_name] = compute_baseline_score(layer_data["findings"])
             layer_data["baseline_score"] = scores[layer_name]
 
-    overall_score = compute_weighted_average(scores)
+    overall_score = compute_weighted_average(scores, LAYER_WEIGHTS)
 
     all_findings = static_findings + semantic_findings + behavioral_findings
     total_critical = sum(1 for f in all_findings

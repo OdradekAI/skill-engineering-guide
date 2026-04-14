@@ -38,12 +38,12 @@ The auditor agent (or inline auditor) may adjust the baseline by **±2 points** 
 <!-- BEGIN:structure -->
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
-| S1 | Critical | `skills/` and `hooks/` directories exist | `audit_project.py` |
-| S2 | Warning | At least one platform manifest directory present | `audit_project.py` |
-| S3 | Warning | `.gitignore` exists | `audit_project.py` |
-| S5 | Warning | `README.md` exists | `audit_project.py` |
-| S6 | Info | `LICENSE` exists | `audit_project.py` |
-| S7 | Warning | Bootstrap skill (`using-*`) exists with `SKILL.md` | `audit_project.py` |
+| S1 | Critical | `skills/` and `hooks/` directories exist | `audit_plugin.py` |
+| S2 | Warning | At least one platform manifest directory present | `audit_plugin.py` |
+| S3 | Warning | `.gitignore` exists | `audit_plugin.py` |
+| S5 | Warning | `README.md` exists | `audit_plugin.py` |
+| S6 | Info | `LICENSE` exists | `audit_plugin.py` |
+| S7 | Warning | Bootstrap skill (`using-*`) exists with `SKILL.md` | `audit_plugin.py` |
 | S8 | Warning | Skill-agent responsibility boundary: skills handle orchestration (scope detection, dispatch, result composition), agents handle execution (checks, scoring, reporting). No duplication of execution details — agent file is the single source of truth | `agent-only` |
 | S9 | Info | Skill directory names match `name` field in SKILL.md frontmatter | `audit_skill.py` |
 | S10 | Info | Agent files in `agents/` are self-contained — body includes complete execution protocol (≥5 non-empty body lines), not just a pointer | `audit_skill.py` |
@@ -61,14 +61,14 @@ Run these checks only for platforms the project claims to support.
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
 | P1 | Critical | Each target platform has its manifest file present | `agent-only` |
-| P2 | Critical | Manifest JSON is valid (parseable, no syntax errors) | `audit_project.py` (M1) |
-| P3 | Critical | Cursor manifest paths (`skills`, `hooks`) resolve to existing directories/files | `audit_project.py` (M2) |
+| P2 | Critical | Manifest JSON is valid (parseable, no syntax errors) | `audit_plugin.py` (M1) |
+| P3 | Critical | Cursor manifest paths (`skills`, `hooks`) resolve to existing directories/files | `audit_plugin.py` (M2) |
 | P4 | Warning | Manifest metadata (name, version, description) is filled in | `agent-only` |
 | P5 | Warning | Author and repository fields are populated | `agent-only` |
 | P7 | Info | `claude plugin validate` (or `/plugin validate`) passes without errors — quick schema check for `plugin.json`, frontmatter, and `hooks.json` (Claude Code environments only) | `agent-only` |
 <!-- END:platform_manifests -->
 
-**Script ID mapping:** `audit_project.py` emits M1 (JSON parse), M2 (path resolve), M3 (OpenCode exports). These map to P2, P3, and OpenCode-specific validation respectively.
+**Script ID mapping:** `audit_plugin.py` emits M1 (JSON parse), M2 (path resolve), M3 (OpenCode exports). These map to P2, P3, and OpenCode-specific validation respectively.
 
 **Platform manifest locations:**
 - Claude Code: `.claude-plugin/plugin.json`
@@ -84,14 +84,14 @@ Run these checks only for platforms the project claims to support.
 <!-- BEGIN:version_sync -->
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
-| V1 | Critical | `.version-bump.json` exists and is valid | `audit_project.py` |
-| V2 | Warning | All files listed in `.version-bump.json` actually exist | `audit_project.py` |
-| V3 | Critical | All listed files have the same version string (no drift) | `audit_project.py` |
-| V4 | Info | `scripts/bump-version.sh` wrapper exists | `audit_project.py` |
+| V1 | Critical | `.version-bump.json` exists and is valid | `audit_plugin.py` |
+| V2 | Warning | All files listed in `.version-bump.json` actually exist | `audit_plugin.py` |
+| V3 | Critical | All listed files have the same version string (no drift) | `audit_plugin.py` |
+| V4 | Info | `scripts/bump-version.sh` wrapper exists | `audit_plugin.py` |
 | V5 | Warning | Every platform manifest is listed in `.version-bump.json` | `agent-only` |
 | V6 | Info | `python skills/releasing/scripts/bump_version.py --check` exits 0 | `agent-only` |
 | V7 | Info | `python skills/releasing/scripts/bump_version.py --audit` finds no undeclared version strings | `agent-only` |
-| V8 | Warning | `skills/scaffolding/assets/scripts/bump_version.py` template is in sync with `skills/releasing/scripts/bump_version.py` source | `agent-only` |
+| V8 | Warning | `skills/scaffolding/assets/scripts/bump_version.py` template is in sync with `skills/releasing/scripts/bump_version.py` source | `audit_plugin.py` |
 <!-- END:version_sync -->
 
 **Quick drift check:**
@@ -170,21 +170,19 @@ Functional correctness checks for session bootstrap hooks. Security-related hook
 <!-- BEGIN:hooks -->
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
-| H1 | Warning | `hooks/` directory exists | `audit_project.py` |
-| H2 | Warning | `hooks/session-start` exists | `audit_project.py` |
-| H3 | Warning | `session-start` references SKILL.md | `audit_project.py` |
-| H4 | Info | `session-start` has shebang line | `audit_project.py` |
-| H5 | Info | `hooks/run-hook.cmd` exists (Windows support) | `audit_project.py` |
-| H6 | Warning | `session-start` handles all target platforms (three-way: CURSOR_PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT, fallback) | `agent-only` |
+| H1 | Warning | `hooks/` directory exists | `audit_plugin.py` |
+| H2 | Warning | `hooks/session-start.py` exists | `audit_plugin.py` |
+| H3 | Warning | `session-start.py` references SKILL.md | `audit_plugin.py` |
+| H6 | Warning | `session-start.py` handles all target platforms (three-way: CURSOR_PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT, fallback) | `agent-only` |
 | H7 | Warning | JSON escaping is correct (backslashes, quotes, newlines, tabs) | `agent-only` |
-| H8 | Info | Uses `printf` instead of heredoc (bash 5.3+ compatibility) | `agent-only` |
-| H9 | Info | `hooks.json` includes top-level `description` field and per-handler `timeout` | `audit_project.py` |
-| H12 | Info | `session-start` exits 0 on read failure (no-op, does not block session) | `agent-only` |
+| H8 | Info | Hook configs invoke `python` with `hooks/session-start.py` (cross-platform; no Git Bash or `.cmd` shim) | `agent-only` |
+| H9 | Info | `hooks.json` includes top-level `description` field and per-handler `timeout` | `audit_plugin.py` |
+| H12 | Info | `session-start.py` exits 0 on read failure (no-op, does not block session) | `agent-only` |
 <!-- END:hooks -->
 
 **Quick hook test:**
 ```bash
-CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python3 -m json.tool
+CLAUDE_PLUGIN_ROOT="$(pwd)" python hooks/session-start.py | python -m json.tool
 ```
 
 ---
@@ -194,15 +192,15 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python3 -m json.tool
 <!-- BEGIN:testing -->
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
-| T1 | Warning | `tests/` directory exists | `audit_project.py` |
+| T1 | Warning | `tests/` directory exists | `audit_plugin.py` |
 | T2 | Info | At least one test per target platform | `agent-only` |
 | T3 | Info | Tests verify skill discovery (skills appear in available list) | `agent-only` |
-| T4 | Info | Tests verify bootstrap injection (session-start content loads) | `agent-only` |
-| T5 | Warning | Each skill has a test prompts file (`tests/prompts/<skill-name>.yml` or `skills/<name>/tests/prompts.yml`) | `audit_project.py` |
+| T4 | Info | Tests verify bootstrap injection (`session-start.py` output / content loads) | `agent-only` |
+| T5 | Warning | Each skill has a test prompts file (`tests/prompts/<skill-name>.yml` or `skills/<name>/tests/prompts.yml`) | `audit_plugin.py` |
 | T6 | Info | Test prompts include both should-trigger and should-not-trigger samples | `agent-only` |
 | T7 | Info | Test prompts cover all major branch paths of the skill | `agent-only` |
-| T8 | Info | Most recent A/B eval result exists in `.bundles-forge/` | `audit_project.py` |
-| T9 | Info | Most recent chain eval result exists in `.bundles-forge/` | `audit_project.py` |
+| T8 | Info | Most recent A/B eval result exists in `.bundles-forge/` | `audit_plugin.py` |
+| T9 | Info | Most recent chain eval result exists in `.bundles-forge/` | `audit_plugin.py` |
 <!-- END:testing -->
 
 ---
@@ -214,15 +212,15 @@ Documentation consistency checks — verifies that project docs stay in sync wit
 <!-- BEGIN:documentation -->
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
-| D1 | Warning | Skill names in AGENTS.md / CLAUDE.md / README match skills/ directory | `check_docs.py` |
-| D2 | Critical | Cross-references (`project:skill`) in all .md files resolve to existing skills | `check_docs.py` |
-| D3 | Warning | CLAUDE.md Platform Manifests table matches `.version-bump.json` | `check_docs.py` |
-| D4 | Critical | Skill scripts referenced in CLAUDE.md exist at their declared `skills/.../scripts/` paths | `check_docs.py` |
-| D5 | Warning | Agent names in CLAUDE.md match agents/ directory | `check_docs.py` |
-| D6 | Warning | README.md and README.zh.md hard data (skills, agents, commands, links) in sync | `check_docs.py` |
-| D7 | Warning | docs/*.md and docs/*.zh.md pairs have consistent hard data (tables, commands, links) | `check_docs.py` |
-| D8 | Warning | Each docs/*.md guide has a `> **Canonical source:**` declaration pointing to an existing skill or agent file | `check_docs.py` |
-| D9 | Warning | Key numbers in docs/*.md guides match their canonical source (e.g., attack surface count, category count, target count) | `check_docs.py` |
+| D1 | Warning | Skill names in AGENTS.md / CLAUDE.md / README match skills/ directory | `audit_docs.py` |
+| D2 | Critical | Cross-references (`project:skill`) in all .md files resolve to existing skills | `audit_docs.py` |
+| D3 | Warning | CLAUDE.md Platform Manifests table matches `.version-bump.json` | `audit_docs.py` |
+| D4 | Critical | Skill scripts referenced in CLAUDE.md exist at their declared `skills/.../scripts/` paths | `audit_docs.py` |
+| D5 | Warning | Agent names in CLAUDE.md match agents/ directory | `audit_docs.py` |
+| D6 | Warning | README.md and README.zh.md hard data (skills, agents, commands, links) in sync | `audit_docs.py` |
+| D7 | Warning | docs/*.md and docs/*.zh.md pairs have consistent hard data (tables, commands, links) | `audit_docs.py` |
+| D8 | Warning | Each docs/*.md guide has a `> **Canonical source:**` declaration pointing to an existing skill or agent file | `audit_docs.py` |
+| D9 | Warning | Key numbers in docs/*.md guides match their canonical source (e.g., attack surface count, category count, target count) | `audit_docs.py` |
 <!-- END:documentation -->
 
 ---
@@ -252,7 +250,7 @@ curl|wget|nc |eval\(|child_process|\.env|api_key|secret|ignore safety|override|b
 
 After running all checks, compile findings using the appropriate report template:
 
-- **Full project audit:** `references/report-template.md` — six-layer structure for 10-category audits
+- **Full project audit:** `references/plugin-report-template.md` — six-layer structure for 10-category audits
 - **Single skill audit:** `references/skill-report-template.md` — three-layer structure for 4-category audits (see `references/skill-checklist.md` for the 4-category checklist)
 - **Workflow audit:** `references/workflow-report-template.md` — three-layer structure for workflow checks
 

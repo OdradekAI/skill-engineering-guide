@@ -10,10 +10,10 @@ Bundles Forge provides four audit scopes, each targeting a different level of gr
 
 | Scope | When to Use | Categories | Script |
 |-------|------------|-----------|--------|
-| **Full Project** | Pre-release, major changes, initial review | 10 categories, 60+ checks | `audit_project.py` |
+| **Full Project** | Pre-release, major changes, initial review | 10 categories, 60+ checks | `audit_plugin.py` |
 | **Single Skill** | Reviewing one skill, third-party skill evaluation | 4 categories (Structure, Quality, Cross-Refs, Security) | `audit_skill.py` |
 | **Workflow** | After adding/removing skills, chain integration check | 3 layers (Static, Semantic, Behavioral), W1-W11 | `audit_workflow.py` |
-| **Security-Only** | Quick safety scan, pre-install check | 7 attack surfaces | `scan_security.py` |
+| **Security-Only** | Quick pattern-based safety check, pre-install scan | 7 file categories, known dangerous patterns | `audit_security.py` |
 
 All scopes share the same scoring formula, severity levels, and report conventions. The agent auto-detects scope from the target path — or you can invoke scripts directly.
 
@@ -84,15 +84,15 @@ The agent detects the project root (has `skills/` directory) and runs all 10 cat
 ### Via Script
 
 ```bash
-python skills/auditing/scripts/audit_project.py <project-root>        # markdown report
-python skills/auditing/scripts/audit_project.py --json <project-root>  # JSON output
+python skills/auditing/scripts/audit_plugin.py <project-root>        # markdown report
+python skills/auditing/scripts/audit_plugin.py --json <project-root>  # JSON output
 ```
 
-`audit_project.py` orchestrates three sub-scripts:
+`audit_plugin.py` orchestrates four sub-scripts:
 - `audit_skill.py` — skill quality linting (Q1-Q15, S9, X1-X3, C1, G1-G5)
-- `scan_security.py` — security pattern scanning (7 attack surfaces)
+- `audit_security.py` — pattern-based security smell detection (7 file categories)
 - `audit_workflow.py` — workflow integration analysis (W1-W9)
-- `check_docs.py` — documentation consistency (D1-D9)
+- `audit_docs.py` — documentation consistency (D1-D9)
 
 Then adds its own checks for structure, manifests, version sync, hooks, and testing.
 
@@ -108,18 +108,18 @@ Then adds its own checks for structure, manifests, version sync, hooks, and test
 | 6 | Workflow | High (3) | Graph topology, integration symmetry, artifacts (W1-W11) |
 | 7 | Hooks | Medium (2) | Bootstrap injection, platform detection (functional correctness only) |
 | 8 | Testing | Medium (2) | Test directory, prompts, A/B eval results |
-| 9 | Documentation | Low (1) | Documentation consistency via `check_docs.py` (D1-D9) |
+| 9 | Documentation | Low (1) | Documentation consistency via `audit_docs.py` (D1-D9) |
 | 10 | Security | High (3) | 7 attack surfaces — SC/HK/OC/AG/BS/MC/PC IDs from `security-checklist.md` |
 
 Total weight = 23. Overall score = `sum(score_i × weight_i) / 23`.
 
 ### Report Template
 
-Full project audits use `skills/auditing/references/report-template.md` — six-layer structure: Decision Brief → Risk Matrix → Findings by Category → Methodology → Appendix. For annotated report examples, see `skills/auditing/references/report-examples.md`.
+Full project audits use `skills/auditing/references/plugin-report-template.md` — six-layer structure: Decision Brief → Risk Matrix → Findings by Category → Methodology → Appendix. For annotated report examples, see `skills/auditing/references/report-examples.md`.
 
 ### Checklists
 
-- **Project checklist:** `skills/auditing/references/audit-checklist.md` (Categories 1-5, 7-10)
+- **Project checklist:** `skills/auditing/references/plugin-checklist.md` (Categories 1-5, 7-10)
 - **Workflow checklist:** `skills/auditing/references/workflow-checklist.md` (Category 6: W1-W11)
 - **Security checklist:** `skills/auditing/references/security-checklist.md` (Category 10 detail)
 
@@ -147,13 +147,13 @@ python skills/auditing/scripts/audit_skill.py --json <skill-directory>     # JSO
 
 `audit_skill.py` orchestrates:
 - `lint_skills.lint_skill()` — quality, structure, and cross-reference checks
-- `scan_security` — security scanning scoped to the skill directory
+- `audit_security` — security scanning scoped to the skill directory
 
 You can also run the sub-scripts individually:
 
 ```bash
-python skills/auditing/scripts/audit_skill.py <skill-directory>     # quality + cross-refs
-python skills/auditing/scripts/scan_security.py <skill-directory>   # security scan
+python skills/auditing/scripts/audit_skill.py <skill-directory>     # quality + cross-refs + security
+python skills/auditing/scripts/audit_security.py <skill-directory>   # security scan only
 ```
 
 ### 4 Categories
@@ -264,9 +264,9 @@ Maps to the `bundles-forge:auditing` skill in security-only mode — runs only C
 ### Via Script
 
 ```bash
-python skills/auditing/scripts/scan_security.py <project-root>           # project-wide scan
-python skills/auditing/scripts/scan_security.py <skill-directory>         # single skill scan
-python skills/auditing/scripts/scan_security.py --json <project-root>     # JSON output
+python skills/auditing/scripts/audit_security.py <project-root>           # project-wide scan
+python skills/auditing/scripts/audit_security.py <skill-directory>         # single skill scan
+python skills/auditing/scripts/audit_security.py --json <project-root>     # JSON output
 ```
 
 ### 7 Attack Surfaces
@@ -310,11 +310,11 @@ Auditing is a **pure diagnostic** scope: it records findings, scores, and go/no-
 ### Script Composition
 
 ```bash
-# Full pipeline: lint → security → docs → full audit (audit_project orchestrates all)
+# Full pipeline: lint → security → docs → full audit (audit_plugin orchestrates all)
 python skills/auditing/scripts/audit_skill.py --json . > lint.json
-python skills/auditing/scripts/scan_security.py --json . > security.json
-python skills/auditing/scripts/check_docs.py --json . > docs.json
-python skills/auditing/scripts/audit_project.py --json . > audit.json   # orchestrates lint + security + docs + workflow
+python skills/auditing/scripts/audit_security.py --json . > security.json
+python skills/auditing/scripts/audit_docs.py --json . > docs.json
+python skills/auditing/scripts/audit_plugin.py --json . > audit.json   # orchestrates lint + security + docs + workflow
 
 # Single skill in CI
 python skills/auditing/scripts/audit_skill.py --json skills/my-skill > skill-audit.json
@@ -326,10 +326,10 @@ python skills/auditing/scripts/audit_workflow.py --json --focus-skills changed-s
 ### Exit Code Usage
 
 ```bash
-python skills/auditing/scripts/audit_project.py . || echo "Audit found issues (exit $?)"
+python skills/auditing/scripts/audit_plugin.py . || echo "Audit found issues (exit $?)"
 
 # Fail CI only on critical
-python skills/auditing/scripts/audit_project.py . ; [ $? -ne 2 ] || exit 1
+python skills/auditing/scripts/audit_plugin.py . ; [ $? -ne 2 ] || exit 1
 ```
 
 ### JSON Output

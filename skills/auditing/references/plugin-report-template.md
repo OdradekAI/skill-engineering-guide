@@ -2,7 +2,7 @@
 
 Six-layer report structure for bundle-plugin audits. Each layer serves a distinct audience depth — Layer 1 enables a 30-second decision, Layer 6 provides raw data for deep dives.
 
-This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `skills/auditing/scripts/audit_project.py` (produces compact Markdown or JSON).
+This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `skills/auditing/scripts/audit_plugin.py` (produces compact Markdown or JSON).
 
 This template covers three audit contexts: **pre-release** (version gate), **post-change** (regression check), and **third-party evaluation** (install decision). For worked examples of each context, see `references/report-examples.md`.
 
@@ -173,15 +173,15 @@ python: "<version>"
 
 | Tool | Purpose |
 |------|---------|
-| `skills/auditing/scripts/audit_project.py` | Orchestrates full audit |
+| `skills/auditing/scripts/audit_plugin.py` | Orchestrates full audit |
 | `skills/auditing/scripts/audit_workflow.py` | Workflow integration analysis |
-| `skills/auditing/scripts/scan_security.py` | Security pattern scanning |
+| `skills/auditing/scripts/audit_security.py` | Security pattern scanning |
 | `skills/auditing/scripts/audit_skill.py` | Skill quality linting |
 | `skills/releasing/scripts/bump_version.py` | Version drift detection |
 
 ### Limitations
 
-- `skills/auditing/scripts/scan_security.py` uses regex — false positives possible on negated contexts; may miss obfuscated patterns
+- `skills/auditing/scripts/audit_security.py` uses regex — false positives possible on negated contexts; may miss obfuscated patterns
 - `skills/auditing/scripts/audit_skill.py` uses a lightweight YAML parser — complex YAML edge cases may be missed
 - Token estimation uses heuristic rates (prose ~1.3×words, code ~chars/3.5, tables ~chars/3.0); actual counts vary by model
 
@@ -215,11 +215,11 @@ python: "<version>"
 
 ### C. Script Outputs
 
-<details><summary>skills/auditing/scripts/audit_project.py output</summary>
+<details><summary>skills/auditing/scripts/audit_plugin.py output</summary>
 <raw output>
 </details>
 
-<details><summary>skills/auditing/scripts/scan_security.py output</summary>
+<details><summary>skills/auditing/scripts/audit_security.py output</summary>
 <raw output>
 </details>
 

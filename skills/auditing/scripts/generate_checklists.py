@@ -53,15 +53,15 @@ SECTION_HEADERS = {
 DEFAULT_HEADER = ("Check", "Severity", "Criteria", "Automation")
 
 CHECKLIST_FILES = {
-    "skills/auditing/references/audit-checklist.md": {
-        "structure": {"scope": "project", "category": "structure"},
-        "platform_manifests": {"scope": "project", "category": "platform_manifests"},
-        "version_sync": {"scope": "project", "category": "version_sync"},
-        "skill_quality": {"scope": "project", "category": "skill_quality"},
-        "cross_references": {"scope": "project", "category": "cross_references"},
-        "hooks": {"scope": "project", "category": "hooks"},
-        "testing": {"scope": "project", "category": "testing"},
-        "documentation": {"scope": "project", "category": "documentation"},
+    "skills/auditing/references/plugin-checklist.md": {
+        "structure": {"scope": "plugin", "category": "structure"},
+        "platform_manifests": {"scope": "plugin", "category": "platform_manifests"},
+        "version_sync": {"scope": "plugin", "category": "version_sync"},
+        "skill_quality": {"scope": "plugin", "category": "skill_quality"},
+        "cross_references": {"scope": "plugin", "category": "cross_references"},
+        "hooks": {"scope": "plugin", "category": "hooks"},
+        "testing": {"scope": "plugin", "category": "testing"},
+        "documentation": {"scope": "plugin", "category": "documentation"},
     },
     "skills/auditing/references/skill-checklist.md": {
         "skill/structure": {"scope": "skill", "category": "structure"},

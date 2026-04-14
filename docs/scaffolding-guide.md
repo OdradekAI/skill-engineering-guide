@@ -201,7 +201,7 @@ Scaffolding can remove MCP servers, CLI executables, or LSP servers — includin
 | OpenCode | `.opencode/plugins/<name>.js` | — (JS plugin handles bootstrap) | `.opencode/INSTALL.md` | No |
 | Gemini CLI | `gemini-extension.json` | — | `GEMINI.md` | Yes |
 
-**Shared hooks:** `hooks/session-start` and `hooks/run-hook.cmd` are shared between Claude Code and Cursor. They're created when either platform is targeted.
+**Shared hooks:** `hooks/session-start.py` is shared between Claude Code and Cursor. It's created when either platform is targeted. Written in Python for cross-platform compatibility.
 
 **`marketplace.json`:** Only generated when the plugin targets marketplace distribution. It declares plugin metadata for the marketplace index and is version-tracked via `.version-bump.json`.
 
@@ -258,10 +258,9 @@ These constraints apply to marketplace-distributed plugins. Development installs
 | Generating all platforms regardless of need | Wanting to be thorough | Only generate for platforms you actually use today |
 | Forgetting `.version-bump.json` entries | New manifest added manually | Every version-bearing manifest needs a bump config entry |
 | Wrong hook casing | Copying from one platform to another | Claude Code: `SessionStart`, Cursor: `sessionStart` |
-| Missing `run-hook.cmd` | Developing on macOS/Linux | Always include if any hook-based platform is targeted — Windows users need it |
 | Bootstrap skill > 200 lines | Packing too much into the routing table | Keep lean — extract heavy content to `references/` |
 | Using intelligent mode for simple packaging | Wanting full infrastructure for 1-2 skills | Minimal mode exists to avoid over-engineering |
-| Forgetting `chmod +x` on `session-start` | Creating the file on Windows | Note in post-scaffold checklist — git can preserve the execute bit |
+| Missing `python` on PATH | Hook won't run without Python | Ensure `session-start.py` can be invoked by `python` — document prerequisite |
 | Using MCP when CLI suffices | Wanting rich integration for simple tools | Consult `references/external-integration.md` decision tree — prefer CLI for stateless, single-shot tools |
 | Using `../` paths to reference files outside the plugin | Wanting to share files across projects | After marketplace install, plugins are cached — `../` paths break. Keep all files within the plugin root |
 | Writing persistent data to `${CLAUDE_PLUGIN_ROOT}` | Treating plugin root as stable storage | `PLUGIN_ROOT` changes on each update. Use `${CLAUDE_PLUGIN_DATA}` for caches and generated state |

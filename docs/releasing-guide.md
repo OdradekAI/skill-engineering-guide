@@ -13,12 +13,12 @@ The release pipeline is designed as a quality gate — not a formality. It ensur
 | Phase | Steps | Tools | Blocking? |
 |-------|-------|-------|-----------|
 | Prerequisites | Clean git status, branch check, tag check | `git status`, `git tag -l` | Yes (dirty tree blocks) |
-| Pre-flight | Version drift, full audit, documentation consistency | `bump_version.py`, `audit_project.py`, `check_docs.py` | Yes (critical findings block) |
+| Pre-flight | Version drift, full audit, documentation consistency | `bump_version.py`, `audit_plugin.py`, `audit_docs.py` | Yes (critical findings block) |
 | Address findings | Review and fix critical/warning issues | Manual + `bundles-forge:optimizing` | Yes (critical must resolve) |
-| Documentation sync | Change coherence review, doc updates | AI review + `check_docs.py` | Yes (contradictions block) |
+| Documentation sync | Change coherence review, doc updates | AI review + `audit_docs.py` | Yes (contradictions block) |
 | Version bump | Update all manifests | `bump_version.py` | — |
 | Documentation update | CHANGELOG, README | Manual | — |
-| Final verification | Re-run all checks | `bump_version.py`, `check_docs.py` | Yes (must pass) |
+| Final verification | Re-run all checks | `bump_version.py`, `audit_docs.py` | Yes (must pass) |
 | Publish | Commit, tag, push, platform publish | `git`, `gh`, platform CLIs | — |
 
 ---
@@ -77,14 +77,14 @@ Run all automated checks before proceeding:
 python skills/releasing/scripts/bump_version.py --check
 
 # Documentation consistency (9 checks)
-python skills/auditing/scripts/check_docs.py .
+python skills/auditing/scripts/audit_docs.py .
 ```
 
 **Plugin validation (Claude Code only):** If running in a Claude Code environment, run `claude plugin validate` (or `/plugin validate` in a session) to verify `plugin.json` schema, skill/agent/command frontmatter, and `hooks.json` validity. On other platforms, the inspector agent covers equivalent structural checks.
 
-**Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `python skills/auditing/scripts/audit_project.py .` (automated checks only, no qualitative scoring).
+**Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `python skills/auditing/scripts/audit_plugin.py .` (automated checks only, no qualitative scoring).
 
-**`check_docs.py` checks (D1–D9):**
+**`audit_docs.py` checks (D1–D9):**
 
 | Check | What It Verifies |
 |-------|-----------------|
@@ -149,7 +149,7 @@ After resolving coherence issues, sync all project documentation:
 3. **`AGENTS.md`** — Update Available Skills table
 4. **`README.md` + `README.zh.md`** — Update Skills table, Agents table, Commands table, code blocks
 
-Re-run `check_docs.py` after making changes to confirm consistency.
+Re-run `audit_docs.py` after making changes to confirm consistency.
 
 ### Step 4: Version Bump
 
@@ -188,7 +188,7 @@ This updates all files declared in `.version-bump.json` and runs a post-bump aud
 ```bash
 python skills/releasing/scripts/bump_version.py --check   # No version drift
 python skills/releasing/scripts/bump_version.py --audit   # No stray version strings
-python skills/auditing/scripts/check_docs.py .           # Documentation consistent
+python skills/auditing/scripts/audit_docs.py .           # Documentation consistent
 ```
 
 All three must exit with code 0 (clean) before publishing.
@@ -247,8 +247,8 @@ For urgent fixes between planned releases:
 1. Fix the issue on `main` (or a dedicated hotfix branch)
 2. Run abbreviated pipeline:
    - `bump_version.py --check` (version drift)
-   - `scan_security.py .` (security only)
-   - `check_docs.py .` (documentation consistency)
+   - `audit_security.py .` (security only)
+   - `audit_docs.py .` (documentation consistency)
 3. Bump patch version
 4. Update CHANGELOG with `### Fixed` section only
 5. Publish
@@ -275,8 +275,8 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 | Problem | Cause | Fix |
 |---------|-------|-----|
 | `bump_version.py --check` finds drift | Manual edit or missed file | Run `bump_version.py <correct-version>` to re-sync |
-| `check_docs.py` reports broken cross-refs | Skill renamed without updating references | Find-and-replace old name across all `.md` files |
-| `check_docs.py` reports skill list mismatch | New skill added but docs not updated | Add skill to AGENTS.md table, README tables, CLAUDE.md |
+| `audit_docs.py` reports broken cross-refs | Skill renamed without updating references | Find-and-replace old name across all `.md` files |
+| `audit_docs.py` reports skill list mismatch | New skill added but docs not updated | Add skill to AGENTS.md table, README tables, CLAUDE.md |
 | Tag already exists | Previous release attempt or version collision | Choose a different version or delete the tag with `git tag -d` |
 | `gh release create` fails | `gh` CLI not installed or not authenticated | Install with `gh auth login` or create release manually on GitHub web UI |
 | CHANGELOG has wrong format | Missing date, wrong version, invalid category | Follow Keep a Changelog format strictly |
@@ -300,8 +300,8 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 python skills/releasing/scripts/bump_version.py --check     # Detect version drift
 python skills/releasing/scripts/bump_version.py --audit     # Find undeclared version strings
 python skills/releasing/scripts/bump_version.py <version>   # Bump all manifests
-python skills/auditing/scripts/check_docs.py .             # Documentation consistency check
-python skills/auditing/scripts/audit_project.py .          # Full quality + security audit
+python skills/auditing/scripts/audit_docs.py .             # Documentation consistency check
+python skills/auditing/scripts/audit_plugin.py .          # Full quality + security audit
 ```
 
 ### Exit Codes

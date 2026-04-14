@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """
-Security scanner for bundle-plugins.
+Pattern-based security smell detector for bundle-plugins.
 
-Scans 7 attack surfaces — SKILL.md files, hook scripts, hook configs
+Scans 7 file categories — SKILL.md files, hook scripts, hook configs
 (HTTP hooks), OpenCode plugins, agent prompts, bundled scripts, and
-MCP configs — for patterns that could exfiltrate data, destroy
-resources, install backdoors, or override safety controls.
+MCP configs — for known dangerous patterns (network calls, eval,
+sensitive file references, etc.) that could indicate data exfiltration,
+resource destruction, backdoors, or safety control overrides.
+
+This is a static pattern matcher, not a comprehensive security auditor.
+It detects explicitly written dangerous patterns but cannot catch
+obfuscated code, indirect calls, or logic-level vulnerabilities.
 
 Each rule has a confidence level:
   - deterministic: unambiguous in executable code; affects score and exit code.
@@ -15,8 +20,8 @@ Each rule has a confidence level:
     decisions on whether to block on suspicious findings.
 
 Usage:
-    python scan_security.py [project-root]
-    python scan_security.py --json [project-root]
+    python audit_security.py [project-root]
+    python audit_security.py --json [project-root]
 
 Exit codes: 0 = clean, 1 = warnings only, 2 = critical findings
            (both deterministic and suspicious findings affect exit codes)

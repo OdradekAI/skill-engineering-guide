@@ -52,7 +52,7 @@ cd your-bundle-plugin-project
 /bundles-audit
 ```
 
-Runs a 10-category quality assessment with security scanning across 7 attack surfaces.
+Runs a 10-category quality assessment with pattern-based security checks across 7 file categories.
 
 ## Concepts
 
@@ -91,7 +91,7 @@ flowchart LR
 | Design | `blueprinting` | Structured interview → design document → orchestrates the creation pipeline: scaffolding, authoring, workflow design, and initial audit. |
 | Scaffold | `scaffolding` | Generates project structure from design, adds or removes platform support — manifests, hooks, scripts, bootstrap skill, and per-platform files. |
 | Write | `authoring` | Guides SKILL.md and agents/*.md authoring — frontmatter, descriptions, instructions, content integration, and progressive disclosure via `references/`. |
-| Audit | `auditing` | 10-category quality assessment including security scanning across 7 attack surfaces. |
+| Audit | `auditing` | 10-category quality assessment including pattern-based security checks across 7 file categories. |
 | Optimize | `optimizing` | Engineering improvements — description triggering, token efficiency, workflow restructuring, adding skills to fill gaps, and feedback iteration. |
 | Release | `releasing` | Orchestrates the pre-release pipeline: version drift check, audit, documentation consistency, change coherence review, version bump, CHANGELOG update, and publish guidance. |
 
@@ -143,19 +143,19 @@ Four audit scopes for different levels of granularity — the agent auto-detects
 
 | Scope | Command / Script | What It Checks |
 |-------|-----------------|----------------|
-| Full Project | `/bundles-audit` or `audit_project.py` | 10 categories (structure, manifests, version sync, skill quality, cross-refs, workflow, hooks, testing, docs, security) |
+| Full Project | `/bundles-audit` or `audit_plugin.py` | 10 categories (structure, manifests, version sync, skill quality, cross-refs, workflow, hooks, testing, docs, security) |
 | Single Skill | `/bundles-audit skills/authoring` or `audit_skill.py` | 4 categories (structure, skill quality, cross-refs, security) |
 | Workflow | Explicit request or `audit_workflow.py` | 3 layers: static structure, semantic interface, behavioral verification (W1-W11) |
-| Security Only | `/bundles-scan` or `scan_security.py` | 7 attack surfaces (skill content, hook scripts, HTTP hooks, OpenCode plugins, agent prompts, bundled scripts, MCP configs) |
+| Security Only | `/bundles-scan` or `audit_security.py` | Pattern-based detection across 7 file categories (skill content, hook scripts, HTTP hooks, OpenCode plugins, agent prompts, bundled scripts, MCP configs) |
 
 ### Quick Start (Scripts)
 
 ```bash
-python skills/auditing/scripts/audit_project.py .                                      # full project audit
+python skills/auditing/scripts/audit_plugin.py .                                      # full project audit
 python skills/auditing/scripts/audit_skill.py skills/authoring                         # single skill audit
 python skills/auditing/scripts/audit_workflow.py .                                     # workflow audit
 python skills/auditing/scripts/audit_workflow.py --focus-skills new-skill .            # focused workflow audit
-python skills/auditing/scripts/scan_security.py .                                      # security-only scan
+python skills/auditing/scripts/audit_security.py .                                      # security-only scan
 ```
 
 Via the agent, you can also audit remote projects:
@@ -255,7 +255,7 @@ User runs /bundles-audit
   → Full project: 10 categories (structure, manifests, version sync,
     quality, cross-refs, workflow, hooks, testing, docs, security)
     → auditor agent runs checklist (if subagents available)
-    → Scripts: audit_project.py, audit_workflow.py, scan_security.py, audit_skill.py
+    → Scripts: audit_plugin.py, audit_workflow.py, audit_security.py, audit_skill.py
   → Single skill: 4 categories (structure, quality, cross-refs, security)
   → Workflow: 3 layers (static structure, semantic interface, behavioral)
   → Score + report with Critical / Warning / Info findings
@@ -298,12 +298,12 @@ User runs /bundles-release
   → Pre-flight checks
     → bump_version.py --check (version drift)
     → auditing (full quality + security)
-    → check_docs.py (documentation consistency)
+    → audit_docs.py (documentation consistency)
   → Address critical findings (block release until resolved)
   → Documentation sync (change coherence review + doc updates)
   → bump_version.py <new-version> (update all manifests)
   → Update CHANGELOG.md and README.md
-  → Final verification (--check + --audit + check_docs.py)
+  → Final verification (--check + --audit + audit_docs.py)
   → Commit, tag, push, gh release create
 ```
 
@@ -335,7 +335,7 @@ Skills, audit reports, and script output accumulate in the conversation context 
 
 - **Start a fresh session** for each major lifecycle phase (blueprinting, authoring, auditing)
 - **Use slash commands** (`/bundles-audit`, `/bundles-optimize`) to re-anchor the agent on the current task
-- **Prefer script output over inline checks** — `python skills/auditing/scripts/audit_project.py .` produces a compact summary instead of the agent reasoning through each check
+- **Prefer script output over inline checks** — `python skills/auditing/scripts/audit_plugin.py .` produces a compact summary instead of the agent reasoning through each check
 
 ## Contributing
 

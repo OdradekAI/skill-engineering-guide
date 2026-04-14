@@ -1,7 +1,7 @@
 ---
 name: releasing
 description: "Use when releasing a bundle-plugin, bumping versions, fixing version drift across manifests, setting up version sync infrastructure, updating CHANGELOG, or publishing to marketplaces. Orchestrates the full pre-release verification pipeline"
-allowed-tools: Python(skills/releasing/scripts/bump_version.py *) Python(skills/auditing/scripts/audit_project.py *) Python(skills/auditing/scripts/check_docs.py *)
+allowed-tools: Python(skills/releasing/scripts/bump_version.py *) Python(skills/auditing/scripts/audit_plugin.py *) Python(skills/auditing/scripts/audit_docs.py *)
 ---
 
 # Releasing Bundle-Plugins
@@ -82,9 +82,9 @@ If the working tree is dirty, stop immediately and ask the user to commit or sta
          │
 1. Pre-flight checks
    ├── Version drift check (bump_version.py --check)
-   ├── Full audit: bundles-forge:auditing (preferred) or audit_project.py (fallback)
-   ├── Documentation consistency (check_docs.py)
-   ├── Cross-reference validity (check_docs.py)
+   ├── Full audit: bundles-forge:auditing (preferred) or audit_plugin.py (fallback)
+   ├── Documentation consistency (audit_docs.py)
+   ├── Cross-reference validity (audit_docs.py)
    └── Git tag conflict check (git tag -l v<version>)
          │
 2. Address findings
@@ -112,7 +112,7 @@ If the working tree is dirty, stop immediately and ask the user to commit or sta
 6. Final verification
    ├── Re-run bump_version.py --check (confirm no drift)
    ├── Re-run bump_version.py --audit (catch stray version strings)
-   └── Re-run check_docs.py (confirm documentation consistency)
+   └── Re-run audit_docs.py (confirm documentation consistency)
          │
 7. Publish
    ├── Commit all changes
@@ -146,12 +146,12 @@ Run all automated checks. If any critical issues are found, resolve them before 
 python skills/releasing/scripts/bump_version.py --check
 
 # Documentation consistency (skill lists, cross-refs, manifests, READMEs)
-python skills/auditing/scripts/check_docs.py <project-root>
+python skills/auditing/scripts/audit_docs.py <project-root>
 ```
 
 **Plugin validation (Claude Code only):** If running in a Claude Code environment, run `claude plugin validate` (or `/plugin validate` in a session) to verify `plugin.json` schema, skill/agent/command frontmatter, and `hooks/hooks.json` validity. Skip this step on other platforms — the inspector agent covers equivalent structural checks.
 
-**Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `python skills/auditing/scripts/audit_project.py <project-root>` (automated checks only, no qualitative scoring).
+**Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `python skills/auditing/scripts/audit_plugin.py <project-root>` (automated checks only, no qualitative scoring).
 
 If audit status is FAIL, resolve critical issues before releasing. If security findings are critical, block the release.
 
@@ -200,7 +200,7 @@ After resolving coherence issues, sync project documentation:
 3. **`AGENTS.md`** — Verify: Available Skills table matches `skills/` directory.
 4. **`README.md` and `README.zh.md`** — Verify: Skills table, Agents table, Commands table, code blocks, and file links are consistent between both files and with the project state.
 
-Use `check_docs.py` output from Step 1 as a guide for what needs updating. After making fixes, re-run `check_docs.py` to confirm all documentation is consistent.
+Use `audit_docs.py` output from Step 1 as a guide for what needs updating. After making fixes, re-run `audit_docs.py` to confirm all documentation is consistent.
 
 ### Step 4: Version Bump
 
@@ -254,7 +254,7 @@ After all changes, re-run verification to confirm nothing broke:
 ```bash
 python skills/releasing/scripts/bump_version.py --check   # No drift
 python skills/releasing/scripts/bump_version.py --audit   # No stray versions
-python skills/auditing/scripts/check_docs.py .           # Documentation consistent
+python skills/auditing/scripts/audit_docs.py .           # Documentation consistent
 ```
 
 ### Step 7: Publish
@@ -324,7 +324,7 @@ For marketplace distribution, ensure `.claude-plugin/marketplace.json` exists wi
 |---------|-----|
 | Releasing with uncommitted changes | Always verify `git status` is clean before starting the pipeline |
 | Releasing without running audit | Always run full pipeline — "it's just a small change" is how drift happens |
-| Skipping documentation consistency check | `check_docs.py` catches skill list drift, broken cross-refs, README desync |
+| Skipping documentation consistency check | `audit_docs.py` catches skill list drift, broken cross-refs, README desync |
 | Not reviewing changes for coherence | Read the full diff since last tag — contradictions and missing registrations are invisible to automated checks |
 | Forgetting to tag the release | Tags are how git-based platforms identify versions |
 | Only pushing a tag without creating a GitHub Release | Tags appear on `/tags` but not `/releases` — use `gh release create` to publish release notes and notify watchers |

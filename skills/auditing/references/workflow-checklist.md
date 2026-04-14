@@ -2,7 +2,7 @@
 
 Structured criteria for evaluating workflow quality — how skills connect, hand off artifacts, and compose into coherent chains. Use this when running a workflow audit, either standalone or as part of a full project audit.
 
-This checklist complements `audit-checklist.md` (which covers 10 project-level categories, including Workflow). Category 5 (Cross-References) in the project checklist handles static link resolution (X1-X3). This checklist handles the workflow graph, semantic interfaces, and behavioral verification that sit above link resolution.
+This checklist complements `plugin-checklist.md` (which covers 10 project-level categories, including Workflow). Category 5 (Cross-References) in the project checklist handles static link resolution (X1-X3). This checklist handles the workflow graph, semantic interfaces, and behavioral verification that sit above link resolution.
 
 ## Scoring
 

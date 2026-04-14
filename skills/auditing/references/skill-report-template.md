@@ -4,7 +4,7 @@ Three-layer report for single skill audits (auto-detected by scope). Lighter tha
 
 This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `skills/auditing/scripts/audit_skill.py` (produces compact Markdown or JSON).
 
-For full project audits (10 categories), use `references/report-template.md` instead.
+For full project audits (10 categories), use `references/plugin-report-template.md` instead.
 
 ## Finding ID Scheme
 
@@ -193,7 +193,7 @@ python: "<version>"
 | Tool | Purpose |
 |------|---------|
 | `skills/auditing/scripts/audit_skill.py` | Frontmatter validation, description conventions, cross-reference resolution |
-| `skills/auditing/scripts/scan_security.py` | Security pattern scanning on SKILL.md content |
+| `skills/auditing/scripts/audit_security.py` | Security pattern scanning on SKILL.md content |
 | Manual/AI review | Qualitative assessment of instruction clarity, description anti-patterns |
 
 ### Out of Scope

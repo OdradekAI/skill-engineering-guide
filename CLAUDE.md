@@ -11,11 +11,9 @@ Bundles Forge is a bundle-plugin engineering toolkit supporting 5 platforms: Cla
 ### Testing
 
 ```bash
-bash tests/run-all.sh                              # all test suites (shell + Python)
-bash tests/test-bootstrap-injection.sh             # session-start hook output
-bash tests/test-skill-discovery.sh                 # skill frontmatter validation
-bash tests/test-version-sync.sh                    # version consistency across manifests
-python tests/test_scripts.py -v                    # Python script tests (unittest)
+bash tests/run-all.sh                              # all Python test suites
+python tests/test_scripts.py -v                    # auditing/releasing script tests (unittest)
+python tests/test_integration.py -v                # structure, hooks, version sync, skill discovery
 python -m pytest tests/test_scripts.py -v          # same, via pytest
 python -m pytest tests/test_scripts.py -v -k test_project_mode_runs_without_error  # single test
 ```
@@ -26,10 +24,10 @@ python -m pytest tests/test_scripts.py -v -k test_project_mode_runs_without_erro
 python skills/auditing/scripts/audit_skill.py [project-root]       # project-level skill quality audit (auto-detects mode)
 python skills/auditing/scripts/audit_skill.py [skill-dir]          # single skill audit (4 categories)
 python skills/auditing/scripts/audit_skill.py --all [project-root] # force project-level mode
-python skills/auditing/scripts/scan_security.py [project-root]     # 7-surface security scan
-python skills/auditing/scripts/audit_project.py [project-root]     # combined audit (calls audit_skill + scan + workflow)
+python skills/auditing/scripts/audit_security.py [project-root]     # 7-surface security scan
+python skills/auditing/scripts/audit_plugin.py [project-root]     # combined audit (calls audit_skill + audit_security + workflow)
 python skills/auditing/scripts/audit_workflow.py [project-root]    # workflow integration audit (W1-W11)
-python skills/auditing/scripts/check_docs.py [project-root]        # documentation consistency (9 checks: D1-D9)
+python skills/auditing/scripts/audit_docs.py [project-root]        # documentation consistency (9 checks: D1-D9)
 python skills/auditing/scripts/generate_checklists.py [project-root]        # regenerate checklist tables from audit-checks.json registry
 python skills/auditing/scripts/generate_checklists.py --check [project-root] # detect checklist drift (exit 1 if stale)
 ```
@@ -51,8 +49,8 @@ python skills/releasing/scripts/bump_version.py <new-version>       # bump all f
 - `skills/` — 7 skill directories, each containing `SKILL.md` and optional `references/` subdirectory
 - `agents/` — 3 subagent definitions (inspector, auditor, evaluator) as `.md` files
 - `commands/` — slash command stubs (`bundles-*.md`) that redirect to skills via `bundles-forge:<skill-name>`
-- `hooks/` — session bootstrap: `session-start` reads `using-bundles-forge/SKILL.md` and injects it as platform-appropriate JSON context. `run-hook.cmd` is a polyglot wrapper (Windows cmd + bash)
-- `docs/` — guides (concepts, blueprinting, auditing, optimizing, releasing) with `*.zh.md` Chinese translations; checked by D7
+- `hooks/` — session bootstrap: `session-start.py` reads `using-bundles-forge/SKILL.md` and injects it as platform-appropriate JSON context (Python for cross-platform compatibility)
+- `docs/` — guides (concepts, blueprinting, scaffolding, authoring, auditing, optimizing, releasing) with `*.zh.md` Chinese translations; checked by D7
 - `skills/auditing/scripts/` — audit, security scan, documentation checks, and checklist generation (shares `_cli.py` for argparse/exit-code patterns)
 - `skills/releasing/scripts/` — version bump tooling (`bump_version.py`)
 - `scripts/` — `bump-version.sh` wrapper for CLI convenience (forwards to `skills/releasing/scripts/bump_version.py`)
@@ -75,7 +73,7 @@ Pipeline stages: `blueprinting` → `optimizing` → `releasing`. Each orchestra
 
 ### Session Bootstrap
 
-The `hooks/session-start` script runs on SessionStart (matcher: `startup|clear|compact`, excluding `resume` since resumed sessions retain context). It reads the `using-bundles-forge` meta-skill and emits JSON context. Platform detection is three-way: `CURSOR_PLUGIN_ROOT` → Cursor format (`additional_context`), `CLAUDE_PLUGIN_ROOT` → Claude Code format (`hookSpecificOutput`), neither → plain text fallback. On read failure, the script warns to stderr and exits 0 (no-op).
+The `hooks/session-start.py` script runs on SessionStart (matcher: `startup|clear|compact`, excluding `resume` since resumed sessions retain context). It reads the `using-bundles-forge` meta-skill and emits JSON context. Platform detection is three-way: `CURSOR_PLUGIN_ROOT` → Cursor format (`additional_context`), `CLAUDE_PLUGIN_ROOT` → Claude Code format (`hookSpecificOutput`), neither → plain text fallback. On read failure, the script warns to stderr and exits 0 (no-op). Written in Python for cross-platform compatibility (Windows/Mac/Linux).
 
 The `hooks/hooks.json` includes a top-level `description` (shown in Claude Code's `/hooks` menu) and per-handler `timeout: 10` to prevent slow hooks from blocking session start.
 
@@ -111,7 +109,7 @@ Version is synchronized across these files (declared in `.version-bump.json`):
 - **Pre-commit:** run `python skills/releasing/scripts/bump_version.py --check` to detect version drift
 - **Pre-commit:** run `python skills/auditing/scripts/generate_checklists.py --check` to detect checklist drift
 - **Pre-release:** run `bundles-forge:auditing` for full quality + security check
-- **Pre-release:** run `python skills/auditing/scripts/check_docs.py` to verify documentation consistency (9 checks: D1-D9)
+- **Pre-release:** run `python skills/auditing/scripts/audit_docs.py` to verify documentation consistency (9 checks: D1-D9)
 - **Source of truth:** Skills are first-class citizens — see `skills/auditing/references/source-of-truth-policy.md` for the full hierarchy and contradiction resolution protocol
 
 ## Security Rules

@@ -4,7 +4,7 @@ Three-layer report for workflow audits. Evaluates how skills connect, hand off a
 
 This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `skills/auditing/scripts/audit_workflow.py` (produces compact Markdown or JSON).
 
-For full project audits (10 categories), use `references/report-template.md` instead.
+For full project audits (10 categories), use `references/plugin-report-template.md` instead.
 For single skill audits (4 categories), use `references/skill-report-template.md` instead.
 
 ## Finding ID Scheme
