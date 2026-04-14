@@ -25,7 +25,7 @@ The fastest way to start a new bundle-plugin:
 
 Two key decisions to make upfront:
 
-- **Minimal vs intelligent mode?** Minimal is for packaging a few standalone skills quickly (Claude Code only, no bootstrap). Intelligent is for orchestrated multi-skill projects with workflow chains. The agent asks you this as the first question.
+- **Quick vs adaptive mode?** Quick is for packaging a few standalone skills quickly (Claude Code only, no bootstrap). Adaptive is for orchestrated multi-skill projects with workflow chains. The agent asks you this as the first question.
 - **Already have a project?** Blueprinting creates *new* projects. To add skills, restructure workflows, or improve an existing project, use `/bundles-optimize` instead — see Target 7 in the [optimizing guide](optimizing-guide.md).
 
 For details on each step, read on.
@@ -70,20 +70,20 @@ The skill runs a structured interview, asking one question at a time:
 
 | # | Question | Why It Matters |
 |---|----------|---------------|
-| 0 | Project complexity | Determines interview depth (minimal vs intelligent mode) |
-| 1 | Project name | Becomes directory name, package name, and plugin ID everywhere |
-| 2 | Target platforms | Determines which manifests to generate |
-| 3 | Skill inventory | Defines what capabilities the plugin will have |
-| 3b | Skill visibility | Entry-point vs internal — affects commands and descriptions |
-| 4 | Workflow chain | Determines how skills connect and the bootstrap content |
-| 5 | Bootstrap strategy | Whether to auto-inject skill awareness at session start |
-| 6 | Advanced components | MCP servers, LSP servers, bin/ executables, output styles |
+| 1 | Project complexity | Determines interview depth (quick vs adaptive mode) |
+| 2 | Project name | Becomes directory name, package name, and plugin ID everywhere |
+| 3 | Target platforms | Determines which manifests to generate |
+| 4 | Skill inventory | Defines what capabilities the plugin will have |
+| 4a | Skill visibility | Entry-point vs internal — affects commands and descriptions |
+| 5 | Workflow chain | Determines how skills connect and the bootstrap content |
+| 6 | Bootstrap strategy | Whether to auto-inject skill awareness at session start |
+| 7 | Advanced components | MCP servers, LSP servers, bin/ executables, output styles |
 
-Questions 3b, 4, 5, and 6 are only asked in **intelligent mode** (orchestrated multi-skill projects). Minimal mode (quick packaging) skips them.
+Questions 4a, 5, 6, and 7 are only asked in **adaptive mode** (orchestrated multi-skill projects). Quick mode (quick packaging) skips them.
 
-### Minimal vs Intelligent Mode
+### Quick vs Adaptive Mode
 
-| | Minimal | Intelligent |
+| | Quick | Adaptive |
 |---|---|---|
 | **Use when** | Bundling standalone skills for distribution | Building an orchestrated workflow |
 | **Interview depth** | 4 questions (name, platforms, skills, done) | 7+ questions with conditional follow-ups |
@@ -92,7 +92,7 @@ Questions 3b, 4, 5, and 6 are only asked in **intelligent mode** (orchestrated m
 | **Commands** | Not generated | Entry-point skills get matching commands |
 | **Duration** | 2-3 minutes | 5-10 minutes |
 
-**Rule of thumb:** If your skills form a chain (output of A feeds into B), use intelligent mode. If they're independent utilities, minimal is fine.
+**Rule of thumb:** If your skills form a chain (output of A feeds into B), use adaptive mode. If they're independent utilities, quick is fine.
 
 ### Tips for Good Answers
 
@@ -164,7 +164,7 @@ All scenarios produce a design document with this structure:
 ```markdown
 ## Bundle-Plugin Design: <project-name>
 
-**Mode:** minimal / intelligent
+**Mode:** quick / adaptive
 **Platforms:** <list>
 **Bootstrap:** yes/no
 
@@ -219,11 +219,11 @@ The skill wasn't loaded, or you said something like "just generate it" that bypa
 
 **Q: The interview is asking too many questions for my simple project.**
 
-You're in intelligent mode. At question 0, answer "quick packaging" (or "minimal") to use the shorter interview flow with only 4 questions.
+You're in adaptive mode. At question 1, answer "quick packaging" (or "quick mode") to use the shorter interview flow with only 4 questions.
 
 **Q: The interview is too short — it skipped important questions.**
 
-You're in minimal mode. Restart and answer "orchestrated multi-skill" at question 0 to get the full intelligent-mode interview with conditional follow-ups.
+You're in quick mode. Restart and answer "orchestrated multi-skill" at question 1 to get the full adaptive-mode interview with conditional follow-ups.
 
 **Q: The design document has the wrong platform listed.**
 
