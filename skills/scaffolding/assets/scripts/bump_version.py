@@ -6,9 +6,9 @@ Reads .version-bump.json and bumps version numbers across all declared
 files, detects drift, and audits for undeclared version strings.
 
 Usage:
-    python scripts/bump_version.py [project-root] <new-version>
-    python scripts/bump_version.py [project-root] --check
-    python scripts/bump_version.py [project-root] --audit
+    python skills/releasing/scripts/bump_version.py [project-root] <new-version>
+    python skills/releasing/scripts/bump_version.py [project-root] --check
+    python skills/releasing/scripts/bump_version.py [project-root] --audit
 
 Exit codes: 0 = in sync, 1 = drift or undeclared files found
 """
@@ -17,6 +17,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(-[\w.]+)?$")
@@ -83,52 +84,76 @@ def write_version(repo_root, path, field, new_version):
                      encoding="utf-8")
 
 
-def cmd_check(repo_root):
+def run_check(repo_root):
+    """Check version drift. Returns structured results for programmatic use."""
     config = load_config(repo_root)
     entries = declared_files(config)
+
     versions = {}
     missing = []
-
-    print("Version check:\n")
     for path, field in entries:
         ver = read_version(repo_root, path, field)
-        label = f"{path} ({field})"
         if ver is None:
-            print(f"  {label:<45}  MISSING")
             missing.append(path)
         else:
-            print(f"  {label:<45}  {ver}")
             versions[path] = ver
 
-    print()
     unique = set(versions.values())
     has_drift = len(unique) > 1 or len(missing) > 0
 
-    if len(unique) > 1:
-        print("DRIFT DETECTED — versions are not in sync:")
-        from collections import Counter
-        counts = Counter(versions.values())
-        for ver, count in counts.most_common():
-            print(f"  {ver} ({count} files)")
-    elif versions:
-        print(f"All declared files are in sync at {list(versions.values())[0]}")
+    return {
+        "versions": versions,
+        "missing": missing,
+        "unique_versions": sorted(unique),
+        "has_drift": has_drift,
+    }
 
-    return has_drift
+
+def cmd_check(repo_root):
+    result = run_check(repo_root)
+    config = load_config(repo_root)
+
+    print("Version check:\n")
+    for path, field in declared_files(config):
+        ver = result["versions"].get(path)
+        label = f"{path} ({field})"
+        if ver is None:
+            print(f"  {label:<45}  MISSING")
+        else:
+            print(f"  {label:<45}  {ver}")
+
+    print()
+    if result["has_drift"]:
+        if len(result["unique_versions"]) > 1:
+            print("DRIFT DETECTED — versions are not in sync:")
+            counts = Counter(result["versions"].values())
+            for ver, count in counts.most_common():
+                print(f"  {ver} ({count} files)")
+        if result["missing"]:
+            for m in result["missing"]:
+                print(f"  MISSING: {m}")
+    else:
+        versions = list(result["versions"].values())
+        if versions:
+            print(f"All declared files are in sync at {versions[0]}")
+
+    return result["has_drift"]
 
 
 def cmd_audit(repo_root):
-    has_drift = cmd_check(repo_root)
+    result = run_check(repo_root)
+    has_drift = result["has_drift"]
+
+    if has_drift:
+        n = len(result["unique_versions"])
+        print(f"Version drift detected ({n} unique versions)")
+    else:
+        versions = list(result["versions"].values())
+        if versions:
+            print(f"Versions in sync at {versions[0]}")
     print()
 
-    config = load_config(repo_root)
-    entries = declared_files(config)
-
-    from collections import Counter
-    version_counts = Counter()
-    for path, field in entries:
-        ver = read_version(repo_root, path, field)
-        if ver:
-            version_counts[ver] += 1
+    version_counts = Counter(result["versions"].values())
 
     if not version_counts:
         print("error: could not determine current version", file=sys.stderr)
@@ -137,8 +162,12 @@ def cmd_audit(repo_root):
     current_version = version_counts.most_common(1)[0][0]
     print(f"Audit: scanning repo for version string '{current_version}'...\n")
 
+    config = load_config(repo_root)
+    entries = declared_files(config)
+
     excludes = set(config.get("audit", {}).get("exclude", []))
     excludes.update({".git", "node_modules"})
+
     declared_paths = {path for path, _ in entries}
 
     found_undeclared = []
@@ -148,7 +177,12 @@ def cmd_audit(repo_root):
         rel = f.relative_to(repo_root)
         rel_str = str(rel).replace("\\", "/")
 
-        if any(exc in rel.parts or rel_str == exc for exc in excludes):
+        skip = False
+        for exc in excludes:
+            if exc in rel.parts or rel_str == exc:
+                skip = True
+                break
+        if skip:
             continue
 
         try:
@@ -156,7 +190,10 @@ def cmd_audit(repo_root):
         except (OSError, PermissionError):
             continue
 
-        if current_version not in content or rel_str in declared_paths:
+        if current_version not in content:
+            continue
+
+        if rel_str in declared_paths:
             continue
 
         for line_num, line in enumerate(content.splitlines(), 1):
@@ -177,12 +214,13 @@ def cmd_audit(repo_root):
 
 def cmd_bump(repo_root, new_version, dry_run=False):
     if not SEMVER_RE.match(new_version):
-        print(f"error: '{new_version}' doesn't look like a version "
-              "(expected X.Y.Z or X.Y.Z-pre.N)", file=sys.stderr)
+        print(f"error: '{new_version}' doesn't look like a version (expected X.Y.Z or X.Y.Z-pre.N)",
+              file=sys.stderr)
         sys.exit(1)
 
     config = load_config(repo_root)
-    print(f"Bumping all declared files to {new_version}...\n")
+    prefix = "[DRY RUN] " if dry_run else ""
+    print(f"{prefix}Bumping all declared files to {new_version}...\n")
 
     for path, field in declared_files(config):
         fpath = repo_root / path

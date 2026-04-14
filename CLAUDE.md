@@ -34,7 +34,7 @@ bundles-forge checklists [project-root]        # regenerate checklist tables fro
 bundles-forge checklists --check [project-root] # detect checklist drift (exit 1 if stale)
 ```
 
-All scripts accept `--json` for machine-readable output. Exit codes: 0 = pass, 1 = warnings, 2 = critical.
+Audit scripts accept `--json` for machine-readable output. Exit codes: 0 = pass, 1 = warnings, 2 = critical.
 
 ### Version Management
 
@@ -48,6 +48,7 @@ bundles-forge bump-version <new-version>       # bump all files declared in .ver
 
 ### Directory Layout
 
+- `bin/` — CLI dispatcher (`bundles-forge`, `bundles-forge.cmd`) routing subcommands to scripts
 - `skills/` — 7 skill directories, each containing `SKILL.md` and optional `references/` subdirectory
 - `agents/` — 3 subagent definitions (inspector, auditor, evaluator) as `.md` files
 - `commands/` — slash command stubs (`bundles-*.md`) that redirect to skills via `bundles-forge:<skill-name>`
@@ -92,7 +93,9 @@ Version is synchronized across these files (declared in `.version-bump.json`):
 
 | Platform | Manifest | Version-synced |
 |----------|----------|:--------------:|
+| (root) | `package.json` | Yes |
 | Claude Code | `.claude-plugin/plugin.json` | Yes |
+| Claude Code | `.claude-plugin/marketplace.json` | Yes |
 | Cursor | `.cursor-plugin/plugin.json` | Yes |
 | Codex | `.codex/INSTALL.md` | No (install guide) |
 | OpenCode | `.opencode/plugins/bundles-forge.js` | No (plugin loader) |

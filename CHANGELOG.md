@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.7.0] - 2026-04-14
+
+### Added
+
+- **`bin/bundles-forge` CLI dispatcher** — unified cross-platform entry point (`bundles-forge` on Unix, `bundles-forge.cmd` on Windows) routing subcommands (`audit-skill`, `audit-plugin`, `audit-docs`, `audit-security`, `audit-workflow`, `checklists`, `bump-version`) to their Python scripts
+- **`docs/index.md` and `docs/index.zh.md`** — bilingual documentation index linking all guides
+- **Audit infrastructure modules** — `_graph.py` (skill dependency graph analysis), `_parsing.py` (SKILL.md frontmatter/body parsing), `_scoring.py` (baseline score computation) shared across audit scripts
+- **`audit-checks.json` registry** — centralized audit check definitions; `generate_checklists.py` regenerates checklist tables from this single source
+- **`plugin-checklist.md`** — generated plugin-level audit checklist
+- **`source-of-truth-policy.md`** — defines the hierarchy (skills > agents > docs > CLAUDE.md) and contradiction resolution protocol
+- **Blueprinting references** — `composition-analysis.md`, `decomposition-analysis.md`, `design-document-template.md` for structured skill design
+- **Releasing references** — `distribution-strategy.md` (platform publish options), `version-infrastructure.md` (`.version-bump.json` schema and setup guide)
+- **Python session hook** — `hooks/session-start.py` replaces shell scripts for cross-platform portability (Windows/macOS/Linux)
+- **Python test infrastructure** — `tests/run_all.py` test runner, `tests/test_graph_fixtures.py` with 3 fixture suites (circular deps, unreachable skills, missing sections)
+
+### Changed
+
+- **All 7 documentation guides** rewritten for clarity, structure, and consistency across English and Chinese versions
+- **All 7 skills** updated — blueprinting three-phase interview flow, auditing script reorganization, releasing reference extraction, scaffolding template sync, authoring quality checklist, optimizing diagnostic improvements
+- **Agents** (`auditor`, `inspector`, `evaluator`) updated for script renaming and scoring alignment
+- **CLAUDE.md** — added `bin/` to directory layout, corrected platform manifests table, scoped `--json` claim to audit scripts
+- **README.md / README.zh.md** — updated CLI command examples, contributing section now requires `checklists --check`
+- **Test suite** refactored from shell to Python (`unittest`), consolidated under `tests/`
+- **Audit scripts** consolidated from root `scripts/` to `skills/auditing/scripts/`; releasing script moved to `skills/releasing/scripts/`
+
+### Removed
+
+- **Root `scripts/` directory** — `audit_skill.py`, `lint_skills.py`, `_cli.py` moved to `skills/auditing/scripts/`
+- **Shell hook scripts** — `hooks/session-start` (bash), `hooks/run-hook.cmd` replaced by `hooks/session-start.py`
+- **Shell test scripts** — `test-bootstrap-injection.sh`, `test-skill-discovery.sh`, `test-version-sync.sh` replaced by Python equivalents
+- **Old audit examples** — `examples/bundles-forge-v1.5.{1,2,3}-audit{,.zh}.md`
+- **`audit-checklist.md`** — replaced by `audit-checks.json` registry and generated checklists
+
 ## [1.6.2] - 2026-04-12
 
 ### Changed

@@ -346,7 +346,7 @@ Skills, audit reports, and script output accumulate in the conversation context 
 
 ## Contributing
 
-Contributions welcome. Please follow the existing code style and ensure all platform manifests stay in sync using `bundles-forge bump-version --check`.
+Contributions welcome. Please follow the existing code style and ensure all platform manifests stay in sync using `bundles-forge bump-version --check` and `bundles-forge checklists --check`.
 
 ## License
 

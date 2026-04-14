@@ -345,7 +345,7 @@ gemini extensions install https://github.com/odradekai/bundles-forge.git
 
 ## 贡献
 
-欢迎贡献。请遵循现有代码风格，并通过 `bundles-forge bump-version --check` 确保所有平台清单版本同步。
+欢迎贡献。请遵循现有代码风格，并通过 `bundles-forge bump-version --check` 和 `bundles-forge checklists --check` 确保所有平台清单版本同步。
 
 ## 许可证
 
