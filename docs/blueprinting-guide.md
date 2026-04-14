@@ -2,15 +2,15 @@
 
 [中文](blueprinting-guide.zh.md)
 
-A user-oriented guide to planning bundle-plugins with Bundles Forge. Covers scenario selection, the design interview, the automated creation pipeline, and common pitfalls.
+A user-oriented guide to planning bundle-plugins with Bundles Forge. Covers the three-phase interview (needs exploration, architecture design, design review), the automated creation pipeline, and common pitfalls.
 
 ## Overview
 
-Blueprinting is the **new-project orchestrator**: it runs a structured design interview and, after you approve the design document, coordinates the full creation pipeline — scaffolding, content authoring, workflow wiring, and initial quality check. It turns a vague idea into a concrete design document before any code or project structure is generated.
+Blueprinting is the **new-project orchestrator**: it runs a structured three-phase interview — first understanding *what* you're building and *why*, then designing the technical architecture, and finally producing a design document for your approval. After approval, it coordinates the full creation pipeline: scaffolding, content authoring, workflow wiring, and initial quality check.
 
-**Why it matters:** Five minutes of blueprinting saves hours of rework. Skipping this step is the #1 cause of poorly structured bundle-plugins that need complete restructuring later.
+**Why it matters:** Five minutes of needs exploration saves hours of rework. Skipping this step is the #1 cause of poorly structured bundle-plugins that need complete restructuring later.
 
-> **Canonical source:** The full execution protocol (interview questions, scenario analysis steps, design document template) lives in `skills/blueprinting/SKILL.md`. This guide helps you decide *which* path to take and *what to expect* — the skill itself handles execution.
+> **Canonical source:** The full execution protocol (interview phases, dialogue strategy, design document template) lives in `skills/blueprinting/SKILL.md`. This guide helps you decide *which* path to take and *what to expect* — the skill itself handles execution.
 
 ---
 
@@ -19,13 +19,14 @@ Blueprinting is the **new-project orchestrator**: it runs a structured design in
 The fastest way to start a new bundle-plugin:
 
 1. **Invoke** `/bundles-blueprint` (or ask the agent to plan a new bundle-plugin)
-2. **Answer** the structured interview — one question at a time
-3. **Review and approve** the design document the agent produces
+2. **Answer** the three-phase interview — needs first, then architecture, one question at a time
+3. **Review and approve** the design document the agent produces (including self-review checks)
 4. **The agent takes over** — it automatically runs scaffolding → authoring → workflow design → auditing
 
-Two key decisions to make upfront:
+Key things to know upfront:
 
-- **Quick vs adaptive mode?** Quick is for packaging a few standalone skills quickly (Claude Code only, no bootstrap). Adaptive is for orchestrated multi-skill projects with workflow chains. The agent asks you this as the first question.
+- **Needs come first.** The agent will ask what problem you're solving and who will use it *before* any technical questions. Even for simple projects, this takes only 2 questions.
+- **The agent recommends, you decide.** For key decisions (quick vs adaptive mode, skill decomposition, platform selection), the agent proposes 2-3 approaches with trade-offs and a recommendation.
 - **Already have a project?** Blueprinting creates *new* projects. To add skills, restructure workflows, or improve an existing project, use `/bundles-optimize` instead — see Target 7 in the [optimizing guide](optimizing-guide.md).
 
 For details on each step, read on.
@@ -60,52 +61,76 @@ Do you have an existing bundle-plugin project?
 
 ---
 
-## The Interview
+## The Three-Phase Interview
 
-**The most common path (Scenario A).** You have an idea for a bundle-plugin and want to plan it properly.
+### Phase 1: Needs Exploration
 
-### What to Expect
-
-The skill runs a structured interview, asking one question at a time:
+**The agent starts by understanding your problem, not your technical preferences.**
 
 | # | Question | Why It Matters |
 |---|----------|---------------|
-| 1 | Project complexity | Determines interview depth (quick vs adaptive mode) |
-| 2 | Project name | Becomes directory name, package name, and plugin ID everywhere |
-| 3 | Target platforms | Determines which manifests to generate |
-| 4 | Skill inventory | Defines what capabilities the plugin will have |
-| 4a | Skill visibility | Entry-point vs internal — affects commands and descriptions |
-| 5 | Workflow chain | Determines how skills connect and the bootstrap content |
-| 6 | Bootstrap strategy | Whether to auto-inject skill awareness at session start |
-| 7 | Advanced components | MCP servers, LSP servers, bin/ executables, output styles |
+| 1 | Problem scenario | What gap exists and how people solve it today |
+| 2 | Target users | Shapes platform selection, complexity, and documentation style |
+| 3 | Core capabilities | Identifies non-negotiable skills vs nice-to-haves |
+| 4 | Usage flow | Reveals workflow dependencies and entry points |
+| 5 | Existing alternatives | Clarifies differentiation (asked only if relevant) |
 
-Questions 4a, 5, 6, and 7 are only asked in **adaptive mode** (orchestrated multi-skill projects). Quick mode (quick packaging) skips them.
+For **quick mode** projects (simple skill packaging), the agent asks only questions 1 and 2 before moving on.
+
+After collecting answers, the agent restates its understanding and asks you to confirm before proceeding to architecture design.
+
+### Phase 2: Architecture Design
+
+**Now the agent makes technical recommendations based on your needs.**
+
+| # | Question | How It Works |
+|---|----------|-------------|
+| 1 | Project complexity | Agent *recommends* quick vs adaptive mode based on Phase 1 — you confirm |
+| 2 | Project name | Kebab-case identifier used everywhere |
+| 3 | Target platforms | Agent recommends based on target users — you confirm or adjust |
+| 4 | Skill inventory | Agent *proposes* a decomposition with trade-offs — you confirm or adjust |
+| 4a | Skill visibility | Entry-point vs internal — affects commands and descriptions (adaptive only) |
+| 5 | Workflow chain | How skills connect (adaptive only) |
+| 6 | Bootstrap strategy | Whether to auto-inject skill awareness (adaptive only) |
+| 7 | Advanced components | MCP servers, LSP servers, bin/ executables, output styles (adaptive only, asked only if relevant) |
+
+Questions 4a, 5, 6, and 7 are only asked in **adaptive mode**. Quick mode skips them.
+
+### Phase 3: Design Document and Review
+
+1. The agent compiles a design document from the interview
+2. It runs a self-review (placeholder scan, consistency check, scope check, ambiguity check)
+3. It presents the document for your approval
+4. You can request changes — the agent updates and re-reviews
+5. Only after your explicit approval does the creation pipeline begin
 
 ### Quick vs Adaptive Mode
 
 | | Quick | Adaptive |
 |---|---|---|
 | **Use when** | Bundling standalone skills for distribution | Building an orchestrated workflow |
-| **Interview depth** | 4 questions (name, platforms, skills, done) | 7+ questions with conditional follow-ups |
+| **Needs exploration** | 2 questions (problem + users) | 5 questions (full needs exploration) |
+| **Architecture depth** | 3 questions (name, platforms, skills) | 7+ questions with conditional follow-ups |
 | **Default platform** | Claude Code only | User-selected |
 | **Bootstrap** | Skipped (not needed) | Recommended for 3+ skills |
 | **Commands** | Not generated | Entry-point skills get matching commands |
-| **Duration** | 2-3 minutes | 5-10 minutes |
+| **Duration** | 3-5 minutes | 8-15 minutes |
 
-**Rule of thumb:** If your skills form a chain (output of A feeds into B), use adaptive mode. If they're independent utilities, quick is fine.
+**Rule of thumb:** If your skills form a chain (output of A feeds into B), use adaptive mode. If they're independent utilities, quick is fine. The agent recommends the mode — you don't need to choose upfront.
 
 ### Tips for Good Answers
 
+- **Problem scenario:** Be specific about the pain point. "It's annoying to do X manually" is better than "I want a tool for X."
+- **Target users:** Mention their skill level and workflow context. "Backend developers using Claude Code who write Python" is more useful than "developers."
 - **Project name:** Use kebab-case (`my-dev-tools`, not `myDevTools`). This name appears everywhere.
 - **Platforms:** Start with what you actually use today. Add others later with `bundles-forge:scaffolding`.
-- **Skill inventory:** Even a rough list helps. You can always add skills later.
-- **Workflow chain:** Draw it out — "skill-a → skill-b → skill-c". If skills are independent, say so.
+- **When the agent proposes approaches:** Read the trade-offs. If none fit, say so — the agent will adjust.
 
 ---
 
 ## Advanced Scenarios
 
-Most users follow the standard interview (Scenario A). These two scenarios handle specialized starting points — both feed into the same interview to finalize project details.
+Most users follow the standard interview (Scenario A). These two scenarios handle specialized starting points — both feed into the same three-phase interview to finalize project details.
 
 ### Scenario B: Decomposition (Splitting a Large Skill)
 
@@ -125,7 +150,7 @@ Most users follow the standard interview (Scenario A). These two scenarios handl
 1. The skill reads your existing SKILL.md and maps its responsibilities
 2. It identifies natural split points based on the signals above
 3. It proposes a decomposition: which pieces become skills, which become shared resources
-4. After you approve, it transitions into the standard interview for remaining project details
+4. After you approve, it transitions into the standard three-phase interview with richer context
 
 **Common patterns:** branch split (if/else branches → separate skills), pipeline extract (sequential phases → chained skills), reference extraction (inline tables → `references/` files). Not every large skill needs decomposition — if the skill is long but has a single clear responsibility, extract to `references/` instead.
 
@@ -141,7 +166,7 @@ Most users follow the standard interview (Scenario A). These two scenarios handl
    - **Repackage as-is** — bundle without modification (source attribution added)
    - **Integrate into workflow** — adapt descriptions, cross-references, and handoffs
 4. It designs the orchestration (workflow chains, glue skills, shared resources, bootstrap)
-5. After you approve, it transitions into the standard interview for remaining details
+5. After you approve, it transitions into the standard three-phase interview with richer context
 
 **Third-party skill handling:**
 
@@ -163,6 +188,18 @@ All scenarios produce a design document with this structure:
 
 ```markdown
 ## Bundle-Plugin Design: <project-name>
+
+### Project Overview
+<One sentence: what this skill bundle is and what problem it solves>
+
+### Target Users
+<Who will use it, their background, typical workflows>
+
+### Use Cases
+<2-3 concrete scenarios>
+
+### Success Criteria
+<How to judge whether this is working well>
 
 **Mode:** quick / adaptive
 **Platforms:** <list>
@@ -187,10 +224,13 @@ All scenarios produce a design document with this structure:
 ```
 
 **Review checklist before approving:**
+- [ ] Project overview clearly states the problem being solved
+- [ ] Target users are specific (not just "developers")
 - [ ] All skills are named in kebab-case
 - [ ] Workflow dependencies are mapped (or marked independent)
 - [ ] Platform choices match what you actually use
 - [ ] Third-party skills have license and security audit noted
+- [ ] Success criteria are measurable where possible
 
 ---
 
@@ -207,7 +247,7 @@ When the design document is approved, **blueprinting orchestrates** a four-phase
 
 Later, use `bundles-forge:scaffolding` again if you need to add more platforms.
 
-The agent carries your approved design document through these phases. **Authoring** is called by **blueprinting** as part of this pipeline; scaffolding does not call authoring.
+The agent carries your approved design document through these phases. **Authoring** is called by **blueprinting** as part of this pipeline; scaffolding does not call authoring. The design document's needs context (project overview, target users, use cases) is passed to authoring to help write more targeted skill descriptions.
 
 ---
 
@@ -215,19 +255,23 @@ The agent carries your approved design document through these phases. **Authorin
 
 **Q: The agent jumps straight to scaffolding without interviewing me. What happened?**
 
-The skill wasn't loaded, or you said something like "just generate it" that bypassed the interview. Explicitly invoke `/bundles-blueprint` to ensure the full interview runs.
+The skill has a HARD-GATE that prevents this. If it happened, the skill wasn't loaded — explicitly invoke `/bundles-blueprint` to ensure the full interview runs. The agent cannot proceed to scaffolding until you approve a design document.
+
+**Q: The agent keeps asking questions and won't move on. How do I speed this up?**
+
+The agent has a sufficiency check — it moves forward once it has enough information. If you want the shorter flow, tell the agent you're doing "quick packaging" early on. Quick mode asks only 2 needs questions + 3 architecture questions. You can also say "that's enough detail, let's proceed" and the agent will assess whether it has enough to generate the design document.
+
+**Q: The agent gave me multiple approaches. I don't know which to pick.**
+
+Read the trade-offs the agent provides. The agent always marks one as "recommended" with reasoning. If you're unsure, go with the recommendation — you can adjust later. If none of the approaches fit, tell the agent what's wrong and it will propose alternatives.
 
 **Q: The interview is asking too many questions for my simple project.**
 
-You're in adaptive mode. At question 1, answer "quick packaging" (or "quick mode") to use the shorter interview flow with only 4 questions.
+You're likely in adaptive mode. At the architecture phase, the agent should have recommended quick mode for simple projects. If it didn't, tell it explicitly that you want quick mode.
 
-**Q: The interview is too short — it skipped important questions.**
+**Q: The design document has something wrong. Can I go back?**
 
-You're in quick mode. Restart and answer "orchestrated multi-skill" at question 1 to get the full adaptive-mode interview with conditional follow-ups.
-
-**Q: The design document has the wrong platform listed.**
-
-Edit the design document before approving — the agent presents it for your review. You can change platforms, skill names, or any other field before giving approval.
+Yes. At the review gate, you can request changes to any part of the design. The agent updates the document and re-runs its self-review. You can also ask to go back to a specific phase to re-discuss a decision without restarting from scratch.
 
 **Q: A third-party skill fails the security audit.**
 

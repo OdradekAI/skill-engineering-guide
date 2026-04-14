@@ -88,7 +88,7 @@ flowchart LR
 
 | 阶段 | 技能 | 作用 |
 |------|------|------|
-| 设计 | `blueprinting` | 结构化访谈 → 设计文档 → 编排创建流水线：脚手架生成、内容编写、工作流设计和初始审计。 |
+| 设计 | `blueprinting` | 三阶段访谈（需求探索 → 架构设计 → 设计审核）→ 设计文档 → 编排创建流水线：脚手架生成、内容编写、工作流设计和初始审计。 |
 | 搭建 | `scaffolding` | 根据设计方案生成项目结构，添加或移除平台支持 — 清单、钩子、脚本、引导 skill 和各平台文件。 |
 | 编写 | `authoring` | 指导 SKILL.md 和 agents/*.md 编写 — frontmatter、描述、指令、内容集成和通过 `references/` 实现的渐进式加载。 |
 | 审计 | `auditing` | 10 大类质量评估，含基于模式的安全检查，覆盖 7 类文件。 |
@@ -106,7 +106,7 @@ flowchart LR
 | 指南 | 涵盖内容 |
 |------|---------|
 | [概念指南](docs/concepts-guide.zh.md) | 核心术语、架构图和设计决策 |
-| [蓝图指南](docs/blueprinting-guide.zh.md) | 访谈技巧、设计文档格式、拆分模式 |
+| [蓝图指南](docs/blueprinting-guide.zh.md) | 三阶段访谈、对话策略、设计文档格式、拆分模式 |
 | [脚手架指南](docs/scaffolding-guide.zh.md) | 项目结构、平台适配器、模板系统 |
 | [编写指南](docs/authoring-guide.zh.md) | SKILL.md 编写模式、渐进式加载、Agent 编写 |
 | [审计指南](docs/auditing-guide.zh.md) | 检查清单、报告模板、CI 集成 |
@@ -218,11 +218,14 @@ flowchart LR
 
 ```
 用户执行 /bundles-blueprint
-  → blueprinting：结构化访谈（范围、平台、skill 拆分方案）
-  → 用户批准设计文档
+  → blueprinting：上下文探索（扫描现有文件/技能）
+  → blueprinting：阶段 1 — 需求探索（问题场景、目标用户、核心能力、使用流程）
+  → blueprinting：阶段 2 — 架构设计（项目复杂度、平台、技能拆分、工作流）
+  → blueprinting：阶段 3 — 生成设计文档 + 自审
+  → 用户批准设计文档（HARD-GATE）
   → scaffolding：生成项目结构、清单、钩子、脚本
     → inspector agent 验证脚手架（如子代理可用）
-  → authoring：指导 SKILL.md 和 agents/*.md 内容编写
+  → authoring：指导 SKILL.md 和 agents/*.md 内容编写（携带设计上下文）
   → blueprinting：工作流设计（交叉引用、集成章节）
   → auditing：初始质量检查
 ```

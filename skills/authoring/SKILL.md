@@ -50,7 +50,7 @@ Before writing any content, verify scope and detect the project context:
 
 Write skill or agent content from scratch.
 
-1. **Gather requirements** — from `skill-inventory` (blueprinting), user description, or conversation context. Identify: skill purpose, triggering scenarios, expected inputs/outputs, relationship to other skills
+1. **Gather requirements** — from `skill-inventory` and design document context (blueprinting), user description, or conversation context. Identify: skill purpose, triggering scenarios, expected inputs/outputs, relationship to other skills. When a design document is available, leverage its project overview, target users, and use cases to write more targeted descriptions and overviews
 2. **Load writing guide** — read `references/skill-writing-guide.md` (frontmatter conventions, description rules, instruction style)
 3. **Write frontmatter** — `name` (kebab-case matching directory), `description` (start with "Use when...", under 250 chars, triggering conditions only)
 4. **Write Overview** — 1-3 sentences: what the skill does, core principle, skill type declaration (rigid / flexible / hybrid)

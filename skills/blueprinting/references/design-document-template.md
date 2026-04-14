@@ -5,6 +5,18 @@ After the interview, compile a design summary using this template. Present to us
 ```markdown
 ## Bundle-Plugin Design: <project-name>
 
+### Project Overview
+<One sentence: what this skill bundle is and what problem it solves>
+
+### Target Users
+<Who will use it, their background, typical workflows, and platform preferences>
+
+### Use Cases
+<2-3 concrete scenarios: who, in what situation, how they use it, what outcome>
+
+### Success Criteria
+<How to judge whether this skill bundle is working well — measurable where possible>
+
 **Mode:** quick / adaptive
 **Platforms:** <list>
 **Bootstrap:** yes/no

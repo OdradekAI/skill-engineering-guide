@@ -72,6 +72,8 @@ Pass the JSON script output to the `auditor` agent (`agents/auditor.md`) as inpu
 
 The auditor executes all 10 categories, scores each on a 0-10 scale, and compiles a layered report. Full execution details — category weights, scoring formula, report format, Go/No-Go logic — are defined in `agents/auditor.md` and supported by checklists in `references/`.
 
+When auditing a project created by `bundles-forge:blueprinting`, the auditor may reference the design document's "Success Criteria" section (if present in `.bundles-forge/` or project root) to evaluate whether the implementation aligns with the original project goals.
+
 **Categories at a glance** (see `references/plugin-checklist.md` for 60+ individual checks):
 
 | Category | Weight |

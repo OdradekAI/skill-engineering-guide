@@ -88,7 +88,7 @@ flowchart LR
 
 | Phase | Skill | What It Does |
 |-------|-------|-------------|
-| Design | `blueprinting` | Structured interview → design document → orchestrates the creation pipeline: scaffolding, authoring, workflow design, and initial audit. |
+| Design | `blueprinting` | Three-phase interview (needs exploration → architecture design → design review) → design document → orchestrates the creation pipeline: scaffolding, authoring, workflow design, and initial audit. |
 | Scaffold | `scaffolding` | Generates project structure from design, adds or removes platform support — manifests, hooks, scripts, bootstrap skill, and per-platform files. |
 | Write | `authoring` | Guides SKILL.md and agents/*.md authoring — frontmatter, descriptions, instructions, content integration, and progressive disclosure via `references/`. |
 | Audit | `auditing` | 10-category quality assessment including pattern-based security checks across 7 file categories. |
@@ -106,7 +106,7 @@ Each skill has a companion guide in [`docs/`](docs/) with detailed usage, exampl
 | Guide | Covers |
 |-------|--------|
 | [Concepts Guide](docs/concepts-guide.md) | Core terminology, architecture diagrams, and design decisions |
-| [Blueprinting Guide](docs/blueprinting-guide.md) | Interview techniques, design document format, decomposition patterns |
+| [Blueprinting Guide](docs/blueprinting-guide.md) | Three-phase interview, dialogue strategy, design document format, decomposition patterns |
 | [Scaffolding Guide](docs/scaffolding-guide.md) | Project anatomy, platform adapters, template system |
 | [Authoring Guide](docs/authoring-guide.md) | SKILL.md writing patterns, progressive disclosure, agent authoring |
 | [Auditing Guide](docs/auditing-guide.md) | Checklists, report templates, CI integration |
@@ -218,11 +218,14 @@ flowchart LR
 
 ```
 User runs /bundles-blueprint
-  → blueprinting: structured interview (scope, platforms, skill decomposition)
-  → User approves design document
+  → blueprinting: context exploration (scan existing files/skills)
+  → blueprinting: Phase 1 — needs exploration (problem, users, capabilities, flow)
+  → blueprinting: Phase 2 — architecture design (complexity, platforms, skill decomposition, workflow)
+  → blueprinting: Phase 3 — generate design document + self-review
+  → User approves design document (HARD-GATE)
   → scaffolding: generate project structure, manifests, hooks, scripts
     → inspector agent validates scaffold (if subagents available)
-  → authoring: guide SKILL.md and agents/*.md content
+  → authoring: guide SKILL.md and agents/*.md content (with design context)
   → blueprinting: workflow design (cross-references, integration sections)
   → auditing: initial quality check
 ```
