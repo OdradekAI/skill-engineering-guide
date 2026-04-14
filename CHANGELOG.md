@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.7.1] - 2026-04-14
+
+### Fixed
+
+- **Security scanner false-positive reduction** — `audit_security.py` now distinguishes `skill_reference` files from `skill_content`, downgrading SC1/SC2 from critical to warning in reference docs; HK4 only fires when actual network imports are present; SC12 skips code fences and inline backtick-wrapped references
+
+### Added
+
+- **Comprehensive v1.7.0 audit report** — `examples/bundles-forge-v1.7.0-audit.zh.md` with full 10-category qualitative assessment, false-positive analysis, and fix recommendations
+- **Security scanner refinement tests** — 9 new tests in `TestSecurityScannerRefinements` covering `skill_reference` classification, SC1/SC2 downgrade, HK4 network-import gating, and SC12 code-fence/backtick suppression
+
 ## [1.7.0] - 2026-04-14
 
 ### Added
