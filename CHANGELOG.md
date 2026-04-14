@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.2] - 2026-04-15
+
+### Changed
+
+- **Blueprinting skill** — added over-scoping challenge, immediate contradiction surfacing, assumptions declaration step, and verification gates for each pipeline phase
+- **Optimizing skill** — added optimization action classification (FIX/DERIVED/CAPTURED), skill health assessment across four dimensions, and workflow gap detection guidance
+- **Blueprinting references** — extracted platform table to `references/platform-reference.md` and advanced component mapping to `references/advanced-components.md`
+
+### Fixed
+
+- **Audit check ID references** — optimizing SKILL.md now correctly cites Q1-Q15 and X1-X3 (was Q1-Q12 and X1-X2) and W1-W4 (was G1-G4)
+- **Quick-mode step count** — blueprinting guides (EN/ZH) updated from "3 questions" to "5 steps" to reflect added assumptions declaration and mode selection
+
 ## [1.7.1] - 2026-04-14
 
 ### Fixed
