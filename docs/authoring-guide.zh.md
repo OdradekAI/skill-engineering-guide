@@ -131,8 +131,11 @@
 - 不超过 250 字符
 - 要积极 — 列出相关场景、边缘情况、替代表达
 - 适当限定范围（如"bundle-plugins"而非"any project"）
+- 包含 Agent 会搜索的关键词：错误信息、症状名、同义词、工具名
 
 ### 正文结构
+
+Agent 按可预测的顺序阅读技能：description 匹配 → Overview 扫描 → Process 执行 → references 按需加载。将关键指令前置到正文前半部分。
 
 良好的 SKILL.md 遵循以下模式：
 
@@ -144,14 +147,16 @@
 6. **Inputs / Outputs** — 带描述的 artifact ID
 7. **Integration** — Called by / Calls / Pairs with
 
+对于非显而易见的决策分支，使用 Mermaid 流程图或 ASCII 决策树代替长篇文字描述。
+
 ### Token 效率
 
-| 目标 | 预算 |
-|------|------|
-| Bootstrap 技能（始终加载） | < 200 行 |
-| 常规技能正文 | < 500 行 |
-| 描述（始终在上下文中） | < 250 字符 |
-| Frontmatter 总量 | < 1024 字符 |
+| 目标 | 行数预算 | 词数预算 |
+|------|----------|----------|
+| Bootstrap 技能（始终加载） | < 200 行 | < 150 词 |
+| 常规技能正文 | < 500 行 | < 500 词 |
+| 描述（始终在上下文中） | — | < 250 字符 |
+| Frontmatter 总量 | — | < 1024 字符 |
 
 在 300+ 行时，lint（Q12）建议将重内容段提取到 `references/` — 这是软阈值而非硬限制。将参考内容（100+ 行）提取出来以保持主文件可扫描。使用渐进披露：核心指令放在 SKILL.md 中，细节放在 references 中。
 
@@ -161,6 +166,7 @@
 - 解释*为什么*，而不仅仅是*做什么* — 理解胜过遵从
 - 每个关键指令至少包含一个具体示例
 - 避免堆砌 MUST/ALWAYS/NEVER 而不解释原因
+- 对 rigid/hybrid 类型的技能，添加防御性指令 — 显式漏洞封堵和合理化借口表（详见 `skill-writing-guide.md` 中的 Defensive Writing 章节）
 
 ### 高级特性
 

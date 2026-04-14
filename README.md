@@ -337,6 +337,10 @@ Skills, audit reports, and script output accumulate in the conversation context 
 - **Use slash commands** (`/bundles-audit`, `/bundles-optimize`) to re-anchor the agent on the current task
 - **Prefer script output over inline checks** — `python skills/auditing/scripts/audit_plugin.py .` produces a compact summary instead of the agent reasoning through each check
 
+## Prerequisites
+
+- **Python 3.9+** — required for auditing scripts and version management tools
+
 ## Contributing
 
 Contributions welcome. Please follow the existing code style and ensure all platform manifests stay in sync using `python skills/releasing/scripts/bump_version.py --check`.

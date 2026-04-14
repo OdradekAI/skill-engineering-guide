@@ -19,7 +19,7 @@ import re
 import sys
 from pathlib import Path
 
-SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(-[\w.]+)?$")
 
 
 def _resolve_field_path(data, field):
@@ -175,10 +175,10 @@ def cmd_audit(repo_root):
         return has_drift
 
 
-def cmd_bump(repo_root, new_version):
+def cmd_bump(repo_root, new_version, dry_run=False):
     if not SEMVER_RE.match(new_version):
-        print(f"error: '{new_version}' doesn't look like a version (expected X.Y.Z)",
-              file=sys.stderr)
+        print(f"error: '{new_version}' doesn't look like a version "
+              "(expected X.Y.Z or X.Y.Z-pre.N)", file=sys.stderr)
         sys.exit(1)
 
     config = load_config(repo_root)
@@ -190,13 +190,17 @@ def cmd_bump(repo_root, new_version):
             print(f"  SKIP (missing): {path}")
             continue
         old_ver = read_version(repo_root, path, field)
-        write_version(repo_root, path, field, new_version)
+        if not dry_run:
+            write_version(repo_root, path, field, new_version)
         label = f"{path} ({field})"
         print(f"  {label:<45}  {old_ver} -> {new_version}")
 
     print()
-    print("Done. Running audit to check for missed files...\n")
-    cmd_audit(repo_root)
+    if dry_run:
+        print("Dry run complete — no files were modified.")
+    else:
+        print("Done. Running audit to check for missed files...\n")
+        cmd_audit(repo_root)
 
 
 def main():
@@ -205,7 +209,7 @@ def main():
     parser.add_argument("project_root", nargs="?", default=".",
                         help="Bundle-plugin project root (default: current directory)")
     parser.add_argument("version", nargs="?", default=None,
-                        help="New version (X.Y.Z) for bump mode")
+                        help="New version (X.Y.Z or X.Y.Z-pre.N) for bump mode")
     parser.add_argument("--check", action="store_true",
                         help="Report current versions (detect drift)")
     parser.add_argument("--audit", action="store_true",
@@ -227,7 +231,7 @@ def main():
         has_issues = cmd_audit(repo_root)
         sys.exit(1 if has_issues else 0)
     elif args.version:
-        cmd_bump(repo_root, args.version)
+        cmd_bump(repo_root, args.version, dry_run=args.dry_run)
     else:
         parser.print_help()
 

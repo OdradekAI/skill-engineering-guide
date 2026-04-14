@@ -336,6 +336,10 @@ gemini extensions install https://github.com/odradekai/bundles-forge.git
 - **使用斜杠命令**（`/bundles-audit`、`/bundles-optimize`）将 Agent 重新锚定到当前任务
 - **优先使用脚本输出而非内联检查** — `python skills/auditing/scripts/audit_plugin.py .` 产出紧凑摘要，避免 Agent 逐项推理占用上下文
 
+## 前置要求
+
+- **Python 3.9+** — 审计脚本和版本管理工具所需
+
 ## 贡献
 
 欢迎贡献。请遵循现有代码风格，并通过 `python skills/releasing/scripts/bump_version.py --check` 确保所有平台清单版本同步。

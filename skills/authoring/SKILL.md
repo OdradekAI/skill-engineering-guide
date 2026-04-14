@@ -31,8 +31,13 @@ When the target is an agent definition (`agents/*.md`) rather than a skill, foll
 
 ## Step 0: Project Context (all paths)
 
-Before writing any content, check whether you're working within an existing bundle-plugin project:
+Before writing any content, verify scope and detect the project context:
 
+0. **Triage: should this be a skill?** — Before writing, verify the content warrants a skill:
+   - One-off, project-specific conventions → belongs in CLAUDE.md / AGENTS.md, not a skill
+   - Mechanically enforceable constraints (regex, schema validation) → automate with scripts, not documentation
+   - Standard practices well-documented by the platform → don't duplicate, cross-reference instead
+   - Skip this check when arriving from `bundles-forge:blueprinting` (triage already done during design)
 1. **Detect project root** — look for `skills/` directory + `package.json` above the target
 2. **If project exists**, read 2-3 existing SKILL.md files to extract the project's conventions:
    - Description style (verb form after "Use when", scoping patterns)
@@ -53,7 +58,7 @@ Write skill or agent content from scratch.
 6. **Write Common Mistakes** — table of pitfalls and fixes (at least 3 entries)
 7. **Write Inputs / Outputs / Integration** — declare artifact IDs, calling relationships, and pairing skills
 8. **Check external dependencies** — if the skill references MCP tools or CLI commands, read `references/skill-writing-guide.md` "External Tool References" section for declaration syntax, fallback patterns, and CLI vs MCP guidance
-9. **Evaluate token budget** — if body exceeds 300 lines, extract heavy sections to `references/`
+9. **Evaluate token budget** — if body exceeds 300 lines, extract heavy sections to `references/`. Front-load critical instructions in the first ~5,000 tokens — after context compaction, only this portion survives
 10. **Run validation** (see Post-Action Validation below)
 
 ## Path 2: Integrate Content
@@ -81,7 +86,7 @@ Fill in scaffolded skill stubs with substantive content.
 5. **Write Overview** — core principle + skill type declaration
 6. **Write the process** — step-by-step flow based on the skill's intended purpose from the design document or user context
 7. **Write remaining sections** — Common Mistakes, Inputs/Outputs/Integration
-8. **Create supporting resources** if needed — `references/` for heavy content, `assets/` for templates. Read `references/skill-writing-guide.md` "Supporting Resources" section for thresholds
+8. **Create supporting resources** if needed — `references/` for heavy content, `assets/` for templates. Read `references/skill-writing-guide.md` "Supporting Resources" section for thresholds. Front-load critical instructions in the first ~5,000 tokens — after context compaction, only this portion survives
 9. **Run validation** (see Post-Action Validation below)
 
 ## Path 4: Improve Content
@@ -91,7 +96,7 @@ Enhance existing in-project content based on user feedback or optimization specs
 1. **Read existing content** — understand current structure, strengths, and gaps
 2. **Identify improvement targets** — from user request, `optimization-spec`, or self-diagnosis:
    - Description not triggering reliably → rewrite following description rules
-   - Token budget exceeded → extract to `references/`, cut redundancy
+   - Token budget exceeded → extract to `references/`, cut redundancy, front-load critical instructions in the first ~5,000 tokens
    - Missing sections → add Overview, Common Mistakes, Inputs/Outputs
    - Instruction style issues → reframe directives as reasoning, add examples
 3. **Load writing guide** if needed — read `references/skill-writing-guide.md` (frontmatter conventions, description rules, instruction style)
@@ -121,6 +126,7 @@ After completing any path, validate the authored content:
 | Description too broad | Scope to the right context (e.g., "bundle-plugins" not just "any project") |
 | Skipping project conventions | Always read existing skills first when working in an established project |
 | Not wiring Integration section | Every skill needs Called by / Calls / Pairs with to connect to the workflow graph |
+| No defensive instructions for rigid skills | For rigid/hybrid skills, add explicit loophole closers, rationalization tables, and red-flag lists — see Defensive Writing in `references/skill-writing-guide.md` |
 | Forgetting validation | Always run `audit_skill.py` after authoring — catches issues before they propagate |
 
 ## Inputs

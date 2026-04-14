@@ -6,12 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Bundles Forge is a bundle-plugin engineering toolkit supporting 5 platforms: Claude Code, Cursor, Codex, OpenCode, and Gemini CLI. It contains 7 skills covering the full lifecycle of bundle-plugin development (design, scaffold, author, audit, optimize, release). The project itself is a bundle-plugin — it uses its own patterns to build and validate itself.
 
+**Requires Python 3.9+** (scripts use `pathlib.Path.is_relative_to` and other 3.9+ features).
+
 ## Commands
 
 ### Testing
 
 ```bash
-bash tests/run-all.sh                              # all Python test suites
+python tests/run_all.py                            # all Python test suites
 python tests/test_scripts.py -v                    # auditing/releasing script tests (unittest)
 python tests/test_integration.py -v                # structure, hooks, version sync, skill discovery
 python -m pytest tests/test_scripts.py -v          # same, via pytest
@@ -53,8 +55,6 @@ python skills/releasing/scripts/bump_version.py <new-version>       # bump all f
 - `docs/` — guides (concepts, blueprinting, scaffolding, authoring, auditing, optimizing, releasing) with `*.zh.md` Chinese translations; checked by D7
 - `skills/auditing/scripts/` — audit, security scan, documentation checks, and checklist generation (shares `_cli.py` for argparse/exit-code patterns)
 - `skills/releasing/scripts/` — version bump tooling (`bump_version.py`)
-- `scripts/` — `bump-version.sh` wrapper for CLI convenience (forwards to `skills/releasing/scripts/bump_version.py`)
-
 ### Skill Architecture: Hub-and-Spoke Model
 
 Skills are organized into two layers:
@@ -75,7 +75,7 @@ Pipeline stages: `blueprinting` → `optimizing` → `releasing`. Each orchestra
 
 The `hooks/session-start.py` script runs on SessionStart (matcher: `startup|clear|compact`, excluding `resume` since resumed sessions retain context). It reads the `using-bundles-forge` meta-skill and emits JSON context. Platform detection is three-way: `CURSOR_PLUGIN_ROOT` → Cursor format (`additional_context`), `CLAUDE_PLUGIN_ROOT` → Claude Code format (`hookSpecificOutput`), neither → plain text fallback. On read failure, the script warns to stderr and exits 0 (no-op). Written in Python for cross-platform compatibility (Windows/Mac/Linux).
 
-The `hooks/hooks.json` includes a top-level `description` (shown in Claude Code's `/hooks` menu) and per-handler `timeout: 10` to prevent slow hooks from blocking session start.
+The `hooks/hooks.json` includes a top-level `description` (shown in Claude Code's `/hooks` menu) and per-handler `timeout: 10` to prevent slow hooks from blocking session start. The `hooks/hooks-cursor.json` provides the Cursor-specific hook configuration (same `session-start.py` script, Cursor's simpler schema without timeout/description fields).
 
 ### Agent Dispatch
 

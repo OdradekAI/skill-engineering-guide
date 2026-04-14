@@ -439,7 +439,7 @@ def run_scan(project_root):
 
         findings = scan_file(f, rel, file_type)
         file_result = {
-            "file": str(rel).replace("\\", "/"),
+            "file": rel.as_posix(),
             "type": file_type,
             "findings": findings,
             "counts": {"critical": 0, "warning": 0, "info": 0},

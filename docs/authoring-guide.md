@@ -131,8 +131,11 @@ These are the key conventions the authoring skill enforces. For the full referen
 - Stay under 250 characters
 - Be pushy — list related scenarios, edge cases, alternative phrasings
 - Scope appropriately (e.g., "bundle-plugins" not just "any project")
+- Include keywords agents would search for: error messages, symptoms, synonyms, tool names
 
 ### Body Structure
+
+Agents read skills in a predictable sequence: description match → Overview scan → Process execution → references on-demand. Front-load critical instructions in the first half of the body.
 
 A well-structured SKILL.md follows this pattern:
 
@@ -144,14 +147,16 @@ A well-structured SKILL.md follows this pattern:
 6. **Inputs / Outputs** — artifact IDs with descriptions
 7. **Integration** — Called by / Calls / Pairs with
 
+For non-obvious decision points, use Mermaid flowcharts or ASCII decision trees instead of long prose.
+
 ### Token Efficiency
 
-| Target | Budget |
-|--------|--------|
-| Bootstrap skill (always loaded) | < 200 lines |
-| Regular skill body | < 500 lines |
-| Description (always in context) | < 250 characters |
-| Total frontmatter | < 1024 characters |
+| Target | Line Budget | Word Budget |
+|--------|-------------|-------------|
+| Bootstrap skill (always loaded) | < 200 lines | < 150 words |
+| Regular skill body | < 500 lines | < 500 words |
+| Description (always in context) | — | < 250 characters |
+| Total frontmatter | — | < 1024 characters |
 
 At 300+ lines, lint (Q12) suggests extracting heavy sections to `references/` — this is a soft threshold, not a hard limit. Extract reference content (100+ lines) to keep the main file scannable. Use progressive disclosure: core instructions in SKILL.md, details in references.
 
@@ -161,6 +166,7 @@ At 300+ lines, lint (Q12) suggests extracting heavy sections to `references/` �
 - Explain *why*, not just *what* — understanding beats compliance
 - Include at least one concrete example per key instruction
 - Avoid piling on MUST/ALWAYS/NEVER without reasoning
+- For rigid/hybrid skills, add defensive instructions — explicit loophole closers and rationalization tables (see Defensive Writing in `skill-writing-guide.md`)
 
 ### Advanced Features
 

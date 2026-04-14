@@ -178,6 +178,16 @@ description: "Use when auditing any project for quality"
 description: "Use when reviewing a bundle-plugin for structural issues, version drift, manifest problems, or skill quality, before releasing a bundle-plugin, or when a user points to a skill folder to review"
 ```
 
+### Keyword Coverage
+
+Beyond the description, plant searchable keywords throughout the skill body — especially in the Overview and Common Mistakes sections. Agents scan for terms matching the user's problem, so include:
+
+- **Error messages and symptoms** — the exact strings or conditions users encounter (e.g., "version drift", "manifest mismatch", "install failure")
+- **Synonyms** — different words for the same concept (e.g., "token budget / context limit / line count")
+- **Tool and command names** — actual CLI commands, script names, and file types the skill involves
+
+The goal is to increase the chance that an agent searching for a specific problem lands on this skill. This complements the description — keywords in the body help after the skill is loaded, ensuring the agent finds the relevant section quickly.
+
 ## Skill Types
 
 Skills generally fall into two categories:
@@ -187,6 +197,24 @@ Skills generally fall into two categories:
 - **Hybrid** — Process is rigid (follow the steps), content decisions are flexible (adapt to context). Examples: authoring, scaffolding
 
 Declare the skill type in the Overview section so the agent knows whether to follow instructions literally or adapt them.
+
+### Content Category (Orthogonal to Execution Discipline)
+
+Skills also vary by what they contain. This axis is independent of rigid/flexible/hybrid and affects how you write the body:
+
+- **Technique** — A concrete method with steps. Write with before/after code comparisons and at least one end-to-end example.
+- **Pattern** — A mental model or heuristic. Write with recognition scenarios (when to apply) and counter-examples (when NOT to apply).
+- **Reference** — API docs, syntax guides, tool documentation. Write with quick-lookup tables sorted by usage frequency.
+
+The two axes combine:
+
+| | Technique | Pattern | Reference |
+|---|---|---|---|
+| **Rigid** | TDD loop, release checklist | (rare) | Security scanning rules |
+| **Flexible** | Brainstorming methods | Design heuristics | API exploration guide |
+| **Hybrid** | Authoring flow | Optimization diagnosis | Platform adapter guide |
+
+Declare both axes in the Overview when it helps the agent understand how to read the skill — e.g., "Skill type: Hybrid technique."
 
 ## Instruction Style
 
@@ -221,7 +249,59 @@ Scan the project structure first.
 
 One real example teaches more than three paragraphs of explanation. Include at least one concrete example per key instruction in the skill.
 
+### Defensive Writing (for Rigid/Hybrid Skills)
+
+When a skill enforces discipline (security gates, release checklists, TDD loops), agents under pressure will find creative ways to rationalize non-compliance. Flexible skills should preserve room for judgment — but rigid and hybrid skills need explicit defenses.
+
+**Four patterns:**
+
+1. **Close loopholes explicitly** — Don't just state the rule; forbid specific workarounds:
+
+```markdown
+# Weak — leaves room for interpretation
+Delete untested code. Start over.
+
+# Stronger — closes specific workarounds
+Delete untested code. Start over.
+- Don't keep it as "reference"
+- Don't "adapt" it while rewriting
+- Delete means delete
+```
+
+2. **Rationalization table** — Collect excuses agents actually produce (from behavioral testing or experience) and counter each one:
+
+```markdown
+| Excuse | Reality |
+|--------|---------|
+| "Too simple to test" | Simple code breaks. Test takes 30 seconds. |
+| "I'll test after" | Tests passing after the fact prove nothing about design intent. |
+```
+
+3. **Red-flag checklist** — Give agents a self-check list of warning signs that they're about to rationalize:
+
+```markdown
+## Red Flags — STOP and Reconsider
+- Skipping a step "just this once"
+- "This is different because..."
+- "The spirit of the rule is..."
+```
+
+4. **"Letter = spirit" declaration** — Cut off the entire class of "I'm following the spirit, not the letter" arguments with an early statement: *"Violating the letter of the rules is violating the spirit of the rules."*
+
 ## Body Structure
+
+### How Agents Read Skills
+
+Agents process skills in a predictable sequence — optimize your content for this flow:
+
+1. **Description match** — agent reads the description (always in context) and decides whether to load the skill
+2. **Overview scan** — after loading, agent reads the Overview to confirm relevance and understand the core principle
+3. **Process execution** — agent follows the step-by-step instructions, consulting sections as needed
+4. **References on demand** — agent loads `references/` files only when a step explicitly directs it to
+
+**Design implications:** Put the most critical triggering keywords in the description. Put the most important behavioral instructions in the first half of the body (before the 5,000-token compaction threshold). Put heavy reference material in `references/` files, loaded only when specific steps need them.
+
+### Section Order
 
 A well-structured SKILL.md typically includes:
 
@@ -232,22 +312,62 @@ A well-structured SKILL.md typically includes:
 5. **Inputs / Outputs** — Artifact IDs consumed and produced (backtick-wrapped)
 6. **Integration** — Called by, Calls, Pairs with — using `project:skill-name` cross-reference format
 
+### Visualizing Decision Points
+
+Use flowcharts or decision trees when the skill has non-obvious branching logic. Don't use them for everything — most content is better served by other formats.
+
+**Use flowcharts for:**
+- Non-obvious decision points (choosing between paths based on context)
+- Process loops where the agent might stop too early
+- "When to use A vs B" decisions
+
+**Don't use flowcharts for:**
+- Linear instructions → numbered lists
+- Reference material → tables
+- Code examples → fenced code blocks
+
+**Recommended formats:** Mermaid (broad rendering support across platforms) or ASCII decision trees (zero dependencies). Keep diagrams small — 5-10 nodes maximum.
+
+```mermaid
+flowchart TD
+    A["Skill has branching logic?"] -->|Yes| B["Non-obvious decision?"]
+    A -->|No| C["Use numbered list"]
+    B -->|Yes| D["Use flowchart"]
+    B -->|No| E["Use table"]
+```
+
 ## Token Efficiency
 
 Every token in a frequently-loaded skill costs context budget across every session.
 
-| Target | Budget |
-|--------|--------|
-| Bootstrap skill (always loaded) | < 200 lines |
-| Regular skill body | < 500 lines |
-| Description (always in context) | < 250 characters |
-| Total frontmatter | < 1024 characters |
+| Target | Line Budget | Word Budget |
+|--------|-------------|-------------|
+| Bootstrap skill (always loaded) | < 200 lines | < 150 words |
+| Regular skill body | < 500 lines | < 500 words |
+| Description (always in context) | — | < 250 characters |
+| Total frontmatter | — | < 1024 characters |
+
+Use whichever metric is easier to check — the core principle is that the body's first ~5,000 tokens must contain all critical instructions (the compaction survival threshold).
 
 **Techniques for staying lean:**
 - Cross-reference other skills (`project:skill-name`) instead of repeating content
 - One excellent example beats three mediocre ones
 - Extract heavy reference content (100+ lines) to `references/` files
 - Don't include information the agent already knows (standard tool usage, basic git commands)
+
+## Behavioral Verification
+
+Static auditing (`audit_skill.py`) checks structural compliance — frontmatter format, line counts, broken references. It cannot verify that agents actually follow the skill's instructions as intended.
+
+For high-stakes skills (especially rigid and hybrid types), consider testing with subagents before delivery:
+
+1. **Baseline** — run a pressure scenario with a subagent that does NOT have the skill loaded. Document how the agent behaves naturally — what shortcuts it takes, what rationalizations it offers
+2. **With-skill** — run the same scenario with the skill loaded. Verify the agent now follows the instructions correctly
+3. **Loophole discovery** — if the agent finds new ways to rationalize non-compliance, update the skill to close those gaps
+
+A common failure mode: descriptions that summarize the skill's workflow cause agents to follow the description as a shortcut, skipping the full body. If your baseline test reveals this, rewrite the description to contain only triggering conditions.
+
+This is a recommended practice, not a required step. Apply it when the cost of agent non-compliance is high — release pipelines, security gates, and discipline-enforcing processes where "close enough" isn't acceptable.
 
 ## Progressive Disclosure
 
