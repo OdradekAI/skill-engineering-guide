@@ -15,9 +15,9 @@ The release pipeline is designed as a quality gate — not a formality. It ensur
 | Prerequisites | Clean git status, branch check, tag check | `git status`, `git tag -l` | Yes (dirty tree blocks) |
 | Pre-flight | Version drift, full audit, documentation consistency | `bump_version.py`, `audit_plugin.py`, `audit_docs.py` | Yes (critical findings block) |
 | Address findings | Review and fix critical/warning issues | Manual + `bundles-forge:optimizing` | Yes (critical must resolve) |
-| Documentation sync | Change coherence review, doc updates | AI review + `audit_docs.py` | Yes (contradictions block) |
+| Change Review & Doc Sync | Change coherence review, doc updates | AI review + `audit_docs.py` | Yes (contradictions block) |
 | Version bump | Update all manifests | `bump_version.py` | — |
-| Documentation update | CHANGELOG, README | Manual | — |
+| Release Notes | CHANGELOG, README | Manual | — |
 | Final verification | Re-run all checks | `bump_version.py`, `audit_docs.py` | Yes (must pass) |
 | Publish | Commit, tag, push, platform publish | `git`, `gh`, platform CLIs | — |
 
@@ -74,10 +74,10 @@ Run all automated checks before proceeding:
 
 ```bash
 # Version drift detection
-python skills/releasing/scripts/bump_version.py --check
+python skills/releasing/scripts/bump_version.py <project-root> --check
 
 # Documentation consistency (9 checks)
-python skills/auditing/scripts/audit_docs.py .
+python skills/auditing/scripts/audit_docs.py <project-root>
 ```
 
 **Plugin validation (Claude Code only):** If running in a Claude Code environment, run `claude plugin validate` (or `/plugin validate` in a session) to verify `plugin.json` schema, skill/agent/command frontmatter, and `hooks.json` validity. On other platforms, the inspector agent covers equivalent structural checks.
@@ -112,11 +112,11 @@ All findings from Step 1 are grouped by severity:
 
 For quality fixes, invoke `bundles-forge:optimizing` as part of this pipeline. Auditing only surfaces findings; it does not hand off to optimizing automatically — **releasing** (or you) orchestrates that step.
 
-### Step 3: Documentation Sync
+### Step 3: Change Review & Doc Sync
 
 This step combines automated checking with AI judgment.
 
-**3a. Change Coherence Review**
+**Change coherence review:**
 
 Review the diff from the last release to HEAD:
 
@@ -140,7 +140,7 @@ Look for:
 | Missing registrations | New skill not added to bootstrap routing, README, AGENTS.md | Critical |
 | Stale references | Old skill name used in prose after rename | Critical |
 
-**3b. Documentation Update**
+**Documentation update:**
 
 After resolving coherence issues, sync all project documentation:
 
@@ -154,12 +154,12 @@ Re-run `audit_docs.py` after making changes to confirm consistency.
 ### Step 4: Version Bump
 
 ```bash
-python skills/releasing/scripts/bump_version.py <new-version>
+python skills/releasing/scripts/bump_version.py <project-root> <new-version>
 ```
 
 This updates all files declared in `.version-bump.json` and runs a post-bump audit to catch any missed files.
 
-### Step 5: Documentation Update
+### Step 5: Release Notes
 
 **CHANGELOG.md** — Use [Keep a Changelog](https://keepachangelog.com/) format:
 
@@ -186,9 +186,9 @@ This updates all files declared in `.version-bump.json` and runs a post-bump aud
 ### Step 6: Final Verification
 
 ```bash
-python skills/releasing/scripts/bump_version.py --check   # No version drift
-python skills/releasing/scripts/bump_version.py --audit   # No stray version strings
-python skills/auditing/scripts/audit_docs.py .           # Documentation consistent
+python skills/releasing/scripts/bump_version.py <project-root> --check   # No version drift
+python skills/releasing/scripts/bump_version.py <project-root> --audit   # No stray version strings
+python skills/auditing/scripts/audit_docs.py <project-root>             # Documentation consistent
 ```
 
 All three must exit with code 0 (clean) before publishing.
@@ -274,7 +274,7 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| `bump_version.py --check` finds drift | Manual edit or missed file | Run `bump_version.py <correct-version>` to re-sync |
+| `bump_version.py --check` finds drift | Manual edit or missed file | Run `bump_version.py [project-root] <correct-version>` to re-sync |
 | `audit_docs.py` reports broken cross-refs | Skill renamed without updating references | Find-and-replace old name across all `.md` files |
 | `audit_docs.py` reports skill list mismatch | New skill added but docs not updated | Add skill to AGENTS.md table, README tables, CLAUDE.md |
 | Tag already exists | Previous release attempt or version collision | Choose a different version or delete the tag with `git tag -d` |
@@ -297,11 +297,11 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 ### Commands
 
 ```bash
-python skills/releasing/scripts/bump_version.py --check     # Detect version drift
-python skills/releasing/scripts/bump_version.py --audit     # Find undeclared version strings
-python skills/releasing/scripts/bump_version.py <version>   # Bump all manifests
-python skills/auditing/scripts/audit_docs.py .             # Documentation consistency check
-python skills/auditing/scripts/audit_plugin.py .          # Full quality + security audit
+python skills/releasing/scripts/bump_version.py [project-root] --check     # Detect version drift
+python skills/releasing/scripts/bump_version.py [project-root] --audit     # Find undeclared version strings
+python skills/releasing/scripts/bump_version.py [project-root] <version>   # Bump all manifests
+python skills/auditing/scripts/audit_docs.py <project-root>               # Documentation consistency check
+python skills/auditing/scripts/audit_plugin.py <project-root>             # Full quality + security audit
 ```
 
 ### Exit Codes

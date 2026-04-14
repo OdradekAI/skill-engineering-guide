@@ -17,9 +17,10 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 
-SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(-[\w.]+)?$")
 
 
 def _resolve_field_path(data, field):
@@ -125,7 +126,6 @@ def cmd_check(repo_root):
     if result["has_drift"]:
         if len(result["unique_versions"]) > 1:
             print("DRIFT DETECTED — versions are not in sync:")
-            from collections import Counter
             counts = Counter(result["versions"].values())
             for ver, count in counts.most_common():
                 print(f"  {ver} ({count} files)")
@@ -141,18 +141,19 @@ def cmd_check(repo_root):
 
 
 def cmd_audit(repo_root):
-    has_drift = cmd_check(repo_root)
+    result = run_check(repo_root)
+    has_drift = result["has_drift"]
+
+    if has_drift:
+        n = len(result["unique_versions"])
+        print(f"Version drift detected ({n} unique versions)")
+    else:
+        versions = list(result["versions"].values())
+        if versions:
+            print(f"Versions in sync at {versions[0]}")
     print()
 
-    config = load_config(repo_root)
-    entries = declared_files(config)
-
-    from collections import Counter
-    version_counts = Counter()
-    for path, field in entries:
-        ver = read_version(repo_root, path, field)
-        if ver:
-            version_counts[ver] += 1
+    version_counts = Counter(result["versions"].values())
 
     if not version_counts:
         print("error: could not determine current version", file=sys.stderr)
@@ -160,6 +161,9 @@ def cmd_audit(repo_root):
 
     current_version = version_counts.most_common(1)[0][0]
     print(f"Audit: scanning repo for version string '{current_version}'...\n")
+
+    config = load_config(repo_root)
+    entries = declared_files(config)
 
     excludes = set(config.get("audit", {}).get("exclude", []))
     excludes.update({".git", "node_modules"})
@@ -210,7 +214,7 @@ def cmd_audit(repo_root):
 
 def cmd_bump(repo_root, new_version, dry_run=False):
     if not SEMVER_RE.match(new_version):
-        print(f"error: '{new_version}' doesn't look like a version (expected X.Y.Z)",
+        print(f"error: '{new_version}' doesn't look like a version (expected X.Y.Z or X.Y.Z-pre.N)",
               file=sys.stderr)
         sys.exit(1)
 
@@ -243,7 +247,7 @@ def main():
     parser.add_argument("project_root", nargs="?", default=".",
                         help="Bundle-plugin project root (default: current directory)")
     parser.add_argument("version", nargs="?", default=None,
-                        help="New version (X.Y.Z) for bump mode")
+                        help="New version (X.Y.Z or X.Y.Z-pre.N) for bump mode")
     parser.add_argument("--check", action="store_true",
                         help="Report current versions (detect drift)")
     parser.add_argument("--audit", action="store_true",

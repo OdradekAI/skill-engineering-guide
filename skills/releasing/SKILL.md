@@ -1,6 +1,6 @@
 ---
 name: releasing
-description: "Use when releasing a bundle-plugin, bumping versions, fixing version drift across manifests, setting up version sync infrastructure, updating CHANGELOG, or publishing to marketplaces. Orchestrates the full pre-release verification pipeline"
+description: "Use when releasing a bundle-plugin, bumping versions, fixing version drift across manifests, setting up version sync infrastructure, updating CHANGELOG, publishing to marketplaces, or checking release readiness"
 allowed-tools: Python(skills/releasing/scripts/bump_version.py *) Python(skills/auditing/scripts/audit_plugin.py *) Python(skills/auditing/scripts/audit_docs.py *)
 ---
 
@@ -8,56 +8,35 @@ allowed-tools: Python(skills/releasing/scripts/bump_version.py *) Python(skills/
 
 ## Overview
 
-Orchestrate the complete release workflow for a bundle-plugin: verify quality, scan for security risks, check documentation consistency, review change coherence, bump versions, update documentation, and publish to target platforms. This skill also owns version management infrastructure — keeping all platform manifests in sync.
+Orchestrate the complete release workflow for a bundle-plugin: verify quality, scan for security risks, check documentation consistency, review change coherence, bump versions, update documentation, and publish to target platforms.
 
 **Core principle:** Release is a checkpoint, not a formality. Every release deserves the full pipeline — even "minor" version bumps can introduce drift or break platform installs. Users should complete all agent, skill, and workflow development before invoking this skill.
 
+**Skill type: Rigid** — follow every step exactly. Releases have no room for improvisation.
+
+For version management infrastructure details (`.version-bump.json` schema, script usage, version setup for new projects), read `references/version-infrastructure.md`. For distribution strategy options, read `references/distribution-strategy.md`.
+
 **Announce at start:** "I'm using the releasing skill to prepare this project for release."
 
-## Version Management Infrastructure
+## Entry Detection
 
-All platform manifests contain version strings that must stay synchronized. A single drift causes install failures or stale caches.
+| Context | Path |
+|---------|------|
+| User wants to release a version, provides a project directory | **Path 1: Standard release** — run the full pipeline below |
+| Urgent fix with small changes | **Path 2: Hotfix release** — run the abbreviated pipeline (see Hotfix Releases) |
+| Project needs version infrastructure for the first time | **Path 3: Version setup** — read `references/version-infrastructure.md` § Version Setup |
 
-### `.version-bump.json`
+## The Release Pipeline
 
-Declares every file and JSON path containing the version:
-
-```json
-{
-  "files": [
-    { "path": "package.json", "field": "version" },
-    { "path": ".claude-plugin/plugin.json", "field": "version" },
-    { "path": ".claude-plugin/marketplace.json", "field": "plugins.0.version" },
-    { "path": ".cursor-plugin/plugin.json", "field": "version" },
-    { "path": "gemini-extension.json", "field": "version" }
-  ],
-  "audit": {
-    "exclude": ["CHANGELOG.md", "node_modules", ".git", ".version-bump.json", "skills/releasing/scripts/bump_version.py"]
-  }
-}
+```
+0. Prerequisites  →  1. Pre-flight Checks  →  2. Address Findings
+→  3. Change Review & Doc Sync  →  4. Version Bump
+→  5. Release Notes  →  6. Final Verification  →  7. Publish
 ```
 
-Only include entries for platforms the project actually targets.
+### Step 0: Prerequisites
 
-### `skills/releasing/scripts/bump_version.py`
-
-Three commands (requires Python 3):
-
-| Command | What It Does |
-|---------|-------------|
-| `python skills/releasing/scripts/bump_version.py 1.2.3` | Update all declared files to new version |
-| `python skills/releasing/scripts/bump_version.py --check` | Detect version drift between files |
-| `python skills/releasing/scripts/bump_version.py --audit` | Check + scan repo for undeclared version strings |
-
-### When to Check Versions
-
-- **After adding a platform** — new manifest needs a `.version-bump.json` entry
-- **Before release** — run `--check` to verify sync, `--audit` to catch strays
-- **After audit finds drift** — bump to correct version
-
-## Prerequisites
-
-Before starting the release process, verify these conditions. Hard requirements block the pipeline; soft requirements trigger warnings.
+Verify all conditions before entering the pipeline. Hard requirements block the pipeline; soft requirements trigger warnings.
 
 **Hard requirements (must pass):**
 - The project is a bundle-plugin (has `skills/` directory and `package.json`)
@@ -69,69 +48,9 @@ Before starting the release process, verify these conditions. Hard requirements 
 - The current branch is `main` or `master` — if not, warn the user and ask for confirmation before proceeding
 - The target version tag does not already exist — run `git tag -l v<version>` to verify
 
-If the working tree is dirty, stop immediately and ask the user to commit or stash changes. Do not proceed with a dirty tree.
-
-## The Release Pipeline
-
-```
-0. Prerequisites
-   ├── git status clean (hard — blocks pipeline)
-   ├── .bundles-forge/ audit report exists (soft — will run audit if missing)
-   ├── Branch check (soft — warn if not main)
-   └── Tag conflict check (soft — warn if tag exists)
-         │
-1. Pre-flight checks
-   ├── Version drift check (bump_version.py --check)
-   ├── Full audit: bundles-forge:auditing (preferred) or audit_plugin.py (fallback)
-   ├── Documentation consistency (audit_docs.py)
-   ├── Cross-reference validity (audit_docs.py)
-   └── Git tag conflict check (git tag -l v<version>)
-         │
-2. Address findings
-   ├── Original audit findings + documentation consistency findings
-   └── Categorized by severity: Critical / Warning / Info
-         │
-3. Documentation sync
-   ├── AI review of change coherence (tag..HEAD diff)
-   │   ├── Contradictions between changed files
-   │   ├── Redundant content across skills/docs
-   │   ├── Over-engineered abstractions
-   │   └── Missing registrations (new skill not in routing, etc.)
-   ├── Fix docs/ content if outdated
-   ├── Sync CLAUDE.md and AGENTS.md with project state
-   └── Sync README.md and README.zh.md
-         │
-4. Version bump
-   └── python skills/releasing/scripts/bump_version.py <new-version>
-         │
-5. Documentation update
-   ├── Update CHANGELOG.md (what changed, migration notes)
-   ├── Validate CHANGELOG format, version number, date, no duplicates
-   └── Update README.md if needed (new skills, changed workflows)
-         │
-6. Final verification
-   ├── Re-run bump_version.py --check (confirm no drift)
-   ├── Re-run bump_version.py --audit (catch stray version strings)
-   └── Re-run audit_docs.py (confirm documentation consistency)
-         │
-7. Publish
-   ├── Commit all changes
-   ├── Tag the release (git tag v<version>)
-   └── Publish per platform (see Platform Publishing below)
-```
-
-### Step 0: Prerequisites
-
-Verify all hard requirements before entering the pipeline.
-
 ```bash
-# Working tree must be clean
 git status
-
-# Check if target tag already exists
 git tag -l v<version>
-
-# Check current branch
 git branch --show-current
 ```
 
@@ -142,10 +61,7 @@ If the working tree is dirty, instruct the user to commit all development work f
 Run all automated checks. If any critical issues are found, resolve them before continuing.
 
 ```bash
-# Version drift
-python skills/releasing/scripts/bump_version.py --check
-
-# Documentation consistency (skill lists, cross-refs, manifests, READMEs)
+python skills/releasing/scripts/bump_version.py <project-root> --check
 python skills/auditing/scripts/audit_docs.py <project-root>
 ```
 
@@ -164,11 +80,11 @@ Present all findings to the user grouped by severity:
 
 For fixes, invoke `bundles-forge:optimizing` for quality issues.
 
-### Step 3: Documentation Sync
+### Step 3: Change Review & Doc Sync
 
 This step requires AI judgment — it cannot be fully automated.
 
-**3a. Change coherence review:**
+**Change coherence review:**
 
 Read the diff from the last release tag to HEAD:
 
@@ -191,7 +107,7 @@ Review all changed files for:
 
 Present findings as a blocking report using the same Critical/Warning/Info severity model as Step 2. Critical items must be resolved before proceeding.
 
-**3b. Documentation update:**
+**Documentation update:**
 
 After resolving coherence issues, sync project documentation:
 
@@ -216,12 +132,12 @@ Help the user choose the right version increment:
 Pre-release versions follow semver pre-release syntax. The bump script accepts any valid version string — pre-release versions work the same as stable ones across all manifests.
 
 ```bash
-python skills/releasing/scripts/bump_version.py <new-version>
+python skills/releasing/scripts/bump_version.py <project-root> <new-version>
 ```
 
-This updates all declared files and runs an audit to catch any missed files.
+This updates all declared files and runs an audit to catch any missed files. For the full command reference, read `references/version-infrastructure.md`.
 
-### Step 5: Documentation Update
+### Step 5: Release Notes
 
 **CHANGELOG.md** — Add an entry for the new version using [Keep a Changelog](https://keepachangelog.com/) format:
 
@@ -252,9 +168,9 @@ This updates all declared files and runs an audit to catch any missed files.
 After all changes, re-run verification to confirm nothing broke:
 
 ```bash
-python skills/releasing/scripts/bump_version.py --check   # No drift
-python skills/releasing/scripts/bump_version.py --audit   # No stray versions
-python skills/auditing/scripts/audit_docs.py .           # Documentation consistent
+python skills/releasing/scripts/bump_version.py <project-root> --check
+python skills/releasing/scripts/bump_version.py <project-root> --audit
+python skills/auditing/scripts/audit_docs.py <project-root>
 ```
 
 ### Step 7: Publish
@@ -294,29 +210,6 @@ For urgent fixes between planned releases:
 3. Bump patch version
 4. Update CHANGELOG with `### Fixed` section
 5. Publish
-
-## Version Setup (New Projects)
-
-When setting up version infrastructure for the first time:
-
-1. Create `.version-bump.json` with entries for all version-bearing manifests
-2. Create `skills/releasing/scripts/bump_version.py` (from scaffold templates)
-3. Run `python skills/releasing/scripts/bump_version.py --check` to verify initial sync
-4. Run `python skills/releasing/scripts/bump_version.py --audit` to catch any missed files
-
-## Distribution Strategy
-
-Choose how users will install the plugin based on the target audience:
-
-| Strategy | Best For | How |
-|----------|----------|-----|
-| Marketplace (Claude Code) | Public distribution, widest reach | `claude plugin publish` — users install via `claude plugin install` |
-| Project scope | Team tooling shared via git | Install with `--scope project` — config committed to `.claude/settings.json` |
-| Local scope | Personal project-specific plugins | Install with `--scope local` — gitignored, per-developer |
-| Git-based (Codex, OpenCode, Gemini) | Platforms without marketplaces | Users clone the repo and follow per-platform install docs |
-| Development mode | Iterating before publishing | `claude --plugin-dir .` — loads current directory, no caching |
-
-For marketplace distribution, ensure `.claude-plugin/marketplace.json` exists with plugin metadata. For development iteration, use `--plugin-dir .` to bypass caching — changes take effect immediately without version bumps.
 
 ## Common Mistakes
 

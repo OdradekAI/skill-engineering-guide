@@ -15,9 +15,9 @@
 | 前置条件 | 干净 git 状态、分支检查、标签检查 | `git status`、`git tag -l` | 是（脏工作区阻塞） |
 | 预检 | 版本漂移、完整审计、文档一致性 | `bump_version.py`、`audit_plugin.py`、`audit_docs.py` | 是（严重发现阻塞） |
 | 处理发现 | 审查并修复 critical/warning 问题 | 手动 + `bundles-forge:optimizing` | 是（critical 必须解决） |
-| 文档同步 | 变更一致性审查、文档更新 | AI 审查 + `audit_docs.py` | 是（矛盾阻塞） |
+| 变更审查与文档同步 | 变更一致性审查、文档更新 | AI 审查 + `audit_docs.py` | 是（矛盾阻塞） |
 | 版本升级 | 更新所有清单 | `bump_version.py` | — |
-| 文档更新 | CHANGELOG、README | 手动 | — |
+| 发布说明 | CHANGELOG、README | 手动 | — |
 | 最终验证 | 重新运行所有检查 | `bump_version.py`、`audit_docs.py` | 是（必须通过） |
 | 发布 | 提交、打标签、推送、平台发布 | `git`、`gh`、平台 CLI | — |
 
@@ -74,10 +74,10 @@ git branch --show-current
 
 ```bash
 # 版本漂移检测
-python skills/releasing/scripts/bump_version.py --check
+python skills/releasing/scripts/bump_version.py <project-root> --check
 
 # 文档一致性（9 项检查）
-python skills/auditing/scripts/audit_docs.py .
+python skills/auditing/scripts/audit_docs.py <project-root>
 ```
 
 **插件验证（仅 Claude Code）：** 在 Claude Code 环境中，运行 `claude plugin validate`（或会话内 `/plugin validate`）以验证 `plugin.json` schema、skill/agent/command frontmatter 和 `hooks.json` 有效性。其他平台通过 inspector agent 覆盖等效的结构检查。
@@ -112,11 +112,11 @@ python skills/auditing/scripts/audit_docs.py .
 
 如需质量修复，在本流水线中调用 `bundles-forge:optimizing`。审计只呈现发现，不会自动交给优化 — 由**发布**（或你）编排该步骤。
 
-### 步骤 3：文档同步
+### 步骤 3：变更审查与文档同步
 
 此步骤结合自动化检查和 AI 判断。
 
-**3a. 变更一致性审查**
+**变更一致性审查：**
 
 审查从上次发布到 HEAD 的差异：
 
@@ -140,7 +140,7 @@ git diff $(git describe --tags --abbrev=0)..HEAD
 | 遗漏注册 | 新技能未添加到引导路由、README、AGENTS.md | Critical |
 | 过期引用 | 重命名后仍使用旧技能名称 | Critical |
 
-**3b. 文档更新**
+**文档更新：**
 
 解决一致性问题后，同步所有项目文档：
 
@@ -154,12 +154,12 @@ git diff $(git describe --tags --abbrev=0)..HEAD
 ### 步骤 4：版本升级
 
 ```bash
-python skills/releasing/scripts/bump_version.py <new-version>
+python skills/releasing/scripts/bump_version.py <project-root> <new-version>
 ```
 
 这会更新 `.version-bump.json` 中声明的所有文件，并运行升级后审计以捕获遗漏。
 
-### 步骤 5：文档更新
+### 步骤 5：发布说明
 
 **CHANGELOG.md** — 使用 [Keep a Changelog](https://keepachangelog.com/) 格式：
 
@@ -186,9 +186,9 @@ python skills/releasing/scripts/bump_version.py <new-version>
 ### 步骤 6：最终验证
 
 ```bash
-python skills/releasing/scripts/bump_version.py --check   # 无版本漂移
-python skills/releasing/scripts/bump_version.py --audit   # 无游离版本字符串
-python skills/auditing/scripts/audit_docs.py .           # 文档一致
+python skills/releasing/scripts/bump_version.py <project-root> --check   # 无版本漂移
+python skills/releasing/scripts/bump_version.py <project-root> --audit   # 无游离版本字符串
+python skills/auditing/scripts/audit_docs.py <project-root>             # 文档一致
 ```
 
 三者必须全部以退出码 0（干净）退出后才能发布。
@@ -274,7 +274,7 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 
 | 问题 | 原因 | 修复 |
 |------|------|------|
-| `bump_version.py --check` 发现漂移 | 手动编辑或遗漏文件 | 运行 `bump_version.py <correct-version>` 重新同步 |
+| `bump_version.py --check` 发现漂移 | 手动编辑或遗漏文件 | 运行 `bump_version.py [project-root] <correct-version>` 重新同步 |
 | `audit_docs.py` 报告断裂的交叉引用 | 重命名技能但未更新引用 | 在所有 `.md` 文件中查找替换旧名称 |
 | `audit_docs.py` 报告技能列表不匹配 | 添加新技能但未更新文档 | 将技能添加到 AGENTS.md 表、README 表、CLAUDE.md |
 | 标签已存在 | 之前的发布尝试或版本冲突 | 选择不同版本或 `git tag -d` 删除标签 |
@@ -297,11 +297,11 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 ### 命令
 
 ```bash
-python skills/releasing/scripts/bump_version.py --check     # 检测版本漂移
-python skills/releasing/scripts/bump_version.py --audit     # 查找未声明的版本字符串
-python skills/releasing/scripts/bump_version.py <version>   # 升级所有清单
-python skills/auditing/scripts/audit_docs.py .             # 文档一致性检查
-python skills/auditing/scripts/audit_plugin.py .          # 完整质量 + 安全审计
+python skills/releasing/scripts/bump_version.py [project-root] --check     # 检测版本漂移
+python skills/releasing/scripts/bump_version.py [project-root] --audit     # 查找未声明的版本字符串
+python skills/releasing/scripts/bump_version.py [project-root] <version>   # 升级所有清单
+python skills/auditing/scripts/audit_docs.py <project-root>               # 文档一致性检查
+python skills/auditing/scripts/audit_plugin.py <project-root>             # 完整质量 + 安全审计
 ```
 
 ### 退出码
