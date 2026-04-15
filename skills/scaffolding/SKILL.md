@@ -58,7 +58,6 @@ Generated for all intelligent-mode projects regardless of platform selection:
 | `LICENSE` | Default MIT unless specified |
 | `.gitignore` | node_modules, .worktrees, OS files |
 | `.version-bump.json` | Version sync manifest |
-| `skills/releasing/scripts/bump_version.py` | Version management tool |
 | `skills/<skill-name>/SKILL.md` | One directory per skill |
 | `commands/<entry-skill>.md` | One command per entry-point skill |
 

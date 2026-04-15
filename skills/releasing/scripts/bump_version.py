@@ -5,10 +5,10 @@ Version synchronization tool for bundle-plugins.
 Reads .version-bump.json and bumps version numbers across all declared
 files, detects drift, and audits for undeclared version strings.
 
-Usage:
-    python skills/releasing/scripts/bump_version.py [project-root] <new-version>
-    python skills/releasing/scripts/bump_version.py [project-root] --check
-    python skills/releasing/scripts/bump_version.py [project-root] --audit
+Usage (via CLI):
+    bundles-forge bump-version [project-root] <new-version>
+    bundles-forge bump-version [project-root] --check
+    bundles-forge bump-version [project-root] --audit
 
 Exit codes: 0 = in sync, 1 = drift or undeclared files found
 """

@@ -13,7 +13,7 @@ Supplementary examples for the audit report template (`plugin-report-template.md
 | Dimension | Example |
 |-----------|---------|
 | Platform | `3/5 platforms affected` — Cursor, Claude Code, and Codex manifests have invalid paths |
-| Workflow | `blocks scaffolding → auditing chain` — broken cross-reference prevents workflow progression |
+| Workflow | `blocks skill-A → skill-B chain` — broken cross-reference prevents workflow progression |
 | Component | `4/7 skills` — four skills exceed token budget |
 | Functional | `breaks install` — session-start hook fails on Windows because `python` is not on PATH |
 
@@ -58,7 +58,7 @@ Supplementary examples for the audit report template (`plugin-report-template.md
 - Layer 1 focuses on release readiness — "Can we ship this version?"
 - Include version bump verification (`bump_version.py --check` and `--audit`)
 - Decision Brief includes release recommendation
-- Pair with `bundles-forge:releasing` for the full release pipeline
+- Pair with the `releasing` skill (if available) for the full release pipeline
 
 **Conditional section for Decision Brief:**
 ```markdown

@@ -205,7 +205,7 @@ Scan `agents/*.md` and any `*-prompt.md` files within skill directories.
 
 ## Category 5: Bundled Script Safety (Weight: Medium)
 
-Scan `skills/auditing/scripts/`, `skills/releasing/scripts/`, and any `scripts/` under skill directories.
+Scan `scripts/` at the project root and any `scripts/` under skill directories.
 
 <!-- BEGIN:security/bundled_scripts -->
 | Check | Risk | Pattern | Automation |
@@ -220,7 +220,7 @@ Scan `skills/auditing/scripts/`, `skills/releasing/scripts/`, and any `scripts/`
 
 ### Legitimate Script Baseline
 
-The standard `skills/releasing/scripts/bump_version.py` should only:
+A version bump script (e.g. `scripts/bump_version.py`) should only:
 1. Read `.version-bump.json`
 2. Read/write version fields in declared JSON files using `jq`
 3. Grep the repo for version strings
@@ -301,8 +301,8 @@ Scan `plugin.json` manifests and hook commands for path and configuration issues
 | hooks/session-start.py | Hook script | 0 | 0 | 0 |
 | .opencode/plugins/example.js | OpenCode plugin | 0 | 0 | 1 |
 | skills/my-skill/SKILL.md | Skill content | 0 | 0 | 0 |
-| agents/inspector.md | Agent prompt | 0 | 0 | 0 |
-| skills/releasing/scripts/bump_version.py | Bundled script | 0 | 0 | 0 |
+| agents/example-agent.md | Agent prompt | 0 | 0 | 0 |
+| scripts/bump_version.py | Bundled script | 0 | 0 | 0 |
 
 ### Recommendations
 1. <highest-priority remediation>

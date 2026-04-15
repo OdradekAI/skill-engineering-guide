@@ -13,12 +13,12 @@
 | 阶段 | 步骤 | 工具 | 阻塞？ |
 |------|------|------|--------|
 | 前置条件 | 干净 git 状态、分支检查、标签检查 | `git status`、`git tag -l` | 是（脏工作区阻塞） |
-| 预检 | 版本漂移、完整审计、文档一致性 | `bump_version.py`、`audit_plugin.py`、`audit_docs.py` | 是（严重发现阻塞） |
+| 预检 | 版本漂移、完整审计、文档一致性 | `bundles-forge bump-version`、`bundles-forge audit-plugin`、`bundles-forge audit-docs` | 是（严重发现阻塞） |
 | 处理发现 | 审查并修复 critical/warning 问题 | 手动 + `bundles-forge:optimizing` | 是（critical 必须解决） |
-| 变更审查与文档同步 | 变更一致性审查、文档更新 | AI 审查 + `audit_docs.py` | 是（矛盾阻塞） |
-| 版本升级 | 更新所有清单 | `bump_version.py` | — |
+| 变更审查与文档同步 | 变更一致性审查、文档更新 | AI 审查 + `bundles-forge audit-docs` | 是（矛盾阻塞） |
+| 版本升级 | 更新所有清单 | `bundles-forge bump-version` | — |
 | 发布说明 | CHANGELOG、README | 手动 | — |
-| 最终验证 | 重新运行所有检查 | `bump_version.py`、`audit_docs.py` | 是（必须通过） |
+| 最终验证 | 重新运行所有检查 | `bundles-forge bump-version`、`bundles-forge audit-docs` | 是（必须通过） |
 | 发布 | 提交、打标签、推送、平台发布 | `git`、`gh`、平台 CLI | — |
 
 ---
@@ -84,7 +84,7 @@ bundles-forge audit-docs <project-root>
 
 **完整审计：** 调用 `bundles-forge:auditing`（首选 — 通过 auditor 子代理提供 10 类定性评估与评分）。回退：`bundles-forge audit-plugin .`（仅自动化检查，无定性评分）。
 
-**`audit_docs.py` 检查项（D1–D9）：**
+**`bundles-forge audit-docs` 检查项（D1–D9）：**
 
 | 检查 | 验证内容 |
 |------|---------|
@@ -149,7 +149,7 @@ git diff $(git describe --tags --abbrev=0)..HEAD
 3. **`AGENTS.md`** — 更新可用技能表
 4. **`README.md` + `README.zh.md`** — 更新技能表、Agent 表、命令表、代码块
 
-更改后重新运行 `audit_docs.py` 确认一致性。
+更改后重新运行 `bundles-forge audit-docs` 确认一致性。
 
 ### 步骤 4：版本升级
 
@@ -246,9 +246,9 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 
 1. 在 `main` 上修复问题（或使用专用热修复分支）
 2. 运行精简流水线：
-   - `bump_version.py --check`（版本漂移）
-   - `audit_security.py .`（仅安全）
-   - `audit_docs.py .`（文档一致性）
+   - `bundles-forge bump-version --check`（版本漂移）
+   - `bundles-forge audit-security .`（仅安全）
+   - `bundles-forge audit-docs .`（文档一致性）
 3. 升级补丁版本
 4. 更新 CHANGELOG，仅包含 `### Fixed` 部分
 5. 发布
@@ -262,9 +262,8 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 对于尚未建立版本管理的新项目：
 
 1. 创建 `.version-bump.json`，包含所有版本承载清单的条目
-2. 添加 `skills/releasing/scripts/bump_version.py`（从脚手架模板或 bundles-forge 复制）
-3. 验证：`bundles-forge bump-version --check`
-4. 审计：`bundles-forge bump-version --audit`
+2. 验证：`bundles-forge bump-version --check`
+3. 审计：`bundles-forge bump-version --audit`
 
 完整项目搭建（含版本基础设施）请参见 `bundles-forge:scaffolding`。
 
@@ -274,9 +273,9 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 
 | 问题 | 原因 | 修复 |
 |------|------|------|
-| `bump_version.py --check` 发现漂移 | 手动编辑或遗漏文件 | 运行 `bump_version.py [project-root] <correct-version>` 重新同步 |
-| `audit_docs.py` 报告断裂的交叉引用 | 重命名技能但未更新引用 | 在所有 `.md` 文件中查找替换旧名称 |
-| `audit_docs.py` 报告技能列表不匹配 | 添加新技能但未更新文档 | 将技能添加到 AGENTS.md 表、README 表、CLAUDE.md |
+| `bundles-forge bump-version --check` 发现漂移 | 手动编辑或遗漏文件 | 运行 `bundles-forge bump-version [project-root] <correct-version>` 重新同步 |
+| `bundles-forge audit-docs` 报告断裂的交叉引用 | 重命名技能但未更新引用 | 在所有 `.md` 文件中查找替换旧名称 |
+| `bundles-forge audit-docs` 报告技能列表不匹配 | 添加新技能但未更新文档 | 将技能添加到 AGENTS.md 表、README 表、CLAUDE.md |
 | 标签已存在 | 之前的发布尝试或版本冲突 | 选择不同版本或 `git tag -d` 删除标签 |
 | `gh release create` 失败 | `gh` CLI 未安装或未认证 | 通过 `gh auth login` 安装或在 GitHub 网页 UI 手动创建 |
 | CHANGELOG 格式错误 | 缺少日期、版本错误、类别无效 | 严格遵循 Keep a Changelog 格式 |
@@ -287,7 +286,7 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 | CHANGELOG 未更新 | 跳过了步骤 5 | 用户需要知道发生了什么变更，尤其是破坏性变更 |
 | 修复后出现新漂移 | 修复引入了新的不一致 | 在步骤 6 发布前重新运行所有检查 |
 | `marketplace.json` 版本过期 | 未在 `.version-bump.json` 中跟踪 | 添加 `plugins.0.version` 字段路径的条目 |
-| 手动编辑清单中的版本号 | 直接编辑 JSON 而未使用脚本 | 始终使用 `bump_version.py` — 它会运行升级后审计 |
+| 手动编辑清单中的版本号 | 直接编辑 JSON 而未使用 CLI | 始终使用 `bundles-forge bump-version` — 它会运行升级后审计 |
 | 意外从非 main 分支发布 | 误选了功能分支 | 先合并到 main，或确认分支发布是有意的 |
 
 ---

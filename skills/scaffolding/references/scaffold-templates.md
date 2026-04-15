@@ -24,7 +24,6 @@ Replace all placeholders before writing to the target project.
 | Template File | Target Path | Purpose |
 |---------------|-------------|---------|
 | `assets/hooks/session-start.py` | `hooks/session-start.py` | Bootstrap injection script (Python; shared across Claude Code, Cursor) |
-| `assets/scripts/bump_version.py` | `skills/releasing/scripts/bump_version.py` | Version sync tool (bump, check, audit) |
 | `assets/root/version-bump.json` | `.version-bump.json` | Version sync config (adapt `files` array to target platforms) |
 | `assets/root/gitignore` | `.gitignore` | Standard ignores |
 | `assets/root/package.json` | `package.json` | Project identity (omit `main` if OpenCode not targeted) |
@@ -45,6 +44,7 @@ Replace all placeholders before writing to the target project.
 
 | Template File | Target Path | Purpose |
 |---------------|-------------|---------|
+| `assets/scripts/bump_version.py` | `scripts/bump_version.py` | Standalone version sync tool for CI (not needed if using `bundles-forge` CLI) |
 | `assets/mcp-json.md` | `.mcp.json` | MCP server definitions (choose transport from template variants) |
 
 ### Platform Adapters

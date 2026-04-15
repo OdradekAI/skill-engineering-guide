@@ -8,14 +8,14 @@ Comprehensive guide to auditing bundle-plugins with Bundles Forge. Covers all fo
 
 Bundles Forge provides four audit scopes, each targeting a different level of granularity:
 
-| Scope | When to Use | Categories | Script |
+| Scope | When to Use | Categories | CLI Command |
 |-------|------------|-----------|--------|
-| **Full Project** | Pre-release, major changes, initial review | 10 categories, 60+ checks | `audit_plugin.py` |
-| **Single Skill** | Reviewing one skill, third-party skill evaluation | 4 categories (Structure, Quality, Cross-Refs, Security) | `audit_skill.py` |
-| **Workflow** | After adding/removing skills, chain integration check | 3 layers (Static, Semantic, Behavioral), W1-W11 | `audit_workflow.py` |
-| **Security-Only** | Quick pattern-based safety check, pre-install scan | 7 file categories, known dangerous patterns | `audit_security.py` |
+| **Full Project** | Pre-release, major changes, initial review | 10 categories, 60+ checks | `bundles-forge audit-plugin` |
+| **Single Skill** | Reviewing one skill, third-party skill evaluation | 4 categories (Structure, Quality, Cross-Refs, Security) | `bundles-forge audit-skill` |
+| **Workflow** | After adding/removing skills, chain integration check | 3 layers (Static, Semantic, Behavioral), W1-W11 | `bundles-forge audit-workflow` |
+| **Security-Only** | Quick pattern-based safety check, pre-install scan | 7 file categories, known dangerous patterns | `bundles-forge audit-security` |
 
-All scopes share the same scoring formula, severity levels, and report conventions. The agent auto-detects scope from the target path — or you can invoke scripts directly.
+All scopes share the same scoring formula, severity levels, and report conventions. The agent auto-detects scope from the target path — or you can invoke CLI commands directly.
 
 > **Canonical source:** Execution details (scoring formula, report format, qualitative assessment criteria) are defined in `agents/auditor.md` — the single source of truth for the audit protocol. This guide summarizes those details for reference.
 
@@ -108,7 +108,7 @@ Then adds its own checks for structure, manifests, version sync, hooks, and test
 | 6 | Workflow | High (3) | Graph topology, integration symmetry, artifacts (W1-W11) |
 | 7 | Hooks | Medium (2) | Bootstrap injection, platform detection (functional correctness only) |
 | 8 | Testing | Medium (2) | Test directory, prompts, A/B eval results |
-| 9 | Documentation | Low (1) | Documentation consistency via `audit_docs.py` (D1-D9) |
+| 9 | Documentation | Low (1) | Documentation consistency via `bundles-forge audit-docs` (D1-D9) |
 | 10 | Security | High (3) | 7 attack surfaces — SC/HK/OC/AG/BS/MC/PC IDs from `security-checklist.md` |
 
 Total weight = 23. Overall score = `sum(score_i × weight_i) / 23`.
@@ -213,8 +213,8 @@ bundles-forge audit-workflow --json <project-root>                   # JSON outp
 
 | Layer | Weight | Checks | Automation |
 |-------|--------|--------|------------|
-| Static Structure | High (3) | W1-W5: cycles, reachability, Inputs/Outputs presence, artifact ID matching | `audit_skill.py` graph analysis |
-| Semantic Interface | Medium (2) | W6-W9: Integration completeness, artifact clarity, Calls/Called by symmetry | `audit_workflow.py` + agent review |
+| Static Structure | High (3) | W1-W5: cycles, reachability, Inputs/Outputs presence, artifact ID matching | `bundles-forge audit-skill` graph analysis |
+| Semantic Interface | Medium (2) | W6-W9: Integration completeness, artifact clarity, Calls/Called by symmetry | `bundles-forge audit-workflow` + agent review |
 | Behavioral Verification | Low (1) | W10-W11: chain A/B eval, trigger/exit in context | `evaluator` agent dispatch |
 
 Total weight = 6. Behavioral layer is scored **N/A** (excluded from weighted average) when skipped; the report notes the skip.

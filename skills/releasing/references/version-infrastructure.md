@@ -22,8 +22,7 @@ Declares every file and JSON path containing the version:
       "node_modules",
       ".git",
       ".repos",
-      ".version-bump.json",
-      "skills/releasing/scripts/bump_version.py"
+      ".version-bump.json"
     ]
   }
 }
@@ -31,18 +30,18 @@ Declares every file and JSON path containing the version:
 
 Only include entries for platforms the project actually targets. The script automatically excludes `.git` and `node_modules` during audit scans — listing them in `audit.exclude` is harmless but not required.
 
-## `skills/releasing/scripts/bump_version.py`
+## Version Bump CLI
 
-Version synchronization tool (requires Python 3):
+Version synchronization is provided by the `bundles-forge` CLI (requires Python 3):
 
 | Command | What It Does |
 |---------|-------------|
-| `bump_version.py [project-root] <new-version>` | Update all declared files to new version |
-| `bump_version.py [project-root] <new-version> --dry-run` | Preview version bump without writing files |
-| `bump_version.py [project-root] --check` | Detect version drift between files |
-| `bump_version.py [project-root] --audit` | Check + scan repo for undeclared version strings |
+| `bundles-forge bump-version <new-version>` | Update all declared files to new version |
+| `bundles-forge bump-version <new-version> --dry-run` | Preview version bump without writing files |
+| `bundles-forge bump-version --check` | Detect version drift between files |
+| `bundles-forge bump-version --audit` | Check + scan repo for undeclared version strings |
 
-`[project-root]` defaults to the current directory if omitted. Version accepts `X.Y.Z` or pre-release forms like `X.Y.Z-beta.1`.
+Run from the target project directory, or pass the project root as the first positional argument. Version accepts `X.Y.Z` or pre-release forms like `X.Y.Z-beta.1`.
 
 ## When to Check Versions
 
@@ -55,6 +54,5 @@ Version synchronization tool (requires Python 3):
 When setting up version infrastructure for the first time:
 
 1. Create `.version-bump.json` with entries for all version-bearing manifests
-2. Create `skills/releasing/scripts/bump_version.py` (from scaffold templates)
-3. Run `bump_version.py --check` to verify initial sync
-4. Run `bump_version.py --audit` to catch any missed files
+2. Run `bundles-forge bump-version --check` to verify initial sync
+3. Run `bundles-forge bump-version --audit` to catch any missed files

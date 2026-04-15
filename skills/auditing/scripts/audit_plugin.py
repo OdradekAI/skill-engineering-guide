@@ -169,39 +169,6 @@ def check_version_sync(root):
         findings.append(dict(check="V3", severity="critical",
                              message=f"Version drift detected: {drift}"))
 
-    bump_script = root / "scripts" / "bump-version.sh"
-    if not bump_script.exists():
-        findings.append(dict(check="V4", severity="info",
-                             message="Missing scripts/bump-version.sh"))
-
-    canonical = root / "skills" / "releasing" / "scripts" / "bump_version.py"
-    template = root / "skills" / "scaffolding" / "assets" / "scripts" / "bump_version.py"
-    if canonical.exists() and template.exists():
-        c_lines = canonical.read_text(encoding="utf-8", errors="replace").splitlines()
-        t_lines = template.read_text(encoding="utf-8", errors="replace").splitlines()
-        def _skip_docstring(lines):
-            """Return lines after the module docstring."""
-            in_doc = False
-            result = []
-            for line in lines:
-                if not in_doc and line.strip().startswith('"""'):
-                    in_doc = True
-                    if line.strip().count('"""') >= 2:
-                        in_doc = False
-                    continue
-                if in_doc:
-                    if '"""' in line:
-                        in_doc = False
-                    continue
-                result.append(line)
-            return result
-        c_body = _skip_docstring(c_lines)
-        t_body = _skip_docstring(t_lines)
-        if c_body != t_body:
-            findings.append(dict(check="V8", severity="warning",
-                                 message="bump_version.py template drift: "
-                                         "scaffolding/assets copy differs from releasing source"))
-
     return findings
 
 

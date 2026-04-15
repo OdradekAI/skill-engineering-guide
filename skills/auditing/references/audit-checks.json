@@ -22,11 +22,9 @@
   {"id": "V1",  "category": "version_sync", "severity": "critical", "criteria": "`.version-bump.json` exists and is valid", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
   {"id": "V2",  "category": "version_sync", "severity": "warning",  "criteria": "All files listed in `.version-bump.json` actually exist", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
   {"id": "V3",  "category": "version_sync", "severity": "critical", "criteria": "All listed files have the same version string (no drift)", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
-  {"id": "V4",  "category": "version_sync", "severity": "info",     "criteria": "`scripts/bump-version.sh` wrapper exists", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
   {"id": "V5",  "category": "version_sync", "severity": "warning",  "criteria": "Every platform manifest is listed in `.version-bump.json`", "automation": "`agent-only`", "scopes": ["plugin"]},
-  {"id": "V6",  "category": "version_sync", "severity": "info",     "criteria": "`python skills/releasing/scripts/bump_version.py --check` exits 0", "automation": "`agent-only`", "scopes": ["plugin"]},
-  {"id": "V7",  "category": "version_sync", "severity": "info",     "criteria": "`python skills/releasing/scripts/bump_version.py --audit` finds no undeclared version strings", "automation": "`agent-only`", "scopes": ["plugin"]},
-  {"id": "V8",  "category": "version_sync", "severity": "warning",  "criteria": "`skills/scaffolding/assets/scripts/bump_version.py` template is in sync with `skills/releasing/scripts/bump_version.py` source", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
+  {"id": "V6",  "category": "version_sync", "severity": "info",     "criteria": "`bundles-forge bump-version --check` exits 0", "automation": "`agent-only`", "scopes": ["plugin"]},
+  {"id": "V7",  "category": "version_sync", "severity": "info",     "criteria": "`bundles-forge bump-version --audit` finds no undeclared version strings", "automation": "`agent-only`", "scopes": ["plugin"]},
 
   {"id": "Q1",  "category": "skill_quality", "severity": "critical",     "criteria": "YAML frontmatter present (between `---` delimiters)", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
   {"id": "Q2",  "category": "skill_quality", "severity": "critical",     "criteria": "`name` field exists in frontmatter", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},

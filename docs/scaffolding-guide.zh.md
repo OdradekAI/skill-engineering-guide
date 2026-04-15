@@ -49,7 +49,7 @@
 | 移除平台 | 现有项目 + 目标平台 | 识别待移除文件 | 删除清单，清理钩子，更新文档 | 版本检查，inspector 验证 |
 | 管理可选组件 | 现有项目 + 组件类型 | 读取 external-integration 决策树 | 生成/移除组件文件，更新清单 + 技能 + 文档 | inspector 验证 |
 
-每次操作后，脚手架都会运行确定性检查（`audit_skill.py`）并调度 inspector 代理进行语义验证。
+每次操作后，脚手架都会运行确定性检查（`bundles-forge audit-skill`）并调度 inspector 代理进行语义验证。
 
 ### Minimal 模式
 
@@ -73,7 +73,7 @@
 **预期体验：** Agent 会询问你在构建什么、使用哪些平台、有多少技能。根据你的回答，它只生成必要的内容 — 不引入不必要的可选组件。
 
 **生成层次：**
-1. **核心** — `package.json`、`.gitignore`、`.version-bump.json`、`skills/releasing/scripts/bump_version.py`、技能、命令
+1. **核心** — `package.json`、`.gitignore`、`.version-bump.json`、技能、命令
 2. **平台适配器** — 仅针对所选平台（清单、钩子、安装文档）
 3. **引导** — 如果有 3 个以上技能或工作流链
 4. **可选组件** — 仅在 Agent 检测到需要时（MCP 服务器、LSP 服务器、可执行文件、输出样式、默认设置、用户配置、市场条目）

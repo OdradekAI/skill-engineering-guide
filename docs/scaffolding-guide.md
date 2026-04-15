@@ -49,7 +49,7 @@ All six scaffolding operations follow the same three-phase structure: detect con
 | Remove platform | Existing project + target platform | Identify files to remove | Delete manifests, clean hooks, update docs | Version check, inspector validation |
 | Manage optional components | Existing project + component type | Read external-integration decision tree | Generate/remove component files, update manifests + skills + docs | Inspector validation |
 
-After every operation, scaffolding runs deterministic checks (`audit_skill.py`) and dispatches the inspector agent for semantic validation.
+After every operation, scaffolding runs deterministic checks (`bundles-forge audit-skill`) and dispatches the inspector agent for semantic validation.
 
 ### Minimal Mode
 
@@ -73,7 +73,7 @@ Best for: most new projects. Tell the agent what you're building and it recommen
 **What to expect:** The agent asks what you're building, which platforms you use, and how many skills you have. Based on your answers, it generates only what's needed — no unnecessary optional components.
 
 **Generated layers:**
-1. **Core** — `package.json`, `.gitignore`, `.version-bump.json`, `skills/releasing/scripts/bump_version.py`, skills, commands
+1. **Core** — `package.json`, `.gitignore`, `.version-bump.json`, skills, commands
 2. **Platform adapters** — only for selected platforms (manifests, hooks, install docs)
 3. **Bootstrap** — if you have 3+ skills or a workflow chain
 4. **Optional components** — only if the agent detects a need (MCP servers, LSP servers, executables, output styles, default settings, user configuration, marketplace entry)

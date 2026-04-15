@@ -273,18 +273,16 @@ Markdown files used as prompts when dispatching subagents. Referenced by skills 
 
 Markdown files that define slash commands for platforms that support them (Cursor). Each file is one command.
 
-## `skills/releasing/scripts/` — Version tooling
+## Version Tooling
 
-### `bump_version.py`
-
-Version synchronization tool. Reads `.version-bump.json` and provides:
+Version synchronization is provided by the `bundles-forge` CLI — target projects do not need to bundle their own scripts:
 - `bundles-forge bump-version <version>` — update all declared files
 - `bundles-forge bump-version --check` — detect drift between files
 - `bundles-forge bump-version --audit` — check + scan repo for undeclared version strings
 
-Requires Python 3.
+Projects that need standalone version bumping (e.g. for CI without bundles-forge installed) can optionally place a `scripts/bump_version.py` in the project root. The scaffolding template is available via `assets/scripts/bump_version.py`.
 
-Audit and documentation scripts live under `skills/auditing/scripts/` (for example `audit_plugin.py`, `audit_skill.py`, `audit_security.py`).
+> **Note:** Paths like `skills/releasing/scripts/` and `skills/auditing/scripts/` are internal to the bundles-forge toolkit and do not exist in target projects.
 
 ## `tests/` — Integration Tests
 

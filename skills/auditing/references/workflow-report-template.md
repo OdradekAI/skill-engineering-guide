@@ -2,7 +2,7 @@
 
 Three-layer report for workflow audits. Evaluates how skills connect, hand off artifacts, and compose into coherent chains. Lighter than the full project template — focused on workflow topology, semantic interfaces, and behavioral verification.
 
-This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `skills/auditing/scripts/audit_workflow.py` (produces compact Markdown or JSON).
+This template is for **agent-authored reports** (dispatched via `agents/auditor.md`). For CLI/CI summary output, use `bundles-forge audit-workflow` (produces compact Markdown or JSON).
 
 For full project audits (10 categories), use `references/plugin-report-template.md` instead.
 For single skill audits (4 categories), use `references/skill-report-template.md` instead.
@@ -89,7 +89,7 @@ python: "<version>"
 
 | # | Risk | Impact | If Not Fixed |
 |---|------|--------|-------------|
-| 1 | <one-line risk title> | <quantified: e.g. "breaks blueprinting → scaffolding handoff"> | <worst-case outcome> |
+| 1 | <one-line risk title> | <quantified: e.g. "breaks skill-A → skill-B handoff"> | <worst-case outcome> |
 | 2 | ... | ... | ... |
 | 3 | ... | ... | ... |
 
@@ -186,8 +186,8 @@ This does not affect the Go/No-Go recommendation for static and semantic layers.
 
 | Tool | Purpose |
 |------|---------|
-| `skills/auditing/scripts/audit_workflow.py` | Workflow audit orchestration, semantic checks (W6, W8, W9) |
-| `skills/auditing/scripts/audit_skill.py` | Graph analysis (G1-G5 → W1-W5) |
+| `bundles-forge audit-workflow` | Workflow audit orchestration, semantic checks (W6, W8, W9) |
+| `bundles-forge audit-skill` | Graph analysis (G1-G5 → W1-W5) |
 | `evaluator` agent | Chain A/B eval (W10-W11), if available |
 
 Findings are diagnostic. The calling context decides follow-up actions.

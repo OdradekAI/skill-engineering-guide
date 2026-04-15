@@ -90,11 +90,9 @@ Run these checks only for platforms the project claims to support.
 | V1 | Critical | `.version-bump.json` exists and is valid | `audit_plugin.py` |
 | V2 | Warning | All files listed in `.version-bump.json` actually exist | `audit_plugin.py` |
 | V3 | Critical | All listed files have the same version string (no drift) | `audit_plugin.py` |
-| V4 | Info | `scripts/bump-version.sh` wrapper exists | `audit_plugin.py` |
 | V5 | Warning | Every platform manifest is listed in `.version-bump.json` | `agent-only` |
-| V6 | Info | `python skills/releasing/scripts/bump_version.py --check` exits 0 | `agent-only` |
-| V7 | Info | `python skills/releasing/scripts/bump_version.py --audit` finds no undeclared version strings | `agent-only` |
-| V8 | Warning | `skills/scaffolding/assets/scripts/bump_version.py` template is in sync with `skills/releasing/scripts/bump_version.py` source | `audit_plugin.py` |
+| V6 | Info | `bundles-forge bump-version --check` exits 0 | `agent-only` |
+| V7 | Info | `bundles-forge bump-version --audit` finds no undeclared version strings | `agent-only` |
 <!-- END:version_sync -->
 
 **Quick drift check:**

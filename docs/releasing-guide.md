@@ -13,12 +13,12 @@ The release pipeline is designed as a quality gate — not a formality. It ensur
 | Phase | Steps | Tools | Blocking? |
 |-------|-------|-------|-----------|
 | Prerequisites | Clean git status, branch check, tag check | `git status`, `git tag -l` | Yes (dirty tree blocks) |
-| Pre-flight | Version drift, full audit, documentation consistency | `bump_version.py`, `audit_plugin.py`, `audit_docs.py` | Yes (critical findings block) |
+| Pre-flight | Version drift, full audit, documentation consistency | `bundles-forge bump-version`, `bundles-forge audit-plugin`, `bundles-forge audit-docs` | Yes (critical findings block) |
 | Address findings | Review and fix critical/warning issues | Manual + `bundles-forge:optimizing` | Yes (critical must resolve) |
-| Change Review & Doc Sync | Change coherence review, doc updates | AI review + `audit_docs.py` | Yes (contradictions block) |
-| Version bump | Update all manifests | `bump_version.py` | — |
+| Change Review & Doc Sync | Change coherence review, doc updates | AI review + `bundles-forge audit-docs` | Yes (contradictions block) |
+| Version bump | Update all manifests | `bundles-forge bump-version` | — |
 | Release Notes | CHANGELOG, README | Manual | — |
-| Final verification | Re-run all checks | `bump_version.py`, `audit_docs.py` | Yes (must pass) |
+| Final verification | Re-run all checks | `bundles-forge bump-version`, `bundles-forge audit-docs` | Yes (must pass) |
 | Publish | Commit, tag, push, platform publish | `git`, `gh`, platform CLIs | — |
 
 ---
@@ -84,7 +84,7 @@ bundles-forge audit-docs <project-root>
 
 **Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `bundles-forge audit-plugin .` (automated checks only, no qualitative scoring).
 
-**`audit_docs.py` checks (D1–D9):**
+**`bundles-forge audit-docs` checks (D1–D9):**
 
 | Check | What It Verifies |
 |-------|-----------------|
@@ -149,7 +149,7 @@ After resolving coherence issues, sync all project documentation:
 3. **`AGENTS.md`** — Update Available Skills table
 4. **`README.md` + `README.zh.md`** — Update Skills table, Agents table, Commands table, code blocks
 
-Re-run `audit_docs.py` after making changes to confirm consistency.
+Re-run `bundles-forge audit-docs` after making changes to confirm consistency.
 
 ### Step 4: Version Bump
 
@@ -246,9 +246,9 @@ For urgent fixes between planned releases:
 
 1. Fix the issue on `main` (or a dedicated hotfix branch)
 2. Run abbreviated pipeline:
-   - `bump_version.py --check` (version drift)
-   - `audit_security.py .` (security only)
-   - `audit_docs.py .` (documentation consistency)
+   - `bundles-forge bump-version --check` (version drift)
+   - `bundles-forge audit-security .` (security only)
+   - `bundles-forge audit-docs .` (documentation consistency)
 3. Bump patch version
 4. Update CHANGELOG with `### Fixed` section only
 5. Publish
@@ -262,9 +262,8 @@ Skip the full audit and change coherence review for hotfixes — speed matters. 
 For new projects that don't have version management yet:
 
 1. Create `.version-bump.json` with entries for all version-bearing manifests
-2. Add `skills/releasing/scripts/bump_version.py` (from scaffold templates or copy from bundles-forge)
-3. Verify: `bundles-forge bump-version --check`
-4. Audit: `bundles-forge bump-version --audit`
+2. Verify: `bundles-forge bump-version --check`
+3. Audit: `bundles-forge bump-version --audit`
 
 See `bundles-forge:scaffolding` for full project setup including version infrastructure.
 
@@ -274,9 +273,9 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| `bump_version.py --check` finds drift | Manual edit or missed file | Run `bump_version.py [project-root] <correct-version>` to re-sync |
-| `audit_docs.py` reports broken cross-refs | Skill renamed without updating references | Find-and-replace old name across all `.md` files |
-| `audit_docs.py` reports skill list mismatch | New skill added but docs not updated | Add skill to AGENTS.md table, README tables, CLAUDE.md |
+| `bundles-forge bump-version --check` finds drift | Manual edit or missed file | Run `bundles-forge bump-version [project-root] <correct-version>` to re-sync |
+| `bundles-forge audit-docs` reports broken cross-refs | Skill renamed without updating references | Find-and-replace old name across all `.md` files |
+| `bundles-forge audit-docs` reports skill list mismatch | New skill added but docs not updated | Add skill to AGENTS.md table, README tables, CLAUDE.md |
 | Tag already exists | Previous release attempt or version collision | Choose a different version or delete the tag with `git tag -d` |
 | `gh release create` fails | `gh` CLI not installed or not authenticated | Install with `gh auth login` or create release manually on GitHub web UI |
 | CHANGELOG has wrong format | Missing date, wrong version, invalid category | Follow Keep a Changelog format strictly |
@@ -287,7 +286,7 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 | CHANGELOG not updated | Skipped Step 5 | Users need to know what changed, especially for breaking changes |
 | New drift after fixes | Fix introduced new inconsistency | Re-run all checks in Step 6 before publishing |
 | `marketplace.json` version stale | Not tracked in `.version-bump.json` | Add entry with `plugins.0.version` field path |
-| Manual version edit in manifests | Edited JSON directly instead of using script | Always use `bump_version.py` — it runs a post-bump audit |
+| Manual version edit in manifests | Edited JSON directly instead of using CLI | Always use `bundles-forge bump-version` — it runs a post-bump audit |
 | Release from non-main branch unintentionally | Feature branch selected by mistake | Merge to main first, or confirm that branch release is intentional |
 
 ---

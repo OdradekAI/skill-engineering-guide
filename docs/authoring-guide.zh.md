@@ -55,7 +55,7 @@
 4. 编写完整正文：概述、流程步骤、常见错误、Inputs/Outputs/Integration
 5. 检查外部依赖 — 如果技能引用了 MCP 工具或 CLI 命令，遵循编写指南中的声明语法和回退模式
 6. 评估 token 预算 — 正文超过 500 行或重内容段超过 100 行时提取到 `references/`
-7. 运行 `audit_skill.py` 验证
+7. 运行 `bundles-forge audit-skill` 验证
 
 **代理定义：** 同样的路径适用，但 Agent 会遵循 `references/agent-authoring-guide.md` 中的规范 — 不同的 frontmatter 字段（`maxTurns`、`disallowedTools`）、面向报告的正文和 `.bundles-forge/` 输出格式。
 
@@ -230,7 +230,7 @@ Agent 按可预测的顺序阅读技能：description 匹配 → Overview 扫描
 | 只有抽象规则没有示例 | 匆忙编写 | 每个关键指令至少一个具体示例 |
 | 跳过项目规范 | 孤立工作 | 在已有项目中先读 2-3 个现有技能 |
 | 不接线 Integration 章节 | 把技能当独立体 | 每个技能都需要 Called by / Calls / Pairs with |
-| 忘记验证 | 假设内容正确 | 始终运行 `audit_skill.py` — 在传播前捕获问题 |
+| 忘记验证 | 假设内容正确 | 始终运行 `bundles-forge audit-skill` — 在传播前捕获问题 |
 | 描述太窄 | 过于具体 | 积极列出相关场景和边缘情况 |
 | 描述太宽 | 过于模糊 | 限定到正确的上下文（如"bundle-plugins"而非"any project"） |
 

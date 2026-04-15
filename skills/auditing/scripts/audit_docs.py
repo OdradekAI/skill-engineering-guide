@@ -8,7 +8,7 @@ README translations, docs/) stays in sync with the actual project state
 
 Nine checks:
   D1 — Skill list sync across docs vs skills/ directory
-  D2 — Cross-reference validity (bundles-forge:<name> → skills/<name>/)
+  D2 — Cross-reference validity (<project>:<name> → skills/<name>/)
   D3 — Platform manifest sync (CLAUDE.md table vs .version-bump.json)
   D4 — Command/script accuracy (CLAUDE.md scripts vs actual file paths)
   D5 — Agent list sync (CLAUDE.md agents vs agents/ directory)
@@ -144,9 +144,9 @@ def check_skill_list_sync(root, findings):
     if readme_md:
         cells = _parse_table_column(readme_md, 1, section_header="Skills")
         names = _extract_backtick_names(cells)
-        # Also capture bootstrap skill mentioned in prose
-        if "using-bundles-forge" in readme_md:
-            names.add("using-bundles-forge")
+        for skill_name in actual_skills:
+            if skill_name.startswith("using-") and skill_name in readme_md:
+                names.add(skill_name)
         if names:
             sources["README.md"] = names
 
@@ -158,8 +158,9 @@ def check_skill_list_sync(root, findings):
         if not cells:
             cells = _parse_table_column(readme_zh, 1, section_header="Skills")
         names = _extract_backtick_names(cells)
-        if "using-bundles-forge" in readme_zh:
-            names.add("using-bundles-forge")
+        for skill_name in actual_skills:
+            if skill_name.startswith("using-") and skill_name in readme_zh:
+                names.add(skill_name)
         if names:
             sources["README.zh.md"] = names
 
@@ -182,7 +183,7 @@ def check_skill_list_sync(root, findings):
 # ---------------------------------------------------------------------------
 
 def check_cross_references(root, findings):
-    """Verify all bundles-forge:<name> references point to existing skills."""
+    """Verify all <project>:<name> cross-references point to existing skills."""
     skills_dir = root / "skills"
     actual_skills = {d.name for d in skills_dir.iterdir() if d.is_dir()}
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""SessionStart hook for bundles-forge plugin.
+"""SessionStart hook for <project-name> plugin.
 
-Reads the bootstrap meta-skill (using-bundles-forge/SKILL.md) and emits
+Reads the bootstrap meta-skill (using-<project-name>/SKILL.md) and emits
 platform-appropriate JSON context for the host IDE.
 
 Platform detection:
@@ -19,7 +19,7 @@ from pathlib import Path
 def main():
     script_dir = Path(__file__).resolve().parent
     plugin_root = script_dir.parent
-    skill_path = plugin_root / "skills" / "using-bundles-forge" / "SKILL.md"
+    skill_path = plugin_root / "skills" / "using-<project-name>" / "SKILL.md"
 
     try:
         content = skill_path.read_text(encoding="utf-8")
@@ -42,9 +42,9 @@ def main():
 
     session_ctx = (
         "<EXTREMELY_IMPORTANT>\\n"
-        "You have bundles-forge skills loaded.\\n\\n"
+        "You have <project-name> skills loaded.\\n\\n"
         "**Below is the full content of your "
-        "'bundles-forge:using-bundles-forge' skill. For all other skills, "
+        "'<project-name>:using-<project-name>' skill. For all other skills, "
         "use the 'Skill' tool:**\\n\\n"
         f"{escaped}\\n"
         "</EXTREMELY_IMPORTANT>"
