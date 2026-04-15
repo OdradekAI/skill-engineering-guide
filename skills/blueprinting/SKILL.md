@@ -11,7 +11,7 @@ Turn a vague idea ("I want to package my skills") into a concrete project bluepr
 
 **Core principle:** Understand what you're building — and why — before generating anything. Five minutes of needs exploration saves hours of rework.
 
-**Skill type:** Hybrid — follow the three-phase process rigidly, but question selection, depth, and approach recommendations adapt to user context.
+**Skill type:** Hybrid pattern — follow the three-phase process rigidly, but question selection, depth, and approach recommendations adapt to user context.
 
 **Announce at start:** "I'm using the blueprinting skill to plan your bundle-plugin."
 
@@ -19,12 +19,18 @@ Turn a vague idea ("I want to package my skills") into a concrete project bluepr
 Do NOT invoke bundles-forge:scaffolding or any subsequent orchestration phase until the user has approved the design document. Every project — regardless of perceived simplicity — must pass through needs exploration → architecture design → design document review. Quick mode may shorten the process (needs exploration asks only 2 core questions), but it cannot skip it.
 </HARD-GATE>
 
+| Agent Reasoning | Reality |
+|-----------------|---------|
+| "The user's requirements are already clear" | Seemingly clear requirements often miss platform, workflow, and visibility architecture decisions |
+| "This is just packaging a few existing skills" | Even simple packaging requires compatibility verification, cross-reference validation, and workflow chain mapping |
+| "Moving fast through the process is more efficient" | Five minutes of exploration saves hours of rework from missing architecture decisions |
+
 ## Three Entry Points
 
 This skill handles three scenarios. All three feed into the same three-phase interview — only the initial context differs.
 
 - **Scenario A: New project from scratch** — Begin with Context Exploration, then the full interview
-- **Scenario B: Splitting an existing complex skill** — Context Exploration reads the existing skill via `references/decomposition-analysis.md`, then enters the interview with richer context
+- **Scenario B: Splitting an existing complex skill** — Context Exploration reads the existing skill via `references/decomposition-analysis.md`, then enters the interview with richer context. Splitting produces a new project. To refactor skills within an existing project, use `bundles-forge:optimizing` (Target 7: Skill & Workflow Restructuring).
 - **Scenario C: Composing multiple existing skills** — Context Exploration inventories candidates via `references/composition-analysis.md`, then enters the interview with richer context
 
 If the user has an existing skill they want to break apart, start with Scenario B. If the user has multiple existing skills they want to combine into a **new** unified project, start with Scenario C. Otherwise, start with Scenario A.
@@ -77,22 +83,6 @@ Example: "In Phase 1 you said target users are beginners, but now you're request
 
 After completing each phase, restate the collected information and confirm mutual understanding.
 
-### Sufficiency Check
-
-The design document may only be generated when all the following are met. Each condition has an explicit verification test — if you cannot demonstrate the test passes, the condition is not met.
-
-**Must satisfy** (missing any one blocks document generation):
-- Problem scenario: expressible as "[user] needs to [action] because [reason]" in one sentence
-- Target users: at least one concrete persona with platform + workflow identified
-- Core skills: each has a name + one-sentence purpose + type (rigid/flexible)
-- Architecture mode: quick or adaptive, with explicit reasoning documented
-- Target platform: at least one selected, with rationale tied to target users
-
-**Should satisfy** (mark unmet items as [TBD] in the design document):
-- Workflow chain: dependency graph is drawn (or explicitly marked "all independent")
-- Bootstrap strategy: yes/no decision with reasoning (or "deferred" with rationale)
-- Success criteria: at least one measurable outcome the user can verify post-creation
-
 ## Context Exploration
 
 Before asking any questions, gather available context:
@@ -104,18 +94,16 @@ Before asking any questions, gather available context:
 ### Scenario B (Decomposition)
 1. **Read the existing skill** — follow `references/decomposition-analysis.md` to map responsibilities, identify split points, and propose a decomposition
 2. Present the decomposition proposal to the user for approval
-3. Proceed to Phase 1 with the decomposition as input context
+3. Proceed to Phase 1 with the decomposition as input context. In Phase 1, skip questions already answered by the decomposition analysis. Confirm those answers with the user rather than re-asking.
 
 ### Scenario C (Composition)
 1. **Inventory candidate skills** — follow `references/composition-analysis.md` to check compatibility, detect conflicts, and design orchestration
 2. Present the composition plan to the user for approval
-3. Proceed to Phase 1 with the composition analysis as input context
+3. Proceed to Phase 1 with the composition analysis as input context. In Phase 1, skip questions already answered by the composition analysis. Confirm those answers with the user rather than re-asking.
 
 ## Phase 1: Needs Exploration
 
 Understand what the user wants to build and why, before making any architecture decisions. Ask these one at a time, adapting based on answers.
-
-**Quick mode shortcut:** If the project is clearly simple (user explicitly says they just want to package a few standalone skills), ask only questions 1 and 2, then move to Phase 2.
 
 ### 1. Problem Scenario
 
@@ -149,9 +137,13 @@ Skip this if the user has already addressed it or if the domain is clearly novel
 
 ### Phase 1 Checkpoint
 
-After collecting needs exploration answers, restate the understanding:
+After collecting needs exploration answers, restate the understanding and verify completeness:
 
 > "Let me confirm what I understand: You're building [one-sentence summary] for [target users] to solve [problem]. The core capabilities are [list]. The usage flow is [summary]. Does this match your intent?"
+
+**Must verify before proceeding:**
+- Problem scenario: expressible as "[user] needs to [action] because [reason]" in one sentence
+- Target users: at least one concrete persona with platform + workflow identified
 
 Wait for user confirmation before proceeding to Phase 2. If the user corrects anything, update the understanding and re-confirm.
 
@@ -159,9 +151,7 @@ Wait for user confirmation before proceeding to Phase 2. If the user corrects an
 
 With a clear understanding of what and why, now decide how to build it. The agent should actively recommend answers based on Phase 1 context, rather than asking open-ended questions.
 
-### 0. Assumptions Declaration
-
-Before making any architecture recommendations, explicitly list the key assumptions derived from Phase 1:
+**Before making architecture recommendations:** Explicitly list key assumptions derived from Phase 1 and wait for user confirmation. Template:
 
 > "Based on our needs exploration, I'm operating on these assumptions:
 > 1. [Complexity assumption — e.g., 'This is a straightforward packaging project']
@@ -169,8 +159,6 @@ Before making any architecture recommendations, explicitly list the key assumpti
 > 3. [Independence assumption — e.g., 'Skills appear independent with no workflow chain']
 >
 > If any of these are wrong, correct me now — they will shape all architecture decisions."
-
-Wait for user confirmation before proceeding.
 
 ### 1. Project Complexity
 
@@ -187,6 +175,15 @@ Based on Phase 1 answers, **recommend** quick or adaptive mode:
 - After core questions, conditionally ask about advanced components
 
 Present the recommendation with reasoning: "Based on what you've described — [reasoning] — I recommend [quick/adaptive] mode. [Quick explanation of what this means]."
+
+**Quick mode behavior summary:**
+
+| Phase | Quick Mode Behavior |
+|-------|---------------------|
+| Phase 1 | Ask only questions 1-2; skip 3-5 |
+| Phase 2 | Skip steps 4a (Visibility), 5 (Workflow), 6 (Bootstrap), 7 (Advanced) |
+| Phase 2 defaults | Claude Code only; skills treated as independent |
+| Pipeline | Wire Workflow step simplified (no chains to wire) |
 
 ### 2. Project Name
 
@@ -257,11 +254,27 @@ Do NOT proactively offer this menu. Only ask about advanced components when the 
 
 Signal → Component mapping is documented in `references/advanced-components.md`.
 
+### Phase 2 Checkpoint
+
+Restate the architecture decisions and verify completeness before generating the design document.
+
+**Must satisfy** (missing any one blocks document generation):
+- Core skills: each has a name + one-sentence purpose + type (rigid/flexible)
+- Architecture mode: quick or adaptive, with explicit reasoning documented
+- Target platform: at least one selected, with rationale tied to target users
+
+**Should satisfy** (mark unmet items as [TBD] in the design document):
+- Workflow chain: dependency graph is drawn (or explicitly marked "all independent")
+- Bootstrap strategy: yes/no decision with reasoning (or "deferred" with rationale)
+- Success criteria: at least one measurable outcome the user can verify post-creation
+
+Wait for user confirmation before proceeding to Phase 3.
+
 ## Phase 3: Design Document and Review
 
 ### Generate Design Document
 
-After the interview, compile a design summary using the template in `references/design-document-template.md`. This template includes both needs context (project overview, target users, use cases, success criteria) and technical architecture (mode, platforms, skills, workflow, components).
+After the interview, compile a design summary using the template in `references/design-document-template.md`. This template includes both needs context (project overview, target users, use cases, success criteria) and technical architecture (mode, platforms, skills, workflow, components). Conditional fields: fill `Third-Party Sources` only when Scenario C involves external skills; fill `Notes` for special constraints not captured elsewhere. Leave unused conditional fields out of the document.
 
 ### Design Document Self-Review
 
@@ -288,7 +301,7 @@ The user may request going back to a specific phase to re-discuss decisions — 
 
 After the user approves the design, orchestrate the full project creation pipeline. Execute each phase in order — do not skip or reorder phases.
 
-### Pipeline Phase 1: Scaffold
+### Scaffold
 
 **"Design approved. Invoking scaffolding to generate the project structure."**
 
@@ -297,7 +310,7 @@ Invoke `bundles-forge:scaffolding` with the approved design. Wait for scaffoldin
 → **verify:** inspector self-check passes with 0 critical findings
 → **on fail:** fix structural issues inline, re-run inspector before proceeding
 
-### Pipeline Phase 2: Author Content
+### Author Content
 
 **"Structure generated. Invoking authoring to write skill and agent content."**
 
@@ -310,11 +323,11 @@ Pass the complete list in one invocation — authoring processes them in sequenc
 → **verify:** every skill in the design has a SKILL.md with valid frontmatter (name, description)
 → **on fail:** re-invoke authoring for missing or invalid skills
 
-### Pipeline Phase 3: Workflow Design
+### Wire Workflow
 
 **"Content authored. Designing workflow integration."**
 
-This phase stays within blueprinting — workflow design is a blueprint-level architectural decision that depends on the full project context gathered during the interview. It requires the blueprint's holistic view of skill relationships and dependency chains, making it inappropriate to delegate to an executor skill that operates on individual content units.
+This step runs within blueprinting — workflow wiring requires the full project context from the interview.
 
 1. For each skill pair with a dependency in the Workflow Chain, write the `## Integration` section:
    - `**Calls:**` and `**Called by:**` declarations must be symmetric (A calls B ⟹ B is called by A)
@@ -325,7 +338,7 @@ This phase stays within blueprinting — workflow design is a blueprint-level ar
 → **verify:** all Calls/Called-by pairs are symmetric; bootstrap routes match skill inventory
 → **on fail:** fix asymmetric links or missing routes before proceeding
 
-### Pipeline Phase 4: Initial Quality Check
+### Run Audit
 
 **"Workflow wired. Running initial audit."**
 
@@ -339,11 +352,11 @@ Invoke `bundles-forge:auditing` on the project root for a baseline quality check
 
 | Mistake | Fix |
 |---------|-----|
-| Skipping needs exploration, jumping to architecture design | Understand "what and for whom" before deciding "how to build" |
-| Only asking questions, never offering approaches | When users are stuck, proactively provide 2-3 options with trade-offs and a recommendation |
+| Skipping needs exploration, jumping to architecture design (see HARD-GATE above) | Understand "what and for whom" before deciding "how to build" |
+| Proposing approaches without trade-off analysis | Each approach needs pros, cons, best-fit scenario, and an explicit recommendation — not just a list of options |
 | Forgetting workflow chain mapping | Chains determine bootstrap skill content — an unmapped chain produces a bootstrap that routes incorrectly |
 | Dumping skills into one folder without analyzing compatibility | Audit each skill first — naming conflicts and overlapping responsibilities cause confusion |
-| Copying third-party skills without security audit | Always run `bundles-forge:auditing` on imported content |
+| Copying third-party skills without security audit | Always invoke `bundles-forge:auditing` on imported content |
 | Treating all third-party skills as repackage-only | Ask integration intent — workflow integration requires adaptation |
 | Forgetting skill visibility classification | Entry-point vs internal determines commands/ and description style |
 | Using blueprinting to add skills to an existing project | Blueprinting creates new projects; use `bundles-forge:optimizing` (Target 7) for existing ones |
@@ -351,19 +364,21 @@ Invoke `bundles-forge:auditing` on the project root for a baseline quality check
 ## Inputs
 
 - `user-requirements` (required) — conversational input gathered through the structured interview process
+- `existing-skill` (optional) — path to existing SKILL.md for Scenario B (decomposition)
+- `candidate-skills` (optional) — list of existing skills for Scenario C (composition)
 
 ## Outputs
 
-- `design-document` — structured design summary containing project overview, target users, use cases, success criteria, project name, platforms, skill inventory, workflow chain, bootstrap strategy, and advanced components. Consumed by `bundles-forge:scaffolding` and `bundles-forge:authoring`
+- `design-document` — structured design summary containing project overview, target users, use cases, success criteria, project name, platforms, skill inventory, workflow chain, bootstrap strategy, and advanced components. Contains `skill-inventory` (consumed by `bundles-forge:authoring`) and `workflow-chain` (consumed during the Wire Workflow step). Consumed by `bundles-forge:scaffolding` and `bundles-forge:authoring`
 
 ## Integration
 
 **Calls:**
-- **bundles-forge:scaffolding** — Pipeline Phase 1: generate project structure and platform adapters
+- **bundles-forge:scaffolding** — Scaffold step: generate project structure and platform adapters
   - Artifact: `design-document` → `design-document` (direct match)
-- **bundles-forge:authoring** — Pipeline Phase 2: write SKILL.md and agents/*.md content
+- **bundles-forge:authoring** — Author Content step: write SKILL.md and agents/*.md content
   - Artifact: `design-document` → `skill-inventory` (indirect — skill inventory extracted from design document)
-- **bundles-forge:auditing** — Pipeline Phase 4: initial quality check on the new project
+- **bundles-forge:auditing** — Run Audit step: initial quality check on the new project
   - Artifact: `design-document` → `project-directory` (indirect — auditing targets the scaffolded project, not the design document)
 
 **Pairs with:**

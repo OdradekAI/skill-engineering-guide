@@ -44,7 +44,7 @@ Classify each skill as:
 
 ## C3. Integration Intent & Security Audit (for third-party skills)
 
-For each skill classified as **Needs import**, follow the third-party integration process in `skills/optimizing/references/third-party-integration.md` (shared with `bundles-forge:optimizing`). This covers:
+For each skill classified as **Needs import**, follow the third-party integration process via `bundles-forge:optimizing` (specifically its third-party integration reference). This covers:
 
 - Integration intent classification (repackage as-is vs integrate into workflow)
 - Source attribution template
@@ -61,4 +61,4 @@ With the inventory and compatibility analysis in hand, design how the skills wor
 - **Shared resources** — extract common scripts, reference docs, or templates into project-level `scripts/` or shared `references/` files
 - **Bootstrap routing** — design the `using-<project>` skill's routing table to cover all composed skills
 
-Present the composition plan to the user. Get approval before proceeding to the Interview (Scenario A) to finalize project details like name, platforms, and bootstrap strategy.
+Present the composition plan to the user. Get approval before proceeding to Phase 1: Needs Exploration to finalize project details like name, platforms, and bootstrap strategy.

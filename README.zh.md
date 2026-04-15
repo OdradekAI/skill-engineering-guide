@@ -77,9 +77,8 @@ cd your-bundle-plugin-project
 ```mermaid
 flowchart LR
     Design["blueprinting"] --> Scaffold["scaffolding"]
-    Scaffold --> Write["authoring"]
-    Write --> Audit["auditing"]
-    Design -->|"初始审计"| Audit
+    Design -->|"内容编写"| Write["authoring"]
+    Design -->|"初始审计"| Audit["auditing"]
     Audit -->|问题| Optimize["optimizing"]
     Optimize -->|"委派变更"| Write
     Optimize --> Audit
@@ -201,8 +200,8 @@ flowchart LR
     CMD_SC -->|"仅安全扫描"| auditing
 
     blueprinting -->|"设计批准后"| scaffolding
+    blueprinting -->|"内容编写"| authoring
     blueprinting -->|"初始审计"| auditing
-    scaffolding -->|"结构生成后"| authoring
     auditing -->|"发现问题"| optimizing
     optimizing -->|"委派变更"| authoring
     optimizing -->|"验证修复"| auditing
@@ -223,11 +222,11 @@ flowchart LR
   → blueprinting：阶段 2 — 架构设计（项目复杂度、平台、技能拆分、工作流）
   → blueprinting：阶段 3 — 生成设计文档 + 自审
   → 用户批准设计文档（HARD-GATE）
-  → scaffolding：生成项目结构、清单、钩子、脚本
+  → Scaffold：调用 scaffolding — 生成项目结构、清单、钩子、脚本
     → inspector agent 验证脚手架（如子代理可用）
-  → authoring：指导 SKILL.md 和 agents/*.md 内容编写（携带设计上下文）
-  → blueprinting：工作流设计（交叉引用、集成章节）
-  → auditing：初始质量检查
+  → Author Content：调用 authoring — 指导 SKILL.md 和 agents/*.md 内容编写（携带设计上下文）
+  → Wire Workflow：blueprinting 串联交叉引用、集成章节
+  → Run Audit：调用 auditing — 初始质量检查
 ```
 
 #### `/bundles-scaffold` — 生成或适配项目结构

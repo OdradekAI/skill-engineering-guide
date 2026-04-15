@@ -86,7 +86,7 @@ After collecting answers, the agent restates its understanding and asks you to c
 
 | # | Question | How It Works |
 |---|----------|-------------|
-| 0 | Assumptions declaration | Agent states key assumptions from Phase 1 — you confirm or correct before architecture begins |
+| — | Assumptions gate | Agent states key assumptions from Phase 1 — you confirm or correct before architecture begins |
 | 1 | Project complexity | Agent *recommends* quick vs adaptive mode based on Phase 1 — you confirm |
 | 2 | Project name | Kebab-case identifier used everywhere |
 | 3 | Target platforms | Agent recommends based on target users — you confirm or adjust |
@@ -136,7 +136,7 @@ Most users follow the standard interview (Scenario A). These two scenarios handl
 
 ### Scenario B: Decomposition (Splitting a Large Skill)
 
-**You have a SKILL.md that has grown too complex** — too many responsibilities, branching logic, or approaching the 500-line limit.
+**You have a SKILL.md that has grown too complex** — too many responsibilities, branching logic, or approaching the 500-line limit. Splitting produces a **new** project. To refactor skills within an existing project, use `/bundles-optimize` (Target 7).
 
 **Signs you need decomposition:**
 
@@ -238,14 +238,14 @@ All scenarios produce a design document with this structure:
 
 ## The Pipeline: What Happens After Approval
 
-When the design document is approved, **blueprinting orchestrates** a four-phase pipeline. This is not a single automatic handoff only to scaffolding; the orchestrator drives each stage in order:
+When the design document is approved, **blueprinting orchestrates** a four-step pipeline. This is not a single automatic handoff only to scaffolding; the orchestrator drives each step in order:
 
-| Phase | What runs | Purpose |
-|-------|-----------|---------|
-| **Phase 1** | `bundles-forge:scaffolding` | Generate project structure and platform manifests |
-| **Phase 2** | `bundles-forge:authoring` | Author **SKILL.md** and **agents/*.md** — **invoked by blueprinting** after scaffolding (not by scaffolding) |
-| **Phase 3** | Workflow design | Wire skills together (chains, bootstrap, commands) per the design |
-| **Phase 4** | `bundles-forge:auditing` | Validate quality and security before further iteration |
+| Step | What runs | Purpose |
+|------|-----------|---------|
+| **Scaffold** | `bundles-forge:scaffolding` | Generate project structure and platform manifests |
+| **Author Content** | `bundles-forge:authoring` | Author **SKILL.md** and **agents/*.md** — **invoked by blueprinting** after scaffolding (not by scaffolding) |
+| **Wire Workflow** | Workflow design (blueprinting internal) | Wire skills together (chains, bootstrap, commands) per the design |
+| **Run Audit** | `bundles-forge:auditing` | Validate quality and security before further iteration |
 
 Each phase includes a verification gate: the agent checks its work (e.g., inspector passes, frontmatter is valid, workflow links are symmetric, no critical audit findings) and loops back to fix issues before proceeding. If the final audit surfaces warnings, the agent presents them and asks whether to proceed.
 
@@ -263,7 +263,7 @@ The skill has a HARD-GATE that prevents this. If it happened, the skill wasn't l
 
 **Q: The agent keeps asking questions and won't move on. How do I speed this up?**
 
-The agent has a sufficiency check — it moves forward once it has enough information. If you want the shorter flow, tell the agent you're doing "quick packaging" early on. Quick mode asks only 2 needs questions + 3 architecture questions. You can also say "that's enough detail, let's proceed" and the agent will assess whether it has enough to generate the design document.
+Each phase has a checkpoint — the agent moves forward once it has verified the required information. If you want the shorter flow, tell the agent you're doing "quick packaging" early on. Quick mode asks only 2 needs questions + 4 architecture questions. You can also say "that's enough detail, let's proceed" and the agent will assess whether it has enough to generate the design document.
 
 **Q: The agent gave me multiple approaches. I don't know which to pick.**
 

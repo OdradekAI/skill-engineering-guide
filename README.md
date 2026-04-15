@@ -77,9 +77,8 @@ The 7 skills cover the full lifecycle of a bundle-plugin project, organized into
 ```mermaid
 flowchart LR
     Design["blueprinting"] --> Scaffold["scaffolding"]
-    Scaffold --> Write["authoring"]
-    Write --> Audit["auditing"]
-    Design -->|"initial audit"| Audit
+    Design -->|"content authoring"| Write["authoring"]
+    Design -->|"initial audit"| Audit["auditing"]
     Audit -->|issues| Optimize["optimizing"]
     Optimize -->|"delegate changes"| Write
     Optimize --> Audit
@@ -201,8 +200,8 @@ flowchart LR
     CMD_SC -->|"security only"| auditing
 
     blueprinting -->|"design approved"| scaffolding
+    blueprinting -->|"content authoring"| authoring
     blueprinting -->|"initial audit"| auditing
-    scaffolding -->|"structure generated"| authoring
     auditing -->|"issues found"| optimizing
     optimizing -->|"delegate changes"| authoring
     optimizing -->|"verify fixes"| auditing
@@ -223,11 +222,11 @@ User runs /bundles-blueprint
   → blueprinting: Phase 2 — architecture design (complexity, platforms, skill decomposition, workflow)
   → blueprinting: Phase 3 — generate design document + self-review
   → User approves design document (HARD-GATE)
-  → scaffolding: generate project structure, manifests, hooks, scripts
+  → Scaffold: invoke scaffolding — generate project structure, manifests, hooks, scripts
     → inspector agent validates scaffold (if subagents available)
-  → authoring: guide SKILL.md and agents/*.md content (with design context)
-  → blueprinting: workflow design (cross-references, integration sections)
-  → auditing: initial quality check
+  → Author Content: invoke authoring — guide SKILL.md and agents/*.md content (with design context)
+  → Wire Workflow: blueprinting wires cross-references, integration sections
+  → Run Audit: invoke auditing — initial quality check
 ```
 
 #### `/bundles-scaffold` — Generate or adapt project structure

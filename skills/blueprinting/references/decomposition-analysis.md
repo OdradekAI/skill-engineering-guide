@@ -28,7 +28,7 @@ Present the user with:
 - How the skills chain together (workflow dependencies)
 - Whether a bootstrap skill is needed to orchestrate them
 
-Get user approval on the decomposition before proceeding to the Interview (Scenario A) to finalize project details.
+Get user approval on the decomposition before proceeding to Phase 1: Needs Exploration to finalize project details.
 
 ## Example: Splitting an Audit Skill
 
