@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.7.3] - 2026-04-15
+
+### Changed
+
+- **Blueprinting skill** — renamed pipeline phases to named steps (Scaffold, Author Content, Wire Workflow, Run Audit); moved sufficiency check into Phase 2 checkpoint; added HARD-GATE justification table and quick-mode behavior summary; streamlined Context Exploration with skip-if-answered guidance for Scenario B/C
+- **Optimizing skill** — consolidated 8 targets into 6 (merged Token Efficiency + Progressive Disclosure into Content Optimization; removed standalone Platform Coverage — delegates to scaffolding directly); reorganized process into Diagnose → Classify & Route → Apply → Verify
+- **Optimizing guides (EN/ZH)** — updated target counts, renumbered all targets, revised scope tables and routing tables
+- **Blueprinting guides (EN/ZH)** — aligned pipeline naming with SKILL.md, updated cross-references from numbered targets to named targets
+- **README (EN/ZH)** — updated mermaid flowcharts (blueprinting now dispatches to authoring directly), updated optimization target counts and pipeline step names
+
+### Fixed
+
+- **Cross-reference consistency** — all "Target N" references across skills, agents, guides, and READMEs updated to use named targets (e.g., "Skill & Workflow Restructuring target" instead of "Target 7")
+- **Quick-mode question count** — blueprinting guides corrected from "3 architecture questions" to "4 architecture questions"
+
 ## [1.7.2] - 2026-04-15
 
 ### Changed
