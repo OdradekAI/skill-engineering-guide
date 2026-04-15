@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Cross-skill redundancy detection** — `audit_skill.py` C1 check now includes paragraph-hash dedup that detects identical paragraphs across different SKILL.md and references/ files (3+ line threshold, skips auto-generated files)
+- **Orphan reference detection (X4)** — `audit_skill.py` new X4 check scans each skill's `references/` directory for `.md` and `.json` files not referenced by `SKILL.md` or sibling reference files
+- **Mermaid dependency graph** — `audit_workflow.py` output now includes a `mermaid` field with a Mermaid flowchart of the skill dependency graph (hub/spoke subgraph grouping when layer metadata is available)
+- **Unified error handling** — new `BundlesForgeError` exception class in `_cli.py` with `run_main()` wrapper; all scripts now raise exceptions instead of calling `sys.exit()` directly for input validation errors, producing clean error messages without tracebacks
+- **New tests** — 31 new tests covering BundlesForgeError, run_main, generate_mermaid, paragraph hash helpers, X4 orphan detection, Mermaid integration, and C1 redundancy (total: 152 tests, up from 121)
+
+### Changed
+
+- **`_graph.run_graph_analysis()`** — now returns `(findings, graph)` tuple instead of just findings, enabling Mermaid generation without redundant graph construction
+- **`audit-checks.json`** — added X4 entry; regenerated checklist tables
+- **Documentation** — updated `cli-reference.md/.zh.md` and `auditing-guide.md/.zh.md` with X4 and Mermaid features
+
 ## [1.7.3] - 2026-04-15
 
 ### Changed

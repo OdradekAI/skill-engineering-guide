@@ -98,7 +98,7 @@ def _involves_focus(finding, focus_skills):
 def check_static(parsed_skills, focus_skills=None):
     """Run W1-W5 via _graph.run_graph_analysis and tag with layer/focus."""
     findings = []
-    graph_findings = _graph.run_graph_analysis(parsed_skills)
+    graph_findings, graph = _graph.run_graph_analysis(parsed_skills)
 
     for gf in graph_findings:
         wf = dict(gf)
@@ -106,7 +106,7 @@ def check_static(parsed_skills, focus_skills=None):
         wf["focus"] = _involves_focus(wf, focus_skills)
         findings.append(wf)
 
-    return findings
+    return findings, graph
 
 
 # ---------------------------------------------------------------------------
@@ -230,7 +230,7 @@ def run_workflow_audit(project_root, focus_skills=None,
     if lint_results is None:
         lint_results = audit_skill.run_lint(root, parsed_skills=parsed_skills)
 
-    static_findings = check_static(parsed_skills, focus_skills)
+    static_findings, graph = check_static(parsed_skills, focus_skills)
     semantic_findings = check_semantic(parsed_skills, lint_results, focus_skills)
     behavioral_findings = []
 
@@ -286,6 +286,16 @@ def run_workflow_audit(project_root, focus_skills=None,
     focus_findings = [f for f in all_findings if f.get("focus", True)]
     context_findings = [f for f in all_findings if not f.get("focus", True)]
 
+    skill_layers = {}
+    for sname, sdata in parsed_skills["skills"].items():
+        fm = sdata.get("frontmatter") or {}
+        layer = fm.get("layer", "")
+        if layer:
+            skill_layers[sname] = layer
+        elif sname.startswith("using-"):
+            skill_layers[sname] = "meta"
+    mermaid = _graph.generate_mermaid(graph, skill_layers or None)
+
     return {
         "status": status,
         "overall_score": overall_score,
@@ -294,6 +304,7 @@ def run_workflow_audit(project_root, focus_skills=None,
         "focus_skills": sorted(focus_skills) if focus_skills else None,
         "focus_findings": focus_findings,
         "context_findings": context_findings,
+        "mermaid": mermaid,
     }
 
 
@@ -365,6 +376,14 @@ def format_markdown(results, project_name):
         out.append(f"| {label} | {w} | {score_str} "
                    f"| {c.get('critical', 0)} | {c.get('warning', 0)} "
                    f"| {c.get('info', 0)} |")
+
+    mermaid = results.get("mermaid")
+    if mermaid:
+        out.append("\n### Dependency Graph\n")
+        out.append("```mermaid")
+        out.append(mermaid)
+        out.append("```")
+        out.append("")
 
     return "\n".join(out)
 

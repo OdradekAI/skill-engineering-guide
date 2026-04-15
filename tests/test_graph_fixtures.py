@@ -27,20 +27,20 @@ class TestW1CircularDependencies(unittest.TestCase):
         self.parsed = parse_all_skills(FIXTURES_DIR / "circular-deps")
 
     def test_cycle_detected(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w1 = [f for f in findings if f["check"] == "W1"]
         self.assertGreater(len(w1), 0,
                            "Expected at least one W1 cycle finding")
 
     def test_undeclared_cycle_is_warning(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w1_warnings = [f for f in findings
                        if f["check"] == "W1" and f["severity"] == "warning"]
         self.assertGreater(len(w1_warnings), 0,
                            "Undeclared cycle should produce a warning")
 
     def test_cycle_message_contains_skill_names(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w1 = [f for f in findings if f["check"] == "W1"]
         msg = w1[0]["message"]
         self.assertIn("skill-a", msg)
@@ -55,14 +55,14 @@ class TestW2Unreachable(unittest.TestCase):
         self.parsed = parse_all_skills(FIXTURES_DIR / "unreachable")
 
     def test_orphan_skill_detected(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w2 = [f for f in findings if f["check"] == "W2"]
         orphan_findings = [f for f in w2 if "skill-orphan" in f["message"]]
         self.assertGreater(len(orphan_findings), 0,
                            "Expected W2 finding for unreachable 'skill-orphan'")
 
     def test_reachable_skill_not_flagged(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w2 = [f for f in findings if f["check"] == "W2"]
         w2_messages = " ".join(f["message"] for f in w2)
         self.assertNotIn("skill-a", w2_messages,
@@ -78,7 +78,7 @@ class TestW3TerminalWithoutOutputs(unittest.TestCase):
         self.parsed = parse_all_skills(FIXTURES_DIR / "missing-sections")
 
     def test_terminal_skill_without_outputs_detected(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w3 = [f for f in findings if f["check"] == "W3"]
         w3_for_b = [f for f in w3 if "skill-b" in f["message"]]
         self.assertGreater(len(w3_for_b), 0,
@@ -86,7 +86,7 @@ class TestW3TerminalWithoutOutputs(unittest.TestCase):
                            "expected W3 finding")
 
     def test_skill_with_outputs_not_flagged(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w3 = [f for f in findings if f["check"] == "W3"]
         w3_messages = " ".join(f["message"] for f in w3)
         self.assertNotIn("skill-a", w3_messages,
@@ -100,7 +100,7 @@ class TestW4IncomingWithoutInputs(unittest.TestCase):
         self.parsed = parse_all_skills(FIXTURES_DIR / "missing-sections")
 
     def test_referenced_skill_without_inputs_detected(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w4 = [f for f in findings if f["check"] == "W4"]
         w4_for_b = [f for f in w4 if "skill-b" in f["message"]]
         self.assertGreater(len(w4_for_b), 0,
@@ -115,26 +115,43 @@ class TestW5ArtifactMismatch(unittest.TestCase):
         self.parsed = parse_all_skills(FIXTURES_DIR / "artifact-mismatch")
 
     def test_mismatched_artifacts_detected(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w5 = [f for f in findings if f["check"] == "W5"]
         self.assertGreater(len(w5), 0,
                            "Expected W5 finding when producer outputs "
                            "don't match consumer inputs")
 
     def test_w5_is_info_severity(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w5 = [f for f in findings if f["check"] == "W5"]
         for f in w5:
             self.assertEqual(f["severity"], "info",
                              f"W5 should be info-level: {f['message']}")
 
     def test_w5_message_contains_artifact_names(self):
-        findings = _graph.run_graph_analysis(self.parsed)
+        findings, _ = _graph.run_graph_analysis(self.parsed)
         w5 = [f for f in findings if f["check"] == "W5"]
         self.assertGreater(len(w5), 0)
         msg = w5[0]["message"]
         self.assertIn("design-document", msg)
         self.assertIn("optimization-spec", msg)
+
+
+class TestMermaidFromFixtures(unittest.TestCase):
+    """generate_mermaid produces valid output from fixture graphs."""
+
+    def test_circular_deps_graph_has_edges(self):
+        parsed = parse_all_skills(FIXTURES_DIR / "circular-deps")
+        _, graph = _graph.run_graph_analysis(parsed)
+        mermaid = _graph.generate_mermaid(graph)
+        self.assertIn("graph LR", mermaid)
+        self.assertIn("-->", mermaid)
+
+    def test_unreachable_graph_includes_all_skills(self):
+        parsed = parse_all_skills(FIXTURES_DIR / "unreachable")
+        _, graph = _graph.run_graph_analysis(parsed)
+        mermaid = _graph.generate_mermaid(graph)
+        self.assertIn("skill-a", mermaid)
 
 
 if __name__ == "__main__":

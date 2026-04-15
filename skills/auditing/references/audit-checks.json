@@ -47,6 +47,7 @@
   {"id": "X1",  "category": "cross_references", "severity": "warning", "criteria": "All `<project>:<skill-name>` references resolve to existing skills", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
   {"id": "X2",  "category": "cross_references", "severity": "warning", "criteria": "No broken relative-path references to supporting files", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
   {"id": "X3",  "category": "cross_references", "severity": "warning", "criteria": "Text references to subdirectories (`references/`, `templates/`, etc.) match actual skill directory contents", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
+  {"id": "X4",  "category": "cross_references", "severity": "info",    "criteria": "No orphan files in `references/` — every `.md` and `.json` file is referenced by `SKILL.md` or a sibling reference file", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
 
   {"id": "H1",  "category": "hooks", "severity": "warning", "criteria": "`hooks/` directory exists", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
   {"id": "H2",  "category": "hooks", "severity": "warning", "criteria": "`hooks/session-start.py` exists", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},

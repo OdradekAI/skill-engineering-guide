@@ -521,5 +521,70 @@ class TestBumpVersion(unittest.TestCase):
                             "Invalid version format should cause non-zero exit")
 
 
+class TestWorkflowMermaidOutput(unittest.TestCase):
+    """audit_workflow.py JSON output includes a mermaid field."""
+
+    def test_json_has_mermaid_field(self):
+        result = subprocess.run(
+            [sys.executable, str(AUDITING_SCRIPTS / "audit_workflow.py"),
+             "--json", str(REPO_ROOT)],
+            capture_output=True, text=True
+        )
+        self.assertIn(result.returncode, (0, 1),
+                      f"audit_workflow should exit 0 or 1:\n{result.stderr}")
+        data = json.loads(result.stdout)
+        self.assertIn("mermaid", data,
+                      "JSON output should contain 'mermaid' field")
+        self.assertIn("graph LR", data["mermaid"],
+                      "Mermaid output should start with 'graph LR'")
+
+    def test_mermaid_contains_edges(self):
+        result = subprocess.run(
+            [sys.executable, str(AUDITING_SCRIPTS / "audit_workflow.py"),
+             "--json", str(REPO_ROOT)],
+            capture_output=True, text=True
+        )
+        data = json.loads(result.stdout)
+        self.assertIn("-->", data["mermaid"],
+                      "Mermaid graph should contain at least one edge")
+
+
+class TestSkillAuditC1Redundancy(unittest.TestCase):
+    """audit_skill.py project mode detects paragraph redundancy in C1."""
+
+    def test_consistency_field_exists(self):
+        result = subprocess.run(
+            [sys.executable, str(AUDITING_SCRIPTS / "audit_skill.py"),
+             "--all", "--json", str(REPO_ROOT)],
+            capture_output=True, text=True
+        )
+        data = json.loads(result.stdout)
+        self.assertIn("consistency", data,
+                      "Project-level audit should include 'consistency' field")
+
+    def test_x4_check_registered(self):
+        checks_file = (REPO_ROOT / "skills" / "auditing" / "references"
+                       / "audit-checks.json")
+        data = json.loads(checks_file.read_text(encoding="utf-8"))
+        ids = [c["id"] for c in data]
+        self.assertIn("X4", ids, "X4 should be registered in audit-checks.json")
+
+
+class TestBundlesForgeErrorIntegration(unittest.TestCase):
+    """Scripts using BundlesForgeError print clean error messages."""
+
+    def test_audit_skill_bad_path(self):
+        result = subprocess.run(
+            [sys.executable, str(AUDITING_SCRIPTS / "audit_skill.py"),
+             "/nonexistent/path"],
+            capture_output=True, text=True
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("error:", result.stderr,
+                      "Error message should go to stderr with 'error:' prefix")
+        self.assertNotIn("Traceback", result.stderr,
+                         "BundlesForgeError should not produce tracebacks")
+
+
 if __name__ == "__main__":
     unittest.main()

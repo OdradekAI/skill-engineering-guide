@@ -45,6 +45,8 @@ bundles-forge audit-skill --json [project-root]
 
 **Scope detection:** Accepts a project root (has `skills/` directory), a single skill directory (contains `SKILL.md`), or a direct path to a `SKILL.md` file. Project mode runs all 10 audit categories across all skills; skill mode runs 4 applicable categories on one skill.
 
+**Cross-reference checks:** Includes X1 (skill references), X2 (relative paths), X3 (directory references), and X4 (orphan detection — finds `references/` files not linked from `SKILL.md` or sibling references). In project mode, C1 includes paragraph-hash redundancy detection across skills.
+
 **Exit codes:** `0` clean, `1` warnings, `2` critical.
 
 ---
@@ -111,7 +113,7 @@ bundles-forge audit-workflow --json [project-root]
 | `--focus-skills` | Comma-separated skill names to focus analysis on |
 | `--json` | Output JSON |
 
-Three-layer audit: static graph analysis (W1-W5), semantic interface checks (W6-W9), and behavioral verification (W10-W11).
+Three-layer audit: static graph analysis (W1-W5), semantic interface checks (W6-W9), and behavioral verification (W10-W11). Output includes a Mermaid dependency graph of the skill workflow (in both JSON and Markdown modes).
 
 **Exit codes:** `0` clean, `1` warnings, `2` critical.
 

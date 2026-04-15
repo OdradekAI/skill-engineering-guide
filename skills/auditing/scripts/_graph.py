@@ -140,6 +140,37 @@ def extract_artifact_ids(content, section_name, exclude_prefixes):
 # with canonical W1-W5 check IDs directly (no G-to-W remapping).
 # ---------------------------------------------------------------------------
 
+def generate_mermaid(graph, skill_layers=None):
+    """Generate a Mermaid flowchart from the skill dependency graph.
+
+    Args:
+        graph: Dict mapping skill names to sets of outgoing skill refs.
+        skill_layers: Optional dict mapping skill names to layer labels
+            (e.g. "hub" / "spoke") for subgraph grouping.
+
+    Returns:
+        Mermaid diagram source as a string.
+    """
+    lines = ["graph LR"]
+
+    if skill_layers:
+        by_layer = {}
+        for sname, layer in skill_layers.items():
+            by_layer.setdefault(layer, []).append(sname)
+        for layer, members in sorted(by_layer.items()):
+            safe_id = layer.replace(" ", "_").replace("-", "_")
+            lines.append(f"    subgraph {safe_id} [{layer}]")
+            for sname in sorted(members):
+                lines.append(f"        {sname}")
+            lines.append("    end")
+
+    for src in sorted(graph):
+        for tgt in sorted(graph[src]):
+            lines.append(f"    {src} --> {tgt}")
+
+    return "\n".join(lines)
+
+
 def run_graph_analysis(parsed_skills):
     """Run W1-W5 graph checks on the workflow DAG.
 
@@ -147,7 +178,9 @@ def run_graph_analysis(parsed_skills):
         parsed_skills: Dict returned by _parsing.parse_all_skills().
 
     Returns:
-        List of finding dicts with check IDs W1-W5.
+        Tuple of (findings, graph) where findings is a list of finding dicts
+        with check IDs W1-W5, and graph is the adjacency dict mapping skill
+        names to sets of outgoing refs.
     """
     skills = parsed_skills["skills"]
     valid_prefixes = parsed_skills["valid_prefixes"]
@@ -265,4 +298,4 @@ def run_graph_analysis(parsed_skills):
                             f"'{src}' outputs {sorted(src_out)} and "
                             f"'{tgt}' inputs {sorted(tgt_in)}"))
 
-    return findings
+    return findings, graph

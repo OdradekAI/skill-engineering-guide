@@ -20,8 +20,10 @@ RELEASING_SCRIPTS = REPO_ROOT / "skills" / "releasing" / "scripts"
 sys.path.insert(0, str(AUDITING_SCRIPTS))
 sys.path.insert(0, str(RELEASING_SCRIPTS))
 
-from _parsing import parse_frontmatter, estimate_tokens
+from _cli import BundlesForgeError, run_main
+from _parsing import parse_frontmatter, estimate_tokens, FRONTMATTER_RE
 from _scoring import compute_baseline_score, compute_weighted_average
+from _graph import generate_mermaid
 from bump_version import _resolve_field_path, _set_field_path
 
 
@@ -297,6 +299,225 @@ class TestFieldPathResolution(unittest.TestCase):
         data = {"plugins": [{"version": "1.0.0"}]}
         _set_field_path(data, "plugins.0.version", "2.0.0")
         self.assertEqual(data["plugins"][0]["version"], "2.0.0")
+
+
+# ---------------------------------------------------------------------------
+# _cli.BundlesForgeError
+# ---------------------------------------------------------------------------
+
+class TestBundlesForgeError(unittest.TestCase):
+    """BundlesForgeError carries message and exit code."""
+
+    def test_message_stored(self):
+        e = BundlesForgeError("bad input")
+        self.assertEqual(e.message, "bad input")
+
+    def test_default_code_is_one(self):
+        e = BundlesForgeError("err")
+        self.assertEqual(e.code, 1)
+
+    def test_custom_code(self):
+        e = BundlesForgeError("err", code=2)
+        self.assertEqual(e.code, 2)
+
+    def test_is_exception(self):
+        self.assertTrue(issubclass(BundlesForgeError, Exception))
+
+    def test_str_is_message(self):
+        e = BundlesForgeError("some error")
+        self.assertEqual(str(e), "some error")
+
+
+class TestRunMain(unittest.TestCase):
+    """run_main catches BundlesForgeError and converts to sys.exit."""
+
+    def test_clean_exit(self):
+        def ok():
+            pass
+        run_main(ok)
+
+    def test_catches_error_and_exits(self):
+        def fail():
+            raise BundlesForgeError("test fail", code=2)
+        with self.assertRaises(SystemExit) as ctx:
+            run_main(fail)
+        self.assertEqual(ctx.exception.code, 2)
+
+
+# ---------------------------------------------------------------------------
+# _graph.generate_mermaid
+# ---------------------------------------------------------------------------
+
+class TestGenerateMermaid(unittest.TestCase):
+    """generate_mermaid produces valid Mermaid graph syntax."""
+
+    def test_empty_graph(self):
+        result = generate_mermaid({})
+        self.assertEqual(result, "graph LR")
+
+    def test_single_edge(self):
+        result = generate_mermaid({"a": {"b"}})
+        self.assertIn("a --> b", result)
+        self.assertTrue(result.startswith("graph LR"))
+
+    def test_multiple_edges_sorted(self):
+        result = generate_mermaid({"b": {"c", "a"}, "a": {"c"}})
+        lines = result.splitlines()
+        edge_lines = [l.strip() for l in lines if "-->" in l]
+        self.assertEqual(edge_lines, ["a --> c", "b --> a", "b --> c"])
+
+    def test_no_edges_node_only(self):
+        result = generate_mermaid({"a": set()})
+        self.assertEqual(result, "graph LR")
+
+    def test_with_layers_subgraph(self):
+        graph = {"orchestrator": {"worker"}, "worker": set()}
+        layers = {"orchestrator": "hub", "worker": "spoke"}
+        result = generate_mermaid(graph, skill_layers=layers)
+        self.assertIn("subgraph hub [hub]", result)
+        self.assertIn("subgraph spoke [spoke]", result)
+        self.assertIn("orchestrator --> worker", result)
+
+    def test_layer_ids_sanitized(self):
+        graph = {"a": set()}
+        layers = {"a": "my layer"}
+        result = generate_mermaid(graph, skill_layers=layers)
+        self.assertIn("subgraph my_layer [my layer]", result)
+
+
+# ---------------------------------------------------------------------------
+# Paragraph hash redundancy (used by C1 in audit_skill.py)
+# ---------------------------------------------------------------------------
+
+class TestParagraphHashHelpers(unittest.TestCase):
+    """Test the paragraph extraction and hashing logic used in C1."""
+
+    def _split_paragraphs(self, text):
+        """Replicate the paragraph splitting logic from audit_skill.py."""
+        import hashlib as _hl
+        import re as _re
+        body_text = FRONTMATTER_RE.sub("", text, count=1).strip()
+        results = {}
+        for para in _re.split(r"\n\s*\n", body_text):
+            lines = [ln for ln in para.strip().splitlines()
+                     if ln.strip() and not ln.strip().startswith("#")]
+            if len(lines) < 3:
+                continue
+            normalized = "\n".join(ln.strip() for ln in lines)
+            h = _hl.sha256(normalized.encode()).hexdigest()[:16]
+            results[h] = normalized
+        return results
+
+    def test_skip_short_paragraphs(self):
+        text = "Line one.\n\nLine two."
+        self.assertEqual(len(self._split_paragraphs(text)), 0)
+
+    def test_skip_heading_only_lines(self):
+        text = "# Title\n## Sub\n### Sub2"
+        self.assertEqual(len(self._split_paragraphs(text)), 0)
+
+    def test_extract_long_paragraph(self):
+        text = "Line 1\nLine 2\nLine 3\n\nShort."
+        paras = self._split_paragraphs(text)
+        self.assertEqual(len(paras), 1)
+
+    def test_frontmatter_stripped(self):
+        text = "---\nname: test\n---\nLine 1\nLine 2\nLine 3"
+        paras = self._split_paragraphs(text)
+        self.assertEqual(len(paras), 1)
+
+    def test_same_content_same_hash(self):
+        text = "A\nB\nC"
+        paras = self._split_paragraphs(text)
+        h1 = list(paras.keys())[0]
+        paras2 = self._split_paragraphs("  A  \n  B  \n  C  ")
+        h2 = list(paras2.keys())[0]
+        self.assertEqual(h1, h2)
+
+    def test_different_content_different_hash(self):
+        p1 = self._split_paragraphs("A\nB\nC")
+        p2 = self._split_paragraphs("X\nY\nZ")
+        self.assertNotEqual(list(p1.keys())[0], list(p2.keys())[0])
+
+
+# ---------------------------------------------------------------------------
+# X4 orphan detection logic
+# ---------------------------------------------------------------------------
+
+class TestX4OrphanDetection(unittest.TestCase):
+    """Test the orphan reference file detection used by X4 in audit_skill.py."""
+
+    def setUp(self):
+        import tempfile
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.skill_dir = self.tmpdir / "skills" / "test-skill"
+        self.skill_dir.mkdir(parents=True)
+        self.refs_dir = self.skill_dir / "references"
+        self.refs_dir.mkdir()
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def _detect_orphans(self):
+        """Replicate the X4 detection logic from audit_skill.py."""
+        refs_dir = self.refs_dir
+        skill_dir = self.skill_dir
+        skill_md = skill_dir / "SKILL.md"
+        content = skill_md.read_text(encoding="utf-8") if skill_md.exists() else ""
+
+        ref_files = sorted(
+            f for f in refs_dir.iterdir()
+            if f.is_file() and f.suffix in (".md", ".json")
+        )
+        all_texts = {skill_md: content}
+        for rf in ref_files:
+            try:
+                all_texts[rf] = rf.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                pass
+
+        orphans = []
+        for rf in ref_files:
+            fname = rf.name
+            ref_rel = f"references/{fname}"
+            referenced = any(
+                fname in txt or ref_rel in txt
+                for path, txt in all_texts.items() if path != rf
+            )
+            if not referenced:
+                orphans.append(fname)
+        return orphans
+
+    def test_no_orphans_when_referenced(self):
+        (self.skill_dir / "SKILL.md").write_text(
+            "See `references/guide.md` for details.", encoding="utf-8")
+        (self.refs_dir / "guide.md").write_text("# Guide", encoding="utf-8")
+        self.assertEqual(self._detect_orphans(), [])
+
+    def test_orphan_detected(self):
+        (self.skill_dir / "SKILL.md").write_text(
+            "No references here.", encoding="utf-8")
+        (self.refs_dir / "orphan.md").write_text("# Orphan", encoding="utf-8")
+        self.assertEqual(self._detect_orphans(), ["orphan.md"])
+
+    def test_sibling_reference_counts(self):
+        (self.skill_dir / "SKILL.md").write_text(
+            "See `references/main.md`.", encoding="utf-8")
+        (self.refs_dir / "main.md").write_text(
+            "Also see helper.md for more.", encoding="utf-8")
+        (self.refs_dir / "helper.md").write_text("# Helper", encoding="utf-8")
+        self.assertEqual(self._detect_orphans(), [])
+
+    def test_filename_only_match(self):
+        (self.skill_dir / "SKILL.md").write_text(
+            "Refer to guide.md in the references directory.", encoding="utf-8")
+        (self.refs_dir / "guide.md").write_text("# Guide", encoding="utf-8")
+        self.assertEqual(self._detect_orphans(), [])
+
+    def test_empty_references_dir(self):
+        (self.skill_dir / "SKILL.md").write_text("Content.", encoding="utf-8")
+        self.assertEqual(self._detect_orphans(), [])
 
 
 if __name__ == "__main__":

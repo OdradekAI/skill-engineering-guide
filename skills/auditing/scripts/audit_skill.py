@@ -18,6 +18,7 @@ Usage:
 Exit codes: 0 = pass, 1 = warnings, 2 = critical findings
 """
 
+import hashlib
 import json
 import re
 import sys
@@ -35,6 +36,7 @@ from _parsing import (
     parse_all_skills,
     detect_project_meta,
 )
+from _cli import BundlesForgeError
 from _graph import CROSS_REF_RE, extract_all_refs
 
 # ---------------------------------------------------------------------------
@@ -217,6 +219,33 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
                                  message=f"Text references '{ref_dir_name}/' directory "
                                          "but it does not exist in skill directory"))
 
+    # X4: Orphan reference files — files in references/ not referenced by
+    # SKILL.md or any sibling reference file.
+    refs_dir = skill_dir / "references"
+    if refs_dir.is_dir():
+        ref_files = sorted(
+            f for f in refs_dir.iterdir()
+            if f.is_file() and f.suffix in (".md", ".json")
+        )
+        all_texts = {skill_dir / "SKILL.md": content}
+        for rf in ref_files:
+            try:
+                all_texts[rf] = rf.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                pass
+        for rf in ref_files:
+            fname = rf.name
+            ref_rel = f"references/{fname}"
+            referenced = any(
+                fname in txt or ref_rel in txt
+                for path, txt in all_texts.items() if path != rf
+            )
+            if not referenced:
+                findings.append(dict(
+                    check="X4", severity="info",
+                    message=f"Reference file '{ref_rel}' is not referenced "
+                            "by SKILL.md or any sibling reference"))
+
     # Q15: Conditional branch reachability — large blocks guarded by
     # "If ... unavailable" style conditions should be in references/
     body_line_list = body.splitlines()
@@ -348,6 +377,48 @@ def run_lint(project_root, parsed_skills=None):
                 check="C1", severity="info",
                 message="Cross-skill inconsistencies: " + "; ".join(sub_issues)))
 
+        # C1 sub-check: cross-file paragraph hash redundancy detection
+        _AUTO_GEN_MARKER = re.compile(
+            r"auto-generated|Tables in this file are auto-generated",
+            re.IGNORECASE)
+        paragraph_hashes = {}
+        for sname, sdata in parsed_skills["skills"].items():
+            skill_path = parsed_skills["skills_dir"] / sname
+            files_to_scan = []
+            skill_md = skill_path / "SKILL.md"
+            if skill_md.is_file():
+                files_to_scan.append(skill_md)
+            refs = skill_path / "references"
+            if refs.is_dir():
+                files_to_scan.extend(
+                    sorted(f for f in refs.iterdir()
+                           if f.is_file() and f.suffix == ".md"))
+            for fpath in files_to_scan:
+                try:
+                    text = fpath.read_text(encoding="utf-8", errors="replace")
+                except OSError:
+                    continue
+                if _AUTO_GEN_MARKER.search(text[:500]):
+                    continue
+                body_text = FRONTMATTER_RE.sub("", text, count=1).strip()
+                for para in re.split(r"\n\s*\n", body_text):
+                    lines = [ln for ln in para.strip().splitlines()
+                             if ln.strip() and not ln.strip().startswith("#")]
+                    if len(lines) < 3:
+                        continue
+                    normalized = "\n".join(ln.strip() for ln in lines)
+                    h = hashlib.sha256(normalized.encode()).hexdigest()[:16]
+                    rel = str(fpath.relative_to(parsed_skills["skills_dir"]))
+                    paragraph_hashes.setdefault(h, []).append(rel)
+
+        for h, locations in paragraph_hashes.items():
+            unique_files = sorted(set(locations))
+            if len(unique_files) >= 2:
+                consistency.append(dict(
+                    check="C1", severity="info",
+                    message="Duplicate paragraph across files: "
+                            + ", ".join(unique_files)))
+
         results["consistency"] = consistency
         for f in consistency:
             results["summary"][f["severity"]] += 1
@@ -441,14 +512,11 @@ def resolve_skill_path(raw_path):
     elif p.is_dir():
         skill_dir = p
     else:
-        print(f"error: {raw_path} is not a directory or SKILL.md file",
-              file=sys.stderr)
-        sys.exit(1)
+        raise BundlesForgeError(
+            f"{raw_path} is not a directory or SKILL.md file")
 
     if not (skill_dir / "SKILL.md").exists():
-        print(f"error: {skill_dir} does not contain SKILL.md",
-              file=sys.stderr)
-        sys.exit(1)
+        raise BundlesForgeError(f"{skill_dir} does not contain SKILL.md")
 
     project_root = _find_project_root(skill_dir)
     return skill_dir, project_root
@@ -708,8 +776,7 @@ def main():
 
     if mode == "project":
         if not (resolved / "skills").is_dir():
-            print(f"error: {resolved} has no skills/ directory", file=sys.stderr)
-            sys.exit(1)
+            raise BundlesForgeError(f"{resolved} has no skills/ directory")
         results = run_lint(resolved)
         if args.json:
             print(json.dumps(results, indent=2))
@@ -726,4 +793,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    from _cli import run_main
+    run_main(main)

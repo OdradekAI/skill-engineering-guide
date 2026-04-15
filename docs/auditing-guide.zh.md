@@ -89,7 +89,7 @@ bundles-forge audit-plugin --json <project-root>  # JSON 输出
 ```
 
 `audit_plugin.py` 编排四个子脚本：
-- `audit_skill.py` — 技能质量 lint（Q1-Q15、S9、X1-X3、C1、G1-G5）
+- `audit_skill.py` — 技能质量 lint（Q1-Q15、S9、X1-X4、C1、G1-G5）
 - `audit_security.py` — 基于模式的安全异味检测（7 类文件）
 - `audit_workflow.py` — 工作流集成分析（W1-W9）
 - `audit_docs.py` — 文档一致性检查（D1-D9）
@@ -104,7 +104,7 @@ bundles-forge audit-plugin --json <project-root>  # JSON 输出
 | 2 | 平台清单 | 中 (2) | 清单 JSON 合法、路径可解析 |
 | 3 | 版本同步 | 高 (3) | `.version-bump.json` 完整性、无漂移 |
 | 4 | 技能质量 | 中 (2) | Frontmatter、描述、token 预算（Q1-Q15） |
-| 5 | 交叉引用 | 中 (2) | `project:skill` 解析、相对路径（X1-X3） |
+| 5 | 交叉引用 | 中 (2) | `project:skill` 解析、相对路径、孤儿检测（X1-X4） |
 | 6 | 工作流 | 高 (3) | 图拓扑、集成对称性、制品（W1-W11） |
 | 7 | 钩子 | 中 (2) | 引导注入、平台检测（仅功能正确性） |
 | 8 | 测试 | 中 (2) | 测试目录、提示词、A/B 评估结果 |
@@ -162,7 +162,7 @@ bundles-forge audit-security <skill-directory>   # 安全扫描
 |---|------|------|---------|
 | 1 | 结构 | 高 (3) | S2、S3、S9 — 独立目录、SKILL.md 存在、名称匹配 |
 | 2 | 技能质量 | 中 (2) | Q1-Q15 — frontmatter、描述、token、各节内容 |
-| 3 | 交叉引用 | 中 (2) | X1-X3 — `project:skill` 解析、相对路径 |
+| 3 | 交叉引用 | 中 (2) | X1-X4 — `project:skill` 解析、相对路径、孤儿检测 |
 | 4 | 安全 | 高 (3) | SC1、SC9、SC13、AG1、AG6 — 敏感文件、覆盖、编码（来自 `security-checklist.md`） |
 
 总权重 = 10。技能范围不适用的类别：平台清单、版本同步、钩子、测试、文档。

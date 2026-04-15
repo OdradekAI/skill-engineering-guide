@@ -147,6 +147,7 @@ Static link resolution — verifies that references within skill content point t
 | X1 | Warning | All `<project>:<skill-name>` references resolve to existing skills | `audit_skill.py` |
 | X2 | Warning | No broken relative-path references to supporting files | `audit_skill.py` |
 | X3 | Warning | Text references to subdirectories (`references/`, `templates/`, etc.) match actual skill directory contents | `audit_skill.py` |
+| X4 | Info | No orphan files in `references/` — every `.md` and `.json` file is referenced by `SKILL.md` or a sibling reference file | `audit_skill.py` |
 <!-- END:cross_references -->
 
 **How to check:**

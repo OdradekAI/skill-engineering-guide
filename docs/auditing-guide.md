@@ -89,7 +89,7 @@ bundles-forge audit-plugin --json <project-root>  # JSON output
 ```
 
 `audit_plugin.py` orchestrates four sub-scripts:
-- `audit_skill.py` — skill quality linting (Q1-Q15, S9, X1-X3, C1, G1-G5)
+- `audit_skill.py` — skill quality linting (Q1-Q15, S9, X1-X4, C1, G1-G5)
 - `audit_security.py` — pattern-based security smell detection (7 file categories)
 - `audit_workflow.py` — workflow integration analysis (W1-W9)
 - `audit_docs.py` — documentation consistency (D1-D9)
@@ -104,7 +104,7 @@ Then adds its own checks for structure, manifests, version sync, hooks, and test
 | 2 | Platform Manifests | Medium (2) | Manifest JSON valid, paths resolve |
 | 3 | Version Sync | High (3) | `.version-bump.json` completeness, no drift |
 | 4 | Skill Quality | Medium (2) | Frontmatter, descriptions, token budget (Q1-Q15) |
-| 5 | Cross-References | Medium (2) | `project:skill` resolution, relative paths (X1-X3) |
+| 5 | Cross-References | Medium (2) | `project:skill` resolution, relative paths, orphan detection (X1-X4) |
 | 6 | Workflow | High (3) | Graph topology, integration symmetry, artifacts (W1-W11) |
 | 7 | Hooks | Medium (2) | Bootstrap injection, platform detection (functional correctness only) |
 | 8 | Testing | Medium (2) | Test directory, prompts, A/B eval results |
@@ -162,7 +162,7 @@ bundles-forge audit-security <skill-directory>   # security scan only
 |---|----------|--------|------------|
 | 1 | Structure | High (3) | S2, S3, S9 — own directory, SKILL.md exists, name matches |
 | 2 | Skill Quality | Medium (2) | Q1-Q15 — frontmatter, descriptions, tokens, sections |
-| 3 | Cross-References | Medium (2) | X1-X3 — `project:skill` resolution, relative paths |
+| 3 | Cross-References | Medium (2) | X1-X4 — `project:skill` resolution, relative paths, orphan detection |
 | 4 | Security | High (3) | SC1, SC9, SC13, AG1, AG6 — sensitive files, overrides, encoding |
 
 Total weight = 10. Categories not applicable at skill scope: Platform Manifests, Version Sync, Hooks, Testing, Documentation.

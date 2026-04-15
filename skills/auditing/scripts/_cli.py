@@ -5,6 +5,26 @@ import sys
 from pathlib import Path
 
 
+class BundlesForgeError(Exception):
+    """User-facing error raised by submodules (invalid input, missing files).
+
+    Caught by run_main() which prints the message to stderr and exits.
+    """
+    def __init__(self, message, code=1):
+        self.message = message
+        self.code = code
+        super().__init__(message)
+
+
+def run_main(fn):
+    """Top-level wrapper: catches BundlesForgeError, prints to stderr, exits."""
+    try:
+        fn()
+    except BundlesForgeError as e:
+        print(f"error: {e.message}", file=sys.stderr)
+        sys.exit(e.code)
+
+
 def make_parser(description):
     """Create a standard argparse parser with project-root and --json options."""
     parser = argparse.ArgumentParser(description=description)
@@ -19,8 +39,7 @@ def resolve_root(path_str):
     """Resolve project root and verify it contains a skills/ directory."""
     root = Path(path_str).resolve()
     if not (root / "skills").is_dir():
-        print(f"error: {root} has no skills/ directory", file=sys.stderr)
-        sys.exit(1)
+        raise BundlesForgeError(f"{root} has no skills/ directory")
     return root
 
 

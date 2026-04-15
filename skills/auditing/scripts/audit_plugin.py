@@ -303,7 +303,7 @@ def run_audit(project_root):
     lint_results = audit_skill.run_lint(root, parsed_skills=parsed_skills)
     workflow_results = audit_workflow.run_workflow_audit(
         root, parsed_skills=parsed_skills, lint_results=lint_results)
-    graph_findings = _graph.run_graph_analysis(parsed_skills)
+    graph_findings, _graph_adj = _graph.run_graph_analysis(parsed_skills)
     structure = check_structure(root)
     manifests = check_manifests(root)
     version_sync = check_version_sync(root)

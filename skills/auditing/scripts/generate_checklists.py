@@ -14,10 +14,10 @@ from collections import OrderedDict
 from pathlib import Path
 
 try:
-    from _cli import resolve_root
+    from _cli import resolve_root, BundlesForgeError
 except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _cli import resolve_root
+    from _cli import resolve_root, BundlesForgeError
 
 BEGIN_RE = re.compile(r"^<!--\s*BEGIN:(.+?)\s*-->")
 END_RE = re.compile(r"^<!--\s*END:(.+?)\s*-->")
@@ -91,15 +91,13 @@ CHECKLIST_FILES = {
 def load_registry(root):
     path = root / "skills" / "auditing" / "references" / "audit-checks.json"
     if not path.exists():
-        print(f"error: {path} not found", file=sys.stderr)
-        sys.exit(2)
+        raise BundlesForgeError(f"{path} not found", code=2)
     data = json.loads(path.read_text(encoding="utf-8"))
     ids = [c["id"] for c in data]
     dupes = [x for x in set(ids) if ids.count(x) > 1]
     if dupes:
-        print(f"error: duplicate IDs in registry: {', '.join(sorted(dupes))}",
-              file=sys.stderr)
-        sys.exit(2)
+        raise BundlesForgeError(
+            f"duplicate IDs in registry: {', '.join(sorted(dupes))}", code=2)
     return data
 
 
@@ -306,4 +304,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    from _cli import run_main
+    run_main(main)
