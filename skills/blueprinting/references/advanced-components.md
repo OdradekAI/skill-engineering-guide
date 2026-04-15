@@ -6,7 +6,7 @@ This table maps user signals to advanced components. Only consult when the user 
 
 | Component | User Signal (explicit mention required) | What It Provides |
 |-----------|----------------------------------------|-----------------|
-| External integrations (`bin/` or `.mcp.json`) | "I need to call an external tool/API/service" | CLI executables or MCP servers — consult `skills/scaffolding/references/external-integration.md` to decide CLI vs MCP |
+| External integrations (`bin/` or `.mcp.json`) | "I need to call an external tool/API/service" | CLI executables or MCP servers — consult `bundles-forge:scaffolding` — `references/external-integration.md` to decide CLI vs MCP |
 | `userConfig` | "Users need to provide API keys/endpoints/tokens" | User prompts at enable time with optional sensitive storage (Claude Code only) |
 | `.lsp.json` servers | "I need language-specific code intelligence" | Real-time diagnostics, go-to-definition |
 | `output-styles/` | "I want custom output formatting" | Output style definitions |

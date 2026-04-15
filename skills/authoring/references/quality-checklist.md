@@ -1,6 +1,6 @@
 # Authoring Quality Checklist
 
-> **Canonical source** for check IDs and severity levels: `skills/auditing/references/audit-checks.json`. This checklist adds authoring-oriented Self-Check guidance.
+> **Canonical source** for check IDs and severity levels: `bundles-forge:auditing` — `references/audit-checks.json`. This checklist adds authoring-oriented Self-Check guidance.
 
 Definitive quality specification for SKILL.md files. `bundles-forge audit-skill` automates these checks. Use during authoring to catch issues before running the linter, or to investigate specific lint findings.
 

@@ -10,7 +10,7 @@ allowed-tools: Bash(bundles-forge audit-skill *)
 
 Guide the authoring of effective SKILL.md files, agent definitions (`agents/*.md`), and supporting resources within a bundle-plugin. Good content is the difference between skills that agents consistently find and follow — and ones that get ignored or misinterpreted.
 
-**Core principle:** Write for the agent's experience. Every instruction should be discoverable (good description), loadable (right size), and followable (clear, motivated instructions). Skills are the first-class source of truth in a bundle-plugin — docs and README must not contradict skill content (see `skills/auditing/references/source-of-truth-policy.md`).
+**Core principle:** Write for the agent's experience. Every instruction should be discoverable (good description), loadable (right size), and followable (clear, motivated instructions). Skills are the first-class source of truth in a bundle-plugin — docs and README must not contradict skill content (see `bundles-forge:auditing` — `references/source-of-truth-policy.md`).
 
 **Skill type:** Hybrid — follow the execution flow rigidly (Entry Detection → Path steps → Validation), but apply writing guidance flexibly based on context. The process is discipline-enforcing; the content decisions are pattern-based.
 

@@ -77,7 +77,7 @@ hooks:
 ---
 ```
 
-The `once: true` field makes a hook run only once per session (useful for one-time post-completion checks). Four handler types are available: `command`, `http`, `prompt`, and `agent`. See `skills/scaffolding/references/platform-adapters.md` for the full field reference.
+The `once: true` field makes a hook run only once per session (useful for one-time post-completion checks). Four handler types are available: `command`, `http`, `prompt`, and `agent`. See `bundles-forge:scaffolding` — `references/platform-adapters.md` for the full field reference.
 
 **Cross-platform consideration:** If your bundle-plugin targets multiple platforms, avoid frontmatter hooks in skills that need to work on non-Claude Code platforms. Instead, use `hooks/hooks.json` for session-level hooks.
 
@@ -430,7 +430,7 @@ Create an `assets/` file when:
 
 ## External Tool References (MCP / CLI)
 
-When a skill needs to invoke external tools or services, follow the decision tree in `skills/scaffolding/references/external-integration.md` to choose between CLI and MCP.
+When a skill needs to invoke external tools or services, follow the decision tree in `bundles-forge:scaffolding` — `references/external-integration.md` to choose between CLI and MCP.
 
 ### Declaring CLI Tools
 
@@ -482,7 +482,7 @@ allowed-tools: mcp__my-api__query
 # "env": { "API_TOKEN": "${user_config.api_token}" }
 ```
 
-For the full `userConfig` schema and wiring guide, see `skills/scaffolding/references/external-integration.md`.
+For the full `userConfig` schema and wiring guide, see `bundles-forge:scaffolding` — `references/external-integration.md`.
 
 ### When to Reference What
 

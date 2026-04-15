@@ -163,8 +163,21 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
         resolved = skill_dir / clean_path
         resolved_from_root = project_root / clean_path
         if not resolved.exists() and not resolved_from_root.exists():
-            findings.append(dict(check="X2", severity="warning",
-                                 message=f"Relative path '{ref_path}' not found"))
+            line_start = content.rfind("\n", 0, match.start()) + 1
+            line_end = content.find("\n", match.end())
+            if line_end == -1:
+                line_end = len(content)
+            line = content[line_start:line_end]
+            resolved_via_xref = False
+            for xref in CROSS_REF_RE.finditer(line):
+                if xref.group(1) in valid_prefixes:
+                    target_skill_dir = project_root / "skills" / xref.group(2)
+                    if (target_skill_dir / clean_path).exists():
+                        resolved_via_xref = True
+                        break
+            if not resolved_via_xref:
+                findings.append(dict(check="X2", severity="warning",
+                                     message=f"Relative path '{ref_path}' not found"))
 
     # Q12: Heavy inline content that should be in references/
     non_fm_lines = body.splitlines()

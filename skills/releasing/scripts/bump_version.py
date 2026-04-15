@@ -20,11 +20,6 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-_AUDITING_SCRIPTS = Path(__file__).resolve().parent.parent.parent / "auditing" / "scripts"
-if str(_AUDITING_SCRIPTS) not in sys.path:
-    sys.path.insert(0, str(_AUDITING_SCRIPTS))
-from _cli import BundlesForgeError
-
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+(-[\w.]+)?$")
 
 
@@ -64,7 +59,8 @@ def _set_field_path(data, field, value):
 def load_config(repo_root):
     config_path = repo_root / ".version-bump.json"
     if not config_path.exists():
-        raise BundlesForgeError(".version-bump.json not found")
+        print("error: .version-bump.json not found", file=sys.stderr)
+        sys.exit(1)
     return json.loads(config_path.read_text(encoding="utf-8"))
 
 
@@ -218,9 +214,9 @@ def cmd_audit(repo_root):
 
 def cmd_bump(repo_root, new_version, dry_run=False):
     if not SEMVER_RE.match(new_version):
-        raise BundlesForgeError(
-            f"'{new_version}' doesn't look like a version "
-            "(expected X.Y.Z or X.Y.Z-pre.N)")
+        print(f"error: '{new_version}' doesn't look like a version (expected X.Y.Z or X.Y.Z-pre.N)",
+              file=sys.stderr)
+        sys.exit(1)
 
     config = load_config(repo_root)
     prefix = "[DRY RUN] " if dry_run else ""
@@ -279,5 +275,4 @@ def main():
 
 
 if __name__ == "__main__":
-    from _cli import run_main
-    run_main(main)
+    main()

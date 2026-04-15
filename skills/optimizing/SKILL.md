@@ -241,7 +241,7 @@ Add, adjust, or migrate optional plugin components based on evolving project nee
 
 **Diagnosis** — identify signals that a component is needed. See `references/optimization-decision-trees.md` for the full signal-to-component mapping table (userConfig, MCP, LSP, output-styles, PLUGIN_DATA, path migration).
 
-**Decision** — read `skills/scaffolding/references/external-integration.md` for the full decision tree (CLI vs MCP, userConfig schema, PLUGIN_DATA patterns, LSP fields, output-styles format, settings.json scope).
+**Decision** — read `bundles-forge:scaffolding` — `references/external-integration.md` for the full decision tree (CLI vs MCP, userConfig schema, PLUGIN_DATA patterns, LSP fields, output-styles format, settings.json scope).
 
 **Execution** — invoke `bundles-forge:scaffolding` using its "Adding Optional Components" flow. Scaffolding handles file generation, manifest updates, and inspector validation.
 
