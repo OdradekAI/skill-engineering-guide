@@ -13,14 +13,14 @@ Bundles Forge is a bundle-plugin engineering toolkit supporting 6 platforms: Cla
 ### Testing
 
 ```bash
-python tests/run_all.py                            # all 4 test suites (scripts, integration, graph fixtures, unit)
+python tests/run_all.py                            # all 6 test suites (scripts, integration, graph fixtures, unit, skill quality, workflow chains)
 python tests/test_scripts.py -v                    # auditing/releasing script tests (unittest)
 python tests/test_integration.py -v                # structure, hooks, version sync, skill discovery
 python -m pytest tests/test_scripts.py -v          # same, via pytest
 python -m pytest tests/test_scripts.py -v -k test_project_mode_runs_without_error  # single test
 ```
 
-Test suites: `test_scripts` (audit/release CLI scripts), `test_integration` (project structure, hooks, version sync, skill discovery), `test_graph_fixtures` (dependency graph fixtures), `test_unit` (unit tests). All 4 are collected by `tests/run_all.py`.
+Test suites: `test_scripts` (audit/release CLI scripts), `test_integration` (project structure, hooks, version sync, skill discovery), `test_graph_fixtures` (dependency graph fixtures), `test_unit` (unit tests), `test_skill_quality` (description format, cross-references, Integration symmetry), `test_workflow_chains` (live project workflow integrity, Calls/Called-by symmetry, graph connectivity). All 6 are collected by `tests/run_all.py`.
 
 ### Quality & Security
 
@@ -58,58 +58,25 @@ bundles-forge bump-version <new-version>       # bump all files declared in .ver
 - `docs/` — guides (concepts, blueprinting, scaffolding, authoring, auditing, optimizing, releasing) with `*.zh.md` Chinese translations; checked by D7
 - `skills/auditing/scripts/` — audit, security scan, documentation checks, and checklist generation (shares `_cli.py` for argparse/exit-code patterns)
 - `skills/releasing/scripts/` — version bump tooling (`bump_version.py`)
-- `tests/` — 4 test suites run by `run_all.py`; fixtures in `tests/fixtures/`, prompt snapshots in `tests/prompts/`
+- `tests/` — 6 test suites run by `run_all.py`; fixtures in `tests/fixtures/`, prompt snapshots in `tests/prompts/`
 - `examples/` — worked audit report examples
-- `.github/workflows/validate-plugin.yml` — CI: JSON validation, version/checklist drift, audit-skill, audit-security, audit-docs, tests (Python 3.9 + 3.12 matrix)
+- `.github/workflows/validate-plugin.yml` — CI: JSON validation, version/checklist drift, audit-skill, audit-security, audit-docs, audit-workflow, tests (Python 3.9 + 3.12 matrix)
 
-### Skill Architecture: Hub-and-Spoke Model
+### Skill Architecture
 
-Skills are organized into two layers:
-
-**Orchestration layer** (hub) — diagnose, decide, delegate:
-- `blueprinting` — new-project pipeline: interview → scaffolding → authoring → workflow design → auditing
-- `optimizing` — existing-project improvement: diagnose → delegate to authoring/scaffolding → verify via auditing
-- `releasing` — release pipeline: auditing → testing → optimizing (if needed) → version bump → publish
-
-**Execution layer** (spoke) — single-responsibility workers:
-- `scaffolding` — generate project structure, platform adaptation, inspector self-check
-- `authoring` — write/improve SKILL.md and agents/*.md content
-- `auditing` — pure diagnostics: check, score, report (does not orchestrate fixes)
-- `testing` — dynamic verification: local install, hook smoke tests, component discovery
-
-**Meta-skill:** `using-bundles-forge` — lightweight session bootstrap (skill list prompt) and on-demand routing context.
-
-Pipeline stages: `blueprinting` → `optimizing` → `releasing`. Each orchestrator dispatches executors as needed. Users can also invoke any executor directly for standalone tasks.
+Hub-and-spoke model: 3 orchestrators (`blueprinting`, `optimizing`, `releasing`) dispatch 4 executors (`scaffolding`, `authoring`, `auditing`, `testing`). Meta-skill `using-bundles-forge` provides session bootstrap. See README.md "Skills" section and AGENTS.md for details.
 
 ### Session Bootstrap
 
-The `hooks/session-start.py` script runs on SessionStart (matcher: `startup|clear|compact`, excluding `resume` since resumed sessions retain context). It emits a lightweight one-line prompt listing available skills. The full routing context (`using-bundles-forge/SKILL.md`) is loaded on demand via the platform's Skill tool. Platform detection is three-way: `CURSOR_PLUGIN_ROOT` → Cursor format (`additional_context`), `CLAUDE_PLUGIN_ROOT` → Claude Code format (`hookSpecificOutput`), neither → plain text fallback. Written in Python for cross-platform compatibility (Windows/Mac/Linux).
-
-The `hooks/hooks.json` includes a `SessionStart` hook (lightweight bootstrap via `hooks/session-start.py`). The `hooks/hooks-cursor.json` provides the Cursor-specific configuration (same script, Cursor's camelCase event names). The `hooks/openclaw-bootstrap/` directory is an OpenClaw hook-pack (`HOOK.md` + `handler.js`) that fires on `command:new` and `command:reset` events.
+`hooks/session-start.py` runs on SessionStart, emitting a skill-list prompt. Platform detection: `CURSOR_PLUGIN_ROOT` → Cursor, `CLAUDE_PLUGIN_ROOT` → Claude Code, fallback → plain text. Hook configs: `hooks/hooks.json` (Claude Code), `hooks/hooks-cursor.json` (Cursor), `hooks/openclaw-bootstrap/` (OpenClaw).
 
 ### Agent Dispatch
 
-Skills dispatch read-only subagents (disallowed from editing files) as diagnostic tools. Subagents write reports to `.bundles-forge/`:
-- `inspector` — validates scaffolded structure and platform adaptation (dispatched by `scaffolding`)
-- `auditor` — runs 10-category audit (dispatched by `auditing`)
-- `evaluator` — A/B skill evaluation and chain verification (dispatched by `optimizing` and `auditing`)
-
-**Design pattern:** Each agent file in `agents/` is a self-contained executor — it holds the complete execution protocol (what to check, how to score, how to report). Skills handle scope detection, dispatch, result composition, and fallback. When subagents are unavailable, skills fall back to reading the agent file inline. This ensures a single source of truth with zero duplication between skills and agents.
+3 read-only subagents in `agents/`: `inspector` (scaffolding), `auditor` (auditing), `evaluator` (optimizing/auditing). Each agent file is self-contained; skills fall back to reading agent files inline when subagents are unavailable. See AGENTS.md.
 
 ### Platform Manifests
 
-Version is synchronized across these files (declared in `.version-bump.json`):
-
-| Platform | Manifest | Version-synced |
-|----------|----------|:--------------:|
-| (root) | `package.json` | Yes |
-| Claude Code | `.claude-plugin/plugin.json` | Yes |
-| Claude Code | `.claude-plugin/marketplace.json` | Yes |
-| Cursor | `.cursor-plugin/plugin.json` | Yes |
-| Codex | `.codex/INSTALL.md` | No (install guide) |
-| OpenCode | `.opencode/plugins/bundles-forge.js` | No (plugin loader) |
-| Gemini CLI | `gemini-extension.json` | Yes |
-| OpenClaw | (uses `.claude-plugin/plugin.json`) | Yes (shared) |
+Version synchronized across manifests declared in `.version-bump.json`. Run `bundles-forge bump-version --check` to detect drift.
 
 ## Key Conventions
 

@@ -91,30 +91,9 @@ The highest-impact optimization. Descriptions are the primary mechanism for skil
 
 #### A/B Eval for Description Changes
 
-When optimizing a description, never overwrite the original blindly. Use a copy-and-compare approach:
+Follow `references/ab-eval-protocol.md` using the **Description Triggering** context. Compare trigger rate, false negatives, and false positives. Skip A/B if the change is purely additive.
 
-```
-1. Copy the skill to a working version (e.g. `<skill-name>-optimized/`)
-2. Apply the description change to the copy only
-3. Create 5+ realistic test prompts that should trigger this skill
-4. Dispatch two `evaluator` agents (`agents/evaluator.md`) in parallel:
-   - Evaluator A: label "original", loaded with the ORIGINAL skill → run all test prompts
-   - Evaluator B: label "optimized", loaded with the OPTIMIZED skill → run all test prompts
-5. Compare: which version triggered correctly on more prompts?
-6. Present results to user with side-by-side comparison
-7. User decides → adopt optimized version (replace original) or discard
-```
-
-**If subagent dispatch is unavailable:** Ask the user which fallback to use:
-- **Sequential inline:** Read `agents/evaluator.md` and follow its execution protocol inline. Run both evaluations in sequence within this conversation. Randomize which version runs first (flip a coin) to reduce ordering bias — note the execution order in results so the user can judge accordingly
-- **Skip A/B:** Apply the change directly with a simple verification pass instead of comparative evaluation
-
-**What to compare:**
-- Trigger rate: how many of the test prompts correctly activated the skill?
-- False negatives: did the optimized description miss cases the original caught?
-- False positives: did either version trigger on prompts meant for other skills?
-
-**When to skip A/B eval:** If the change is purely additive (adding triggering conditions that were previously missing) and doesn't modify existing trigger phrases, a simple verification pass is sufficient.
+**If subagent dispatch is unavailable:** the A/B eval protocol includes a fallback section — ask the user to choose between sequential inline evaluation (read `agents/evaluator.md` and follow inline) or skipping A/B in favor of a simple verification pass.
 
 ### Target 2: Content Optimization
 
@@ -149,14 +128,7 @@ bundles-forge audit-workflow --focus-skills skill-a,skill-b <root>   # focused o
 
 **After fixes — Chain A/B Eval:**
 
-Use chain evaluation to verify end-to-end handoff quality after workflow changes. Follow the same dispatch and fallback pattern as Description A/B Eval, with these differences:
-
-1. Define a realistic end-to-end scenario (e.g. "design and scaffold a new bundle-plugin")
-2. Dispatch `evaluator` with label "chain" and the ordered skill list
-3. Review transition quality ratings — focus on "broken" handoffs
-4. Address broken handoffs by improving `## Inputs` / `## Outputs` declarations
-
-**When to use:** After modifying Inputs/Outputs sections, adding new skills to a workflow chain, or when audit findings indicate workflow integrity issues (W1-W4). Chain eval is sequential by nature (traces a pipeline), so ordering bias is not a concern.
+Follow `references/ab-eval-protocol.md` using the **Chain Integrity** context. Use after modifying Inputs/Outputs sections, adding new skills to a chain, or when W1-W4 findings indicate integrity issues.
 
 ### Target 4: Security Remediation (project only)
 
@@ -179,61 +151,7 @@ Alternatively, invoke `bundles-forge:auditing` for a full audit that includes se
 
 ### Target 5: Skill & Workflow Restructuring (project only)
 
-Structural changes to achieve user goals: adding skills, replacing skills, reorganizing workflow chains, or converting skills to subagents.
-
-#### 5a. Adding Skills
-
-When the project has a workflow gap or the user needs new capability:
-
-1. **Read existing project** — list all skills, map the workflow graph (`## Integration` sections), identify the bootstrap skill's routing table
-2. **Inventory new skills** — for each skill being added, record source, structure, frontmatter quality
-3. **Compatibility analysis** — check naming conflicts, description style, overlapping responsibilities, cross-reference conventions against the existing project
-4. **For third-party skills** — follow `references/third-party-integration.md` (inventory checklist, compatibility checks, integration intent, security audit)
-5. **Design insertion** — identify where new skills connect to the existing workflow graph, map new `**Calls:**` / `**Called by:**` declarations, update bootstrap routing if needed
-6. **Apply** — copy skills into `skills/`, adapt per integration intent, update existing skills' `## Integration` sections
-7. **Verify** — run `bundles-forge:auditing` in Workflow mode with `--focus-skills <new-skills>` to verify workflow integrity
-
-For Intent B (integrate into workflow) third-party skills, invoke `bundles-forge:authoring` after adaptation for content quality validation.
-
-#### 5b. Replacing Skills
-
-When a better alternative exists for an existing skill:
-
-1. Analyze the replacement skill's compatibility (same checks as 5a)
-2. Map all references to the old skill across the project (cross-references, Integration sections, routing table)
-3. Replace and update all references
-4. Verify with workflow audit
-
-#### 5c. Reorganizing Workflows
-
-When the execution chain needs restructuring:
-
-1. Map the current workflow graph
-2. Identify inefficiencies: unnecessary handoffs, missing shortcuts, bottleneck skills
-3. Propose new chain — present to user for approval
-4. Update `## Integration` sections across affected skills
-5. Update bootstrap routing table
-6. Verify with Chain A/B Eval (Target 3)
-
-#### 5d. Skill-to-Agent Conversion
-
-When a skill would work better as a read-only subagent:
-
-Candidates for conversion:
-- Execution produces verbose temporary context (search results, file contents, logs) that subsequent steps don't need
-- Skills that only inspect/validate without modifying files
-- Skills that produce structured reports (self-contained output)
-- Skills that could run in parallel with other work (optional bonus)
-
-Conversion steps:
-1. Extract the skill's execution protocol into `agents/<role>.md`
-2. Update the dispatching skill to use subagent dispatch instead of skill invocation
-3. Add fallback logic (read agent file inline when subagents unavailable)
-4. Remove the original skill directory if fully replaced
-
-Post-conversion verification:
-1. Dispatch `evaluator` (label "original") with test prompts to confirm the new agent correctly executes the former skill's responsibilities
-2. Run `bundles-forge:auditing` to verify dispatch/fallback logic in the orchestrating skill
+Structural changes to achieve user goals: adding skills, replacing skills, reorganizing workflow chains, or converting skills to subagents. See `references/restructuring-operations.md` for the full step-by-step procedures (5a Adding, 5b Replacing, 5c Reorganizing, 5d Skill-to-Agent Conversion).
 
 ### Target 6: Optional Component Management (project only)
 
@@ -366,11 +284,7 @@ Receive feedback
 
 ### A/B Eval for Feedback Changes
 
-Follow the same dispatch and fallback pattern as Description A/B Eval (Target 1), with these differences:
-
-- **Test scenario:** Use the specific scenario from the user's feedback (the input that produced wrong results), not synthetic test prompts
-- **What to compare:** Output quality and behavioral correctness, not triggering accuracy
-- **When to skip:** If the feedback is about structural issues (missing section, wrong heading level, broken reference) rather than behavioral differences, a simple verification pass is sufficient
+Follow `references/ab-eval-protocol.md` using the **Feedback Iteration** context. Compare output quality and behavioral correctness. Skip if the feedback is about structural issues.
 
 **Rules:**
 - Never apply feedback without user confirmation of the improvement plan

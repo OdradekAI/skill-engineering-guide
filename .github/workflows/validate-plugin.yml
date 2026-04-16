@@ -11,10 +11,17 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     strategy:
       matrix:
+        os: [ubuntu-latest]
         python-version: ['3.9', '3.12']
+        include:
+          - os: windows-latest
+            python-version: '3.12'
 
     steps:
       - uses: actions/checkout@v4
@@ -69,6 +76,9 @@ jobs:
 
       - name: Audit documentation consistency
         run: python bin/bundles-forge audit-docs .
+
+      - name: Audit workflow integrity
+        run: python bin/bundles-forge audit-workflow .
 
       - name: Run tests
         run: python tests/run_all.py

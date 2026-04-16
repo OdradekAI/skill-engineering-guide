@@ -311,6 +311,55 @@ class TestSkillDiscovery(unittest.TestCase):
 
 
 
+class TestBumpVersionSync(unittest.TestCase):
+    """Verify the two copies of bump_version.py have identical logic."""
+
+    RELEASING = REPO_ROOT / "skills" / "releasing" / "scripts" / "bump_version.py"
+    SCAFFOLDING = REPO_ROOT / "skills" / "scaffolding" / "assets" / "scripts" / "bump_version.py"
+
+    @staticmethod
+    def _strip_docstring(source):
+        """Remove the module-level docstring, keeping only executable code."""
+        lines = source.splitlines(keepends=True)
+        result = []
+        in_docstring = False
+        docstring_done = False
+        for line in lines:
+            if not docstring_done and not in_docstring and '"""' in line:
+                if line.count('"""') >= 2:
+                    docstring_done = True
+                    continue
+                in_docstring = True
+                continue
+            if in_docstring:
+                if '"""' in line:
+                    in_docstring = False
+                    docstring_done = True
+                continue
+            result.append(line)
+        return "".join(result)
+
+    def test_both_copies_exist(self):
+        self.assertTrue(self.RELEASING.exists(),
+                        f"Missing: {self.RELEASING}")
+        self.assertTrue(self.SCAFFOLDING.exists(),
+                        f"Missing: {self.SCAFFOLDING}")
+
+    def test_logic_is_identical(self):
+        if not self.RELEASING.exists() or not self.SCAFFOLDING.exists():
+            self.skipTest("One or both bump_version.py files missing")
+        rel_code = self._strip_docstring(
+            self.RELEASING.read_text(encoding="utf-8"))
+        scf_code = self._strip_docstring(
+            self.SCAFFOLDING.read_text(encoding="utf-8"))
+        self.assertEqual(
+            rel_code, scf_code,
+            "bump_version.py logic has drifted between "
+            "releasing/scripts/ and scaffolding/assets/scripts/ "
+            "(docstrings excluded from comparison)"
+        )
+
+
 class TestReferenceFiles(unittest.TestCase):
     """Verify key reference files exist and contain expected sections."""
 

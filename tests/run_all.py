@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-TEST_FILES = ["test_scripts.py", "test_integration.py", "test_graph_fixtures.py", "test_unit.py"]
+TEST_FILES = ["test_scripts.py", "test_integration.py", "test_graph_fixtures.py", "test_unit.py", "test_skill_quality.py", "test_workflow_chains.py"]
 SEPARATOR = "\u2501" * 48
 
 

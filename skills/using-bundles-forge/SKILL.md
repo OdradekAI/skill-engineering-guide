@@ -33,6 +33,8 @@ Exception: `bundles-forge:auditing` and `bundles-forge:optimizing` can also oper
 
 **In Codex:** Skills are discovered from `~/.agents/skills/`. See `references/codex-tools.md` for tool mapping.
 
+**In OpenClaw:** Skills auto-load from the bundle's `skills/` directory. See `references/openclaw-tools.md` for tool mapping.
+
 ## Platform Adaptation
 
 Skills use Claude Code tool names as the default. Non-Claude-Code platforms: see the tool mapping references in this directory for equivalents.
