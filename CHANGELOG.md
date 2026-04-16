@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [1.7.7] - 2026-04-16
+
+### Added
+
+- **Testing skill** — new `bundles-forge:testing` executor for dynamic plugin verification: dev-marketplace setup, hook smoke tests, component discovery, and cross-platform readiness checks
+- **`/bundles-test` command** — slash command stub routing to the testing skill
+- **CI workflow** — `.github/workflows/validate-plugin.yml` for automated JSON validation, version/checklist drift, audit, and Python test matrix (3.9 + 3.12)
+- **Hooks configuration reference** — `skills/scaffolding/references/hooks-configuration.md` with comprehensive hook authoring guide
+- **Deprecation guide** — `skills/optimizing/references/deprecation-guide.md` for safe skill deprecation and migration workflows
+- **Platform test guides** — `skills/testing/references/platform-test-guides.md` with per-platform local testing instructions
+
+### Changed
+
+- **Skill count updated to 8** — all project files now reference 8 skills including the new testing skill
+- **Release pipeline expanded** — releasing now includes a testing phase between audit and version bump
+- **Session bootstrap simplified** — `session-start.py` emits a lightweight one-line prompt; full routing context loaded on demand via the Skill tool
+- **Installation instructions updated** — README install steps now use dev-marketplace workflow (`/plugin marketplace add` + `/plugin install`)
+- **GitHub organization URL updated** — `odradekai` → `OdradekAI` across README and install docs
+- **Using-bundles-forge streamlined** — removed "Red Flags" section; added testing to routing tables and priority order
+
 ## [1.7.6] - 2026-04-16
 
 ### Added
