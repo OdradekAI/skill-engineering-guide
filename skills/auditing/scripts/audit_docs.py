@@ -103,11 +103,23 @@ def check_skill_list_sync(root, findings):
 
     sources = {}
 
-    # AGENTS.md Available Skills table — skill names in column 0
+    # AGENTS.md — try "Available Skills" table first, fall back to content scan
     agents_md = _read_if_exists(root / "AGENTS.md")
     if agents_md:
         cells = _parse_table_column(agents_md, 0, section_header="Available Skills")
-        sources["AGENTS.md"] = _extract_backtick_names(cells)
+        agents_skills = _extract_backtick_names(cells)
+        if not agents_skills:
+            agents_skills = set()
+            for m in _AGENT_BACKTICK_NAME_RE.finditer(agents_md):
+                name = m.group(1)
+                if name in actual_skills:
+                    agents_skills.add(name)
+            for m in re.finditer(r"`skills/([a-z0-9_-]+)/", agents_md):
+                name = m.group(1)
+                if name in actual_skills:
+                    agents_skills.add(name)
+        if agents_skills:
+            sources["AGENTS.md"] = agents_skills
 
     # CLAUDE.md — skill names from Skill Lifecycle Flow + Directory Layout
     claude_md = _read_if_exists(root / "CLAUDE.md")

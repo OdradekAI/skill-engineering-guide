@@ -78,6 +78,14 @@ Hub-and-spoke model: 3 orchestrators (`blueprinting`, `optimizing`, `releasing`)
 
 Version synchronized across manifests declared in `.version-bump.json`. Run `bundles-forge bump-version --check` to detect drift.
 
+| Platform | Manifest | Version-synced |
+|----------|----------|---------------|
+| npm | `package.json` | Yes |
+| Claude Code | `.claude-plugin/plugin.json` | Yes |
+| Claude Code (marketplace) | `.claude-plugin/marketplace.json` | Yes |
+| Cursor | `.cursor-plugin/plugin.json` | Yes |
+| Gemini CLI | `gemini-extension.json` | Yes |
+
 ## Key Conventions
 
 - **Skill naming:** lowercase with hyphens; directory name must match frontmatter `name` field

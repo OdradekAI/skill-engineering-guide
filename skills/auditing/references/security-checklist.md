@@ -15,6 +15,19 @@ Each finding has a confidence level that affects scoring and exit codes:
 - **deterministic** — Unambiguous pattern match in executable code. Affects score and exit code directly.
 - **suspicious** — Context-sensitive match that may be legitimate (e.g. documentation referencing `.env`). Shown in report, affects exit code (at least exit 1), but flagged as "needs review" in output. JSON output includes a `confidence` field for CI to make fine-grained decisions.
 
+### Suspicious Finding Triage (Stage 2)
+
+Static scanning (Stage 1) flags suspicious findings for semantic review. When the auditor agent runs (Stage 2), it must triage each suspicious finding:
+
+1. **Read context** — examine the flagged line and surrounding 5 lines
+2. **Classify** — assign one of three dispositions:
+   - **FP** (false-positive): benign pattern (e.g. documentation describing `.env`, YAML `superseded-by:` field). Exclude from score.
+   - **Accepted** (accepted-risk): real pattern but mitigated or intentional. Keep in report, no score penalty.
+   - **TP** (true-positive): genuine security risk. Retain full severity in score.
+3. **Record** — include a Suspicious Triage table in the Security section of the audit report for traceability
+
+If the auditor agent is not dispatched (e.g. CLI-only run), suspicious findings remain in the report at their original severity with "needs review" annotation. CI can use the JSON `confidence` field to distinguish them from deterministic findings.
+
 ## Cross-Surface Threat Mapping
 
 The same threat class appears across multiple attack surfaces with surface-specific patterns:

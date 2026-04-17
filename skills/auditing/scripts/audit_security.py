@@ -394,6 +394,8 @@ def scan_file(path, rel_path, file_type):
                     continue
                 if check_id == "SC11" and _USER_PRIORITY_CONTEXT_RE.search(line):
                     continue
+                if check_id == "SC11" and re.search(r"superseded[_-]by\s*:", line):
+                    continue
                 if check_id == "HK4" and not has_network_imports:
                     continue
                 if check_id == "SC12" and "using-" in str(rel_path):
@@ -434,6 +436,8 @@ def collect_scannable_files(project_root):
         if target.is_dir():
             for f in target.rglob("*"):
                 if f.is_file() and not f.name.startswith("."):
+                    if "node_modules" in f.parts:
+                        continue
                     files.append(f)
 
     mcp_json = project_root / ".mcp.json"

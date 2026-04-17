@@ -1,0 +1,19 @@
+# Test prompts for the testing skill.
+# should-trigger: inputs that should activate this skill.
+# should-not-trigger: inputs that should NOT activate this skill.
+
+should-trigger:
+  - "Test this bundle-plugin locally before I release it"
+  - "Set up a dev-marketplace environment for my plugin"
+  - "Verify that all skills are discoverable after installation"
+  - "Run hook smoke tests to make sure session-start fires correctly"
+  - "Check if my plugin works on Cursor and Claude Code"
+  - "I just scaffolded a new project, let me test it"
+  - "Validate cross-platform readiness for this bundle-plugin"
+
+should-not-trigger:
+  - "Audit this project for quality issues"
+  - "Help me write a new SKILL.md file"
+  - "Plan a new bundle-plugin from scratch"
+  - "Bump the version to 2.0.0 and publish"
+  - "Check this project for security risks"

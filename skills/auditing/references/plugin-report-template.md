@@ -149,6 +149,18 @@ python: "<version>"
   <key evidence snippet>
   ```
 
+<!-- For Security category (3.10): after listing all findings, include a Suspicious Triage
+     table that records the auditor's disposition for each confidence:"suspicious" finding.
+     This makes the LLM semantic review traceable. -->
+
+#### Suspicious Triage (Security category only)
+
+| Finding | File:Line | Disposition | Rationale |
+|---------|-----------|-------------|-----------|
+| [SEC-NNN] SC1 — description | `path:line` | FP / Accepted / TP | one-line explanation |
+
+Dispositions: **FP** = false-positive (excluded from score), **Accepted** = real but mitigated (no score penalty), **TP** = true-positive (full severity retained).
+
 ---
 
 ## 4. Methodology

@@ -30,7 +30,13 @@ When auditing a project, you will:
    - **Hooks**: Assess functional correctness of bootstrap logic (security checks are in Security)
    - **Testing**: Evaluate test coverage adequacy, prompt quality, platform coverage
    - **Documentation**: Review consistency findings from `audit_docs.py` (D1-D9), assess guide quality
-   - **Security**: Review pattern-based findings from `audit_security.py`, assess whether flagged patterns are genuine risks
+   - **Security**: Review pattern-based findings from `audit_security.py`. For each finding with `confidence: "suspicious"`:
+     1. Read the flagged line in context (surrounding 5 lines)
+     2. Classify as: **true-positive** (genuine risk), **false-positive** (benign pattern), or **accepted-risk** (real but mitigated)
+     3. False-positives: exclude from the baseline score calculation and mark as "FP" in the report
+     4. Accepted-risks: keep in the report but do not penalize the score; mark as "Accepted"
+     5. True-positives: retain full severity in score
+     For deterministic findings (`confidence: "deterministic"`), trust the script baseline without re-review.
 
    Category weights are defined in `skills/auditing/references/plugin-checklist.md`.
 
@@ -64,7 +70,7 @@ When auditing a project, you will:
    - Acknowledge strengths alongside problems
    - Prioritize recommendations by impact
    - Trust script baseline results for deterministic checks; focus your effort on qualitative assessment
-   - For security: compare flagged patterns against legitimate baselines documented in the security checklist
+   - For security: triage each `suspicious` finding against the security checklist. Include a **Suspicious Triage** table in the Security section of the report with columns: Finding, Line, Disposition (FP/Accepted/TP), Rationale
    - If you are approaching your turn limit, prioritize completing the report summary and saving the file over finishing lower-priority checks
 
 ### Single Skill Audit Mode

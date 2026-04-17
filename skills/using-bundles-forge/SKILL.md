@@ -1,6 +1,6 @@
 ---
 name: using-bundles-forge
-description: "Use when starting any conversation involving bundle-plugins — blueprinting, scaffolding, authoring, auditing, testing, optimizing, or releasing. Also use when unsure which bundles-forge skill applies"
+description: "Use when starting any conversation involving bundle-plugins — blueprinting, scaffolding, authoring, auditing, testing, optimizing, or releasing. Also use when feeling unsure which bundles-forge skill applies"
 ---
 
 <SUBAGENT-STOP>

@@ -1,6 +1,6 @@
 ---
 name: blueprinting
-description: "Use when planning new bundle-plugins, splitting complex skills, combining skills into bundles, or when a user has a vague idea about packaging skills"
+description: "Use when planning new bundle-plugins, splitting complex skills, combining skills into bundles, or exploring a vague idea about packaging skills"
 ---
 
 # Blueprinting Bundle-Plugins
