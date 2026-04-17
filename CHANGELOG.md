@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+## [1.7.8] - 2026-04-17
+
+### Added
+
+- **2 new test suites** — `test_skill_quality.py` (description format, cross-references, Integration symmetry) and `test_workflow_chains.py` (live project workflow integrity, Calls/Called-by symmetry, graph connectivity); total suites now 6
+- **Testing prompt samples** — `tests/prompts/testing.yml` for testing skill trigger evaluation
+- **Audit report examples** — `examples/bundles-forge-v1.7.7-audit.md` and `.zh.md` worked audit reports
+- **Security triage protocol** — auditor agent now classifies suspicious findings as FP/Accepted/TP with rationale table in report
+- **Suspicious Triage table** — added to `plugin-report-template.md` for traceable security disposition
+- **New references** — `ab-eval-protocol.md`, `restructuring-operations.md`, `adaptive-mode-questions.md` extracted from skill bodies
+
+### Changed
+
+- **AGENTS.md rewritten** — converted from simple agent guidelines to comprehensive PROJECT KNOWLEDGE BASE format (Codex-compatible)
+- **CLAUDE.md streamlined** — condensed Skill Architecture, Session Bootstrap, Agent Dispatch, and Platform Manifests sections; references AGENTS.md for details
+- **blueprinting SKILL.md** — extracted adaptive mode questions 4a-7 to `references/adaptive-mode-questions.md`
+- **optimizing SKILL.md** — extracted A/B eval protocol and restructuring operations to `references/`; simplified inline content
+- **CI matrix expanded** — added Windows (3.12) matrix entry and `audit-workflow` step to `validate-plugin.yml`
+- **audit_docs.py** — improved AGENTS.md skill list parsing with fallback from table-based to content scan
+- **audit_security.py** — added SC11 `superseded-by:` exclusion; skip `node_modules` in scan
+
+### Fixed
+
+- **README/README.zh.md** — added `python` PATH prerequisite note for systems with only `python3`
+- **using-bundles-forge SKILL.md** — added OpenClaw discovery documentation
+
 ## [1.7.7] - 2026-04-16
 
 ### Added

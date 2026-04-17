@@ -2,7 +2,7 @@
   "name": "bundles-forge",
   "displayName": "Bundles Forge",
   "description": "Bundle-plugin engineering toolkit: scaffolding, platform adaptation, version management, and skill lifecycle",
-  "version": "1.7.7",
+  "version": "1.7.8",
   "author": {
     "name": "Luiz",
     "email": "odradekai@outlook.com"

@@ -23,7 +23,7 @@ bundles-forge/
 ├── tests/             # 6 suites via run_all.py; fixtures/ + prompts/ per skill
 ├── examples/          # Worked audit report examples
 ├── .github/workflows/ # validate-plugin.yml (Python 3.9+3.12 matrix)
-└── package.json       # v1.7.7 — version synced via .version-bump.json
+└── package.json       # v1.7.8 — version synced via .version-bump.json
 ```
 
 ## WHERE TO LOOK

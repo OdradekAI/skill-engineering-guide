@@ -10,6 +10,7 @@
     "exclude": [
       "CHANGELOG.md",
       "RELEASE-NOTES.md",
+      "AGENTS.md",
       "node_modules",
       ".git",
       ".repos",
