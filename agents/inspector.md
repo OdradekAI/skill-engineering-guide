@@ -45,10 +45,10 @@ When inspecting, you will:
 
 5. If you are approaching your turn limit, prioritize completing the report summary and saving the file over finishing lower-priority checks.
 
-6. **Save the report** to `.bundles-forge/` in the project root:
+6. **Save the report** to `.bundles-forge/blueprints/` in the workspace root:
    - Filename: `<project-name>-v<version>-inspection.YYYY-MM-DD[.<lang>].md` (read name and version from `package.json`; append `.<lang>` when not English)
    - If a file with the same name exists, append a sequence number: `…-inspection.YYYY-MM-DD-2[.<lang>].md`
-   - Only write new files — never modify or overwrite existing files in `.bundles-forge/`
+   - Only write new files — never modify or overwrite existing files in `.bundles-forge/blueprints/`
    - Never modify any file in the project being inspected
 
 7. **Output Format**:

@@ -238,21 +238,21 @@ def check_testing(root):
                 findings.append(dict(check="T5", severity="warning",
                                      message=f"No test prompts for skill '{name}'"))
 
-    bundles_dir = root / ".bundles-forge"
-    if not bundles_dir.is_dir() or not any(
+    evals_dir = root / ".bundles-forge" / "evals"
+    if not evals_dir.is_dir() or not any(
             f.name.endswith("-eval-original.md") or "-eval-" in f.name
-            for f in bundles_dir.iterdir() if f.is_file()):
+            for f in evals_dir.iterdir() if f.is_file()):
         findings.append(dict(check="T8", severity="info",
-                             message="No A/B eval results found in .bundles-forge/"))
+                             message="No A/B eval results found in .bundles-forge/evals/"))
 
-    if bundles_dir.is_dir():
+    if evals_dir.is_dir():
         has_chain_eval = any(
             "-chain-eval-" in f.name
-            for f in bundles_dir.iterdir() if f.is_file())
+            for f in evals_dir.iterdir() if f.is_file())
         if not has_chain_eval:
             findings.append(dict(check="T9", severity="info",
                                  message="No chain eval results found in "
-                                         ".bundles-forge/"))
+                                         ".bundles-forge/evals/"))
 
     return findings
 
@@ -261,8 +261,8 @@ def check_testing(root):
 # Orchestrator
 # ---------------------------------------------------------------------------
 
-def run_audit(project_root):
-    root = Path(project_root).resolve()
+def run_audit(target_dir):
+    root = Path(target_dir).resolve()
 
     parsed_skills = parse_all_skills(root)
 
@@ -499,9 +499,9 @@ def format_markdown(results, project_name):
 # ---------------------------------------------------------------------------
 
 def main():
-    from _cli import make_parser, resolve_root, exit_by_severity
+    from _cli import make_parser, resolve_target, exit_by_severity
     args = make_parser("Comprehensive audit for bundle-plugins.").parse_args()
-    root = resolve_root(args.project_root)
+    root = resolve_target(args.target_dir)
 
     results = run_audit(root)
     if args.json:

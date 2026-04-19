@@ -11,9 +11,9 @@ Supports --focus-skills to partition findings into Focus Area and Context.
 For agent-authored rich reports, see skills/auditing/references/workflow-report-template.md.
 
 Usage:
-    python audit_workflow.py [project-root]
-    python audit_workflow.py --focus-skills skill-a,skill-b [project-root]
-    python audit_workflow.py --json [project-root]
+    python audit_workflow.py [target-dir]
+    python audit_workflow.py --focus-skills skill-a,skill-b [target-dir]
+    python audit_workflow.py --json [target-dir]
 
 Exit codes: 0 = pass, 1 = warnings, 2 = critical findings
 """
@@ -209,18 +209,18 @@ def check_semantic(parsed_skills, lint_results, focus_skills=None):
 # Orchestrator
 # ---------------------------------------------------------------------------
 
-def run_workflow_audit(project_root, focus_skills=None,
+def run_workflow_audit(target_dir, focus_skills=None,
                        parsed_skills=None, lint_results=None):
     """Run the full workflow audit. Returns structured results dict.
 
     Args:
-        project_root: Path to the bundle-plugin root.
+        target_dir: Path to the bundle-plugin root.
         focus_skills: Optional set of skill names to focus on. If provided,
             findings are tagged with focus=True/False.
         parsed_skills: Optional pre-computed result from parse_all_skills().
         lint_results: Optional pre-computed result from audit_skill.run_lint().
     """
-    root = Path(project_root).resolve()
+    root = Path(target_dir).resolve()
     if focus_skills and isinstance(focus_skills, (list, tuple)):
         focus_skills = set(focus_skills)
 
@@ -397,7 +397,7 @@ def main():
 
     parser = argparse.ArgumentParser(
         description="Workflow audit for bundle-plugins.")
-    parser.add_argument("project_root", nargs="?", default=".",
+    parser.add_argument("target_dir", nargs="?", default=".",
                         help="Bundle-plugin root (default: current directory)")
     parser.add_argument("--json", action="store_true",
                         help="Output JSON instead of markdown")
@@ -405,8 +405,8 @@ def main():
                         help="Comma-separated list of skill names to focus on")
     args = parser.parse_args()
 
-    from _cli import resolve_root, exit_by_severity
-    root = resolve_root(args.project_root)
+    from _cli import resolve_target, exit_by_severity
+    root = resolve_target(args.target_dir)
 
     focus = None
     if args.focus_skills:

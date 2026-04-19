@@ -84,8 +84,8 @@ Search and replace across the entire project:
 ### Step 4: Verify
 
 ```bash
-bundles-forge audit-docs <project-root>    # catches stale references
-bundles-forge audit-skill <project-root>   # catches name mismatches
+bundles-forge audit-docs <target-dir>    # catches stale references
+bundles-forge audit-skill <target-dir>   # catches name mismatches
 ```
 
 ### Step 5: Version bump
@@ -129,8 +129,8 @@ Update all skills that referenced the original:
 ### Step 6: Verify
 
 ```bash
-bundles-forge audit-workflow <project-root>   # workflow chain integrity
-bundles-forge audit-docs <project-root>       # documentation consistency
+bundles-forge audit-workflow <target-dir>   # workflow chain integrity
+bundles-forge audit-docs <target-dir>       # documentation consistency
 ```
 
 ---

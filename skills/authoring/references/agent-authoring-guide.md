@@ -54,7 +54,7 @@ maxTurns: 20
 
 1. **Role & Constraints** — what the agent does, what it cannot do (no editing, no chaining)
 2. **Execution Protocol** — step-by-step checks, scoring formulas, decision logic
-3. **Report Format** — exact template the agent writes to `.bundles-forge/`
+3. **Report Format** — exact template the agent writes to the appropriate `.bundles-forge/` subdirectory (`audits/`, `evals/`, or `blueprints/`)
 
 ### Dispatch Context
 
@@ -62,11 +62,13 @@ Which skill(s) dispatch this agent and under what conditions belongs in the YAML
 
 ### Report Conventions
 
-Agent reports go to `.bundles-forge/` in the project root:
+Agent reports go to `.bundles-forge/<subdirectory>/` in the workspace root:
+- Subdirectory by agent type: `audits/` (auditor), `evals/` (evaluator), `blueprints/` (inspector)
 - Filename pattern: `<project-name>-v<version>-<report-type>.YYYY-MM-DD[.<lang>].md`
 - Read name and version from `package.json`
 - Append `.<lang>` when not English
 - Never modify or overwrite existing files — append sequence number if name collision
+- Create the subdirectory if it does not exist
 
 ## Key Differences from Skills
 
@@ -75,7 +77,7 @@ Agent reports go to `.bundles-forge/` in the project root:
 | Who invokes | Users or other skills | Only the dispatching skill |
 | Can edit files | Yes | No (`disallowedTools: Edit`) |
 | Can chain to skills | Yes | No (subagents cannot invoke skills) |
-| Output | Direct file changes or guidance | Reports to `.bundles-forge/` |
+| Output | Direct file changes or guidance | Reports to `.bundles-forge/<subdirectory>/` |
 | Fallback | N/A | Dispatching skill reads agent file inline |
 
 ## Standard Fallback Pattern
@@ -112,5 +114,5 @@ Write a **skill** when:
 - [ ] Writable agents (no `disallowedTools: Edit`) have `isolation: "worktree"` set
 - [ ] `maxTurns` is set to a reasonable bound
 - [ ] Body has at least 5 non-empty lines (self-contained protocol)
-- [ ] Report format section specifies the `.bundles-forge/` filename pattern
+- [ ] Report format section specifies the `.bundles-forge/<subdirectory>/` filename pattern
 - [ ] Dispatching skill has a fallback block for when subagents are unavailable

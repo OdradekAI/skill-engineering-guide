@@ -25,15 +25,15 @@ Test suites: `test_scripts` (audit/release CLI scripts), `test_integration` (pro
 ### Quality & Security
 
 ```bash
-bundles-forge audit-skill [project-root]       # project-level skill quality audit (auto-detects mode)
+bundles-forge audit-skill [target-dir]       # project-level skill quality audit (auto-detects mode)
 bundles-forge audit-skill [skill-dir]          # single skill audit (4 categories)
-bundles-forge audit-skill --all [project-root] # force project-level mode
-bundles-forge audit-security [project-root]     # 7-surface security scan
-bundles-forge audit-plugin [project-root]     # combined audit (calls audit_skill + audit_security + workflow)
-bundles-forge audit-workflow [project-root]    # workflow integration audit (W1-W11)
-bundles-forge audit-docs [project-root]        # documentation consistency (9 checks: D1-D9)
-bundles-forge checklists [project-root]        # regenerate checklist tables from audit-checks.json registry
-bundles-forge checklists --check [project-root] # detect checklist drift (exit 1 if stale)
+bundles-forge audit-skill --all [target-dir] # force project-level mode
+bundles-forge audit-security [target-dir]     # 7-surface security scan
+bundles-forge audit-plugin [target-dir]     # combined audit (calls audit_skill + audit_security + workflow)
+bundles-forge audit-workflow [target-dir]    # workflow integration audit (W1-W11)
+bundles-forge audit-docs [target-dir]        # documentation consistency (9 checks: D1-D9)
+bundles-forge checklists [target-dir]        # regenerate checklist tables from audit-checks.json registry
+bundles-forge checklists --check [target-dir] # detect checklist drift (exit 1 if stale)
 ```
 
 Audit scripts accept `--json` for machine-readable output. Exit codes: 0 = pass, 1 = warnings, 2 = critical.

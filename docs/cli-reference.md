@@ -31,10 +31,10 @@ Most audit commands share these options (provided by `_cli.make_parser()`):
 Quality audit for individual skills or entire projects.
 
 ```bash
-bundles-forge audit-skill [project-root]
+bundles-forge audit-skill [target-dir]
 bundles-forge audit-skill [skill-directory]
-bundles-forge audit-skill --all [project-root]
-bundles-forge audit-skill --json [project-root]
+bundles-forge audit-skill --all [target-dir]
+bundles-forge audit-skill --json [target-dir]
 ```
 
 | Option | Description |
@@ -56,8 +56,8 @@ bundles-forge audit-skill --json [project-root]
 Pattern-based security scan across 7 attack surfaces.
 
 ```bash
-bundles-forge audit-security [project-root]
-bundles-forge audit-security --json [project-root]
+bundles-forge audit-security [target-dir]
+bundles-forge audit-security --json [target-dir]
 ```
 
 Scans SKILL.md files, hook scripts, hook configs, OpenCode plugins, agent prompts, bundled scripts, and MCP configs for dangerous patterns (network calls, eval, sensitive file references, safety overrides).
@@ -73,8 +73,8 @@ Findings are classified by confidence: `deterministic` (unambiguous in executabl
 Documentation consistency checks (D1-D9).
 
 ```bash
-bundles-forge audit-docs [project-root]
-bundles-forge audit-docs --json [project-root]
+bundles-forge audit-docs [target-dir]
+bundles-forge audit-docs --json [target-dir]
 ```
 
 Verifies alignment between documentation files (CLAUDE.md, AGENTS.md, README, guides) and the actual project structure (skills, manifests, platform configs).
@@ -88,8 +88,8 @@ Verifies alignment between documentation files (CLAUDE.md, AGENTS.md, README, gu
 Combined audit — orchestrates skill, security, workflow, and documentation audits plus plugin health checks.
 
 ```bash
-bundles-forge audit-plugin [project-root]
-bundles-forge audit-plugin --json [project-root]
+bundles-forge audit-plugin [target-dir]
+bundles-forge audit-plugin --json [target-dir]
 ```
 
 Runs all audit scripts in sequence and produces a combined 10-category health report covering structure, versioning, hooks, testing, and all audit dimensions.
@@ -103,9 +103,9 @@ Runs all audit scripts in sequence and produces a combined 10-category health re
 Workflow integrity audit (W1-W11).
 
 ```bash
-bundles-forge audit-workflow [project-root]
-bundles-forge audit-workflow --focus-skills skill1,skill2 [project-root]
-bundles-forge audit-workflow --json [project-root]
+bundles-forge audit-workflow [target-dir]
+bundles-forge audit-workflow --focus-skills skill1,skill2 [target-dir]
+bundles-forge audit-workflow --json [target-dir]
 ```
 
 | Option | Description |
@@ -124,8 +124,8 @@ Three-layer audit: static graph analysis (W1-W5), semantic interface checks (W6-
 Generate or validate checklist tables from the audit-checks registry.
 
 ```bash
-bundles-forge checklists [project-root]
-bundles-forge checklists --check [project-root]
+bundles-forge checklists [target-dir]
+bundles-forge checklists --check [target-dir]
 ```
 
 | Option | Description |
@@ -143,10 +143,10 @@ Without `--check`, regenerates markdown checklist tables from `skills/auditing/r
 Version synchronization across all platform manifests.
 
 ```bash
-bundles-forge bump-version --check [project-root]
-bundles-forge bump-version --audit [project-root]
-bundles-forge bump-version <version> [project-root]
-bundles-forge bump-version --dry-run <version> [project-root]
+bundles-forge bump-version --check [target-dir]
+bundles-forge bump-version --audit [target-dir]
+bundles-forge bump-version <version> [target-dir]
+bundles-forge bump-version --dry-run <version> [target-dir]
 ```
 
 | Option | Description |

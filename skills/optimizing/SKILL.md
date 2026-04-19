@@ -56,8 +56,8 @@ After normalization, determine the scope from the resolved local path:
 Run the quality linter to identify frontmatter issues, description anti-patterns, and broken references before manual optimization:
 
 ```bash
-bundles-forge audit-skill <project-root>        # markdown report
-bundles-forge audit-skill --json <project-root>  # machine-readable
+bundles-forge audit-skill <target-dir>        # markdown report
+bundles-forge audit-skill --json <target-dir>  # machine-readable
 ```
 
 The linter automates checks Q1-Q15 and X1-X3 from the skill quality ruleset. Focus manual effort on the subjective targets below.
@@ -120,7 +120,7 @@ Follow `references/ab-eval-protocol.md` using the **Description Triggering** con
 Consume the `workflow-report` from `bundles-forge:auditing` (Workflow mode) to identify and fix workflow issues. If no workflow report is available, run the workflow audit first:
 
 ```bash
-bundles-forge audit-workflow <project-root>                          # full workflow audit
+bundles-forge audit-workflow <target-dir>                          # full workflow audit
 bundles-forge audit-workflow --focus-skills skill-a,skill-b <root>   # focused on specific skills
 ```
 
@@ -144,7 +144,7 @@ Fix security findings from `bundles-forge:auditing` Category 10.
 **Process:** Run security scan first, then address findings by priority — critical before warnings, warnings before info:
 
 ```bash
-bundles-forge audit-security <project-root>
+bundles-forge audit-security <target-dir>
 ```
 
 Alternatively, invoke `bundles-forge:auditing` for a full audit that includes security (Category 10).
@@ -318,7 +318,7 @@ Follow `references/ab-eval-protocol.md` using the **Feedback Iteration** context
 ## Outputs
 
 - `optimized-skill` — improved SKILL.md content with better descriptions, reduced tokens, or fixed workflow references
-- `eval-report` (optional) — optimization record written to `.bundles-forge/`, structured as:
+- `eval-report` (optional) — optimization record written to `.bundles-forge/evals/`, structured as:
   - **Action type:** FIX, DERIVED, or CAPTURED
   - **Change summary:** one sentence describing what changed and why
   - **Diagnosis basis:** which health dimension, audit finding, or user feedback triggered this optimization

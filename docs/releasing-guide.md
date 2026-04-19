@@ -74,10 +74,10 @@ Run all automated checks before proceeding:
 
 ```bash
 # Version drift detection
-bundles-forge bump-version <project-root> --check
+bundles-forge bump-version <target-dir> --check
 
 # Documentation consistency (9 checks)
-bundles-forge audit-docs <project-root>
+bundles-forge audit-docs <target-dir>
 ```
 
 **Plugin validation (Claude Code only):** If running in a Claude Code environment, run `claude plugin validate` (or `/plugin validate` in a session) to verify `plugin.json` schema, skill/agent/command frontmatter, and `hooks.json` validity. On other platforms, the inspector agent covers equivalent structural checks.
@@ -154,7 +154,7 @@ Re-run `bundles-forge audit-docs` after making changes to confirm consistency.
 ### Step 4: Version Bump
 
 ```bash
-bundles-forge bump-version <project-root> <new-version>
+bundles-forge bump-version <target-dir> <new-version>
 ```
 
 This updates all files declared in `.version-bump.json` and runs a post-bump audit to catch any missed files.
@@ -186,9 +186,9 @@ This updates all files declared in `.version-bump.json` and runs a post-bump aud
 ### Step 6: Final Verification
 
 ```bash
-bundles-forge bump-version <project-root> --check   # No version drift
-bundles-forge bump-version <project-root> --audit   # No stray version strings
-bundles-forge audit-docs <project-root>             # Documentation consistent
+bundles-forge bump-version <target-dir> --check   # No version drift
+bundles-forge bump-version <target-dir> --audit   # No stray version strings
+bundles-forge audit-docs <target-dir>             # Documentation consistent
 ```
 
 All three must exit with code 0 (clean) before publishing.
@@ -273,7 +273,7 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| `bundles-forge bump-version --check` finds drift | Manual edit or missed file | Run `bundles-forge bump-version [project-root] <correct-version>` to re-sync |
+| `bundles-forge bump-version --check` finds drift | Manual edit or missed file | Run `bundles-forge bump-version [target-dir] <correct-version>` to re-sync |
 | `bundles-forge audit-docs` reports broken cross-refs | Skill renamed without updating references | Find-and-replace old name across all `.md` files |
 | `bundles-forge audit-docs` reports skill list mismatch | New skill added but docs not updated | Add skill to AGENTS.md table, README tables, CLAUDE.md |
 | Tag already exists | Previous release attempt or version collision | Choose a different version or delete the tag with `git tag -d` |
@@ -296,11 +296,11 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 ### Commands
 
 ```bash
-bundles-forge bump-version [project-root] --check     # Detect version drift
-bundles-forge bump-version [project-root] --audit     # Find undeclared version strings
-bundles-forge bump-version [project-root] <version>   # Bump all manifests
-bundles-forge audit-docs <project-root>               # Documentation consistency check
-bundles-forge audit-plugin <project-root>             # Full quality + security audit
+bundles-forge bump-version [target-dir] --check     # Detect version drift
+bundles-forge bump-version [target-dir] --audit     # Find undeclared version strings
+bundles-forge bump-version [target-dir] <version>   # Bump all manifests
+bundles-forge audit-docs <target-dir>               # Documentation consistency check
+bundles-forge audit-plugin <target-dir>             # Full quality + security audit
 ```
 
 ### Exit Codes

@@ -65,8 +65,8 @@
   {"id": "T5",  "category": "testing", "severity": "warning", "criteria": "Each skill has a test prompts file (`tests/prompts/<skill-name>.yml` or `skills/<name>/tests/prompts.yml`)", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
   {"id": "T6",  "category": "testing", "severity": "info",    "criteria": "Test prompts include both should-trigger and should-not-trigger samples", "automation": "`agent-only`", "scopes": ["plugin"]},
   {"id": "T7",  "category": "testing", "severity": "info",    "criteria": "Test prompts cover all major branch paths of the skill", "automation": "`agent-only`", "scopes": ["plugin"]},
-  {"id": "T8",  "category": "testing", "severity": "info",    "criteria": "Most recent A/B eval result exists in `.bundles-forge/`", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
-  {"id": "T9",  "category": "testing", "severity": "info",    "criteria": "Most recent chain eval result exists in `.bundles-forge/`", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
+  {"id": "T8",  "category": "testing", "severity": "info",    "criteria": "Most recent A/B eval result exists in `.bundles-forge/evals/`", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
+  {"id": "T9",  "category": "testing", "severity": "info",    "criteria": "Most recent chain eval result exists in `.bundles-forge/evals/`", "automation": "`audit_plugin.py`", "scopes": ["plugin"]},
 
   {"id": "D1",  "category": "documentation", "severity": "warning",  "criteria": "Skill names in AGENTS.md / CLAUDE.md / README match skills/ directory", "automation": "`audit_docs.py`", "scopes": ["plugin"]},
   {"id": "D2",  "category": "documentation", "severity": "critical", "criteria": "Cross-references (`project:skill`) in all .md files resolve to existing skills", "automation": "`audit_docs.py`", "scopes": ["plugin"]},

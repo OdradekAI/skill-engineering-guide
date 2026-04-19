@@ -74,10 +74,10 @@ git branch --show-current
 
 ```bash
 # 版本漂移检测
-bundles-forge bump-version <project-root> --check
+bundles-forge bump-version <target-dir> --check
 
 # 文档一致性（9 项检查）
-bundles-forge audit-docs <project-root>
+bundles-forge audit-docs <target-dir>
 ```
 
 **插件验证（仅 Claude Code）：** 在 Claude Code 环境中，运行 `claude plugin validate`（或会话内 `/plugin validate`）以验证 `plugin.json` schema、skill/agent/command frontmatter 和 `hooks.json` 有效性。其他平台通过 inspector agent 覆盖等效的结构检查。
@@ -154,7 +154,7 @@ git diff $(git describe --tags --abbrev=0)..HEAD
 ### 步骤 4：版本升级
 
 ```bash
-bundles-forge bump-version <project-root> <new-version>
+bundles-forge bump-version <target-dir> <new-version>
 ```
 
 这会更新 `.version-bump.json` 中声明的所有文件，并运行升级后审计以捕获遗漏。
@@ -186,9 +186,9 @@ bundles-forge bump-version <project-root> <new-version>
 ### 步骤 6：最终验证
 
 ```bash
-bundles-forge bump-version <project-root> --check   # 无版本漂移
-bundles-forge bump-version <project-root> --audit   # 无游离版本字符串
-bundles-forge audit-docs <project-root>             # 文档一致
+bundles-forge bump-version <target-dir> --check   # 无版本漂移
+bundles-forge bump-version <target-dir> --audit   # 无游离版本字符串
+bundles-forge audit-docs <target-dir>             # 文档一致
 ```
 
 三者必须全部以退出码 0（干净）退出后才能发布。
@@ -273,7 +273,7 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 
 | 问题 | 原因 | 修复 |
 |------|------|------|
-| `bundles-forge bump-version --check` 发现漂移 | 手动编辑或遗漏文件 | 运行 `bundles-forge bump-version [project-root] <correct-version>` 重新同步 |
+| `bundles-forge bump-version --check` 发现漂移 | 手动编辑或遗漏文件 | 运行 `bundles-forge bump-version [target-dir] <correct-version>` 重新同步 |
 | `bundles-forge audit-docs` 报告断裂的交叉引用 | 重命名技能但未更新引用 | 在所有 `.md` 文件中查找替换旧名称 |
 | `bundles-forge audit-docs` 报告技能列表不匹配 | 添加新技能但未更新文档 | 将技能添加到 AGENTS.md 表、README 表、CLAUDE.md |
 | 标签已存在 | 之前的发布尝试或版本冲突 | 选择不同版本或 `git tag -d` 删除标签 |
@@ -296,11 +296,11 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 ### 命令
 
 ```bash
-bundles-forge bump-version [project-root] --check     # 检测版本漂移
-bundles-forge bump-version [project-root] --audit     # 查找未声明的版本字符串
-bundles-forge bump-version [project-root] <version>   # 升级所有清单
-bundles-forge audit-docs <project-root>               # 文档一致性检查
-bundles-forge audit-plugin <project-root>             # 完整质量 + 安全审计
+bundles-forge bump-version [target-dir] --check     # 检测版本漂移
+bundles-forge bump-version [target-dir] --audit     # 查找未声明的版本字符串
+bundles-forge bump-version [target-dir] <version>   # 升级所有清单
+bundles-forge audit-docs <target-dir>               # 文档一致性检查
+bundles-forge audit-plugin <target-dir>             # 完整质量 + 安全审计
 ```
 
 ### 退出码

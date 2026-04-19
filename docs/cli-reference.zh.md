@@ -31,10 +31,10 @@ bundles-forge -h | --help
 单个 skill 或整个项目的质量审计。
 
 ```bash
-bundles-forge audit-skill [project-root]
+bundles-forge audit-skill [target-dir]
 bundles-forge audit-skill [skill-directory]
-bundles-forge audit-skill --all [project-root]
-bundles-forge audit-skill --json [project-root]
+bundles-forge audit-skill --all [target-dir]
+bundles-forge audit-skill --json [target-dir]
 ```
 
 | 选项 | 说明 |
@@ -56,8 +56,8 @@ bundles-forge audit-skill --json [project-root]
 基于模式的 7 攻击面安全扫描。
 
 ```bash
-bundles-forge audit-security [project-root]
-bundles-forge audit-security --json [project-root]
+bundles-forge audit-security [target-dir]
+bundles-forge audit-security --json [target-dir]
 ```
 
 扫描 SKILL.md 文件、hook 脚本、hook 配置、OpenCode 插件、agent 提示词、捆绑脚本和 MCP 配置，检测危险模式（网络调用、eval、敏感文件引用、安全覆盖）。
@@ -73,8 +73,8 @@ bundles-forge audit-security --json [project-root]
 文档一致性检查（D1-D9）。
 
 ```bash
-bundles-forge audit-docs [project-root]
-bundles-forge audit-docs --json [project-root]
+bundles-forge audit-docs [target-dir]
+bundles-forge audit-docs --json [target-dir]
 ```
 
 验证文档文件（CLAUDE.md、AGENTS.md、README、指南）与实际项目结构（skills、清单、平台配置）的对齐情况。
@@ -88,8 +88,8 @@ bundles-forge audit-docs --json [project-root]
 组合审计 — 编排 skill、安全、工作流和文档审计，加上插件健康检查。
 
 ```bash
-bundles-forge audit-plugin [project-root]
-bundles-forge audit-plugin --json [project-root]
+bundles-forge audit-plugin [target-dir]
+bundles-forge audit-plugin --json [target-dir]
 ```
 
 按顺序运行所有审计脚本，生成涵盖结构、版本、hooks、测试和所有审计维度的 10 类健康报告。
@@ -103,9 +103,9 @@ bundles-forge audit-plugin --json [project-root]
 工作流完整性审计（W1-W11）。
 
 ```bash
-bundles-forge audit-workflow [project-root]
-bundles-forge audit-workflow --focus-skills skill1,skill2 [project-root]
-bundles-forge audit-workflow --json [project-root]
+bundles-forge audit-workflow [target-dir]
+bundles-forge audit-workflow --focus-skills skill1,skill2 [target-dir]
+bundles-forge audit-workflow --json [target-dir]
 ```
 
 | 选项 | 说明 |
@@ -124,8 +124,8 @@ bundles-forge audit-workflow --json [project-root]
 从审计检查注册表生成或验证清单表格。
 
 ```bash
-bundles-forge checklists [project-root]
-bundles-forge checklists --check [project-root]
+bundles-forge checklists [target-dir]
+bundles-forge checklists --check [target-dir]
 ```
 
 | 选项 | 说明 |
@@ -143,10 +143,10 @@ bundles-forge checklists --check [project-root]
 跨所有平台清单的版本同步。
 
 ```bash
-bundles-forge bump-version --check [project-root]
-bundles-forge bump-version --audit [project-root]
-bundles-forge bump-version <version> [project-root]
-bundles-forge bump-version --dry-run <version> [project-root]
+bundles-forge bump-version --check [target-dir]
+bundles-forge bump-version --audit [target-dir]
+bundles-forge bump-version <version> [target-dir]
+bundles-forge bump-version --dry-run <version> [target-dir]
 ```
 
 | 选项 | 说明 |

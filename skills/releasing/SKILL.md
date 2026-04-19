@@ -45,7 +45,7 @@ Verify all conditions before entering the pipeline. Hard requirements block the 
 - The user knows the target version number (or wants help deciding)
 
 **Soft requirements (warn if missing):**
-- A recent audit report exists in `.bundles-forge/` — if not, releasing runs a full audit in Step 1
+- A recent audit report exists in `.bundles-forge/audits/` — if not, releasing runs a full audit in Step 1
 - The current branch is `main` or `master` — if not, warn the user and ask for confirmation before proceeding
 - The target version tag does not already exist — run `git tag -l v<version>` to verify
 
@@ -62,13 +62,13 @@ If the working tree is dirty, instruct the user to commit all development work f
 Run all automated checks. If any critical issues are found, resolve them before continuing.
 
 ```bash
-bundles-forge bump-version <project-root> --check
-bundles-forge audit-docs <project-root>
+bundles-forge bump-version <target-dir> --check
+bundles-forge audit-docs <target-dir>
 ```
 
 **Plugin validation (Claude Code only):** If running in a Claude Code environment, run `claude plugin validate` (or `/plugin validate` in a session) to verify `plugin.json` schema, skill/agent/command frontmatter, and `hooks/hooks.json` validity. Skip this step on other platforms — the inspector agent covers equivalent structural checks.
 
-**Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `bundles-forge audit-plugin <project-root>` (automated checks only, no qualitative scoring).
+**Full audit:** Invoke `bundles-forge:auditing` (preferred — includes qualitative assessment via auditor subagent with 10-category scoring). Fallback: `bundles-forge audit-plugin <target-dir>` (automated checks only, no qualitative scoring).
 
 If audit status is FAIL, resolve critical issues before releasing. If security findings are critical, block the release.
 
@@ -146,7 +146,7 @@ Help the user choose the right version increment:
 Pre-release versions follow semver pre-release syntax. The bump script accepts any valid version string — pre-release versions work the same as stable ones across all manifests.
 
 ```bash
-bundles-forge bump-version <project-root> <new-version>
+bundles-forge bump-version <target-dir> <new-version>
 ```
 
 This updates all declared files and runs an audit to catch any missed files. For the full command reference, read `references/version-infrastructure.md`.
@@ -182,9 +182,9 @@ This updates all declared files and runs an audit to catch any missed files. For
 After all changes, re-run verification to confirm nothing broke:
 
 ```bash
-bundles-forge bump-version <project-root> --check
-bundles-forge bump-version <project-root> --audit
-bundles-forge audit-docs <project-root>
+bundles-forge bump-version <target-dir> --check
+bundles-forge bump-version <target-dir> --audit
+bundles-forge audit-docs <target-dir>
 ```
 
 ### Step 8: Publish

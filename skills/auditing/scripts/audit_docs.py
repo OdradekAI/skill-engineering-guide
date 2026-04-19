@@ -18,8 +18,8 @@ Nine checks:
   D9 — Numeric cross-validation (docs/*.md numbers vs canonical source)
 
 Usage:
-    python audit_docs.py [project-root]
-    python audit_docs.py --json [project-root]
+    python audit_docs.py [target-dir]
+    python audit_docs.py --json [target-dir]
 
 Exit codes: 0 = all pass, 1 = warnings, 2 = critical
 """
@@ -768,8 +768,8 @@ def check_docs_content(root, findings):
 # Runner
 # ---------------------------------------------------------------------------
 
-def run_check(project_root):
-    root = Path(project_root).resolve()
+def run_check(target_dir):
+    root = Path(target_dir).resolve()
     findings = []
 
     check_skill_list_sync(root, findings)
@@ -822,11 +822,11 @@ def format_markdown(results):
 # ---------------------------------------------------------------------------
 
 def main():
-    from _cli import make_parser, resolve_root, exit_by_severity
+    from _cli import make_parser, resolve_target, exit_by_severity
     args = make_parser(
         "Check documentation consistency in a bundle-plugin project."
     ).parse_args()
-    root = resolve_root(args.project_root)
+    root = resolve_target(args.target_dir)
 
     results = run_check(root)
     if args.json:

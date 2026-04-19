@@ -162,7 +162,7 @@ Agent 在做出更改前会显式说明其分类和理由。当变更涉及 `## 
 运行 linter 捕获机械性问题：
 
 ```bash
-bundles-forge audit-skill <project-root>
+bundles-forge audit-skill <target-dir>
 ```
 
 描述相关检查为 **Q3-Q7**：缺失描述（Q3）、"Use when..." 前缀（Q5）、工作流摘要反模式（Q6）、长度 >250 字符（Q7）。完整 lint 套件覆盖 Q1-Q15 和 X1-X3 — 详见快速参考。
@@ -216,7 +216,7 @@ bundles-forge audit-skill <project-root>
 如果没有工作流报告：
 
 ```bash
-bundles-forge audit-workflow <project-root>
+bundles-forge audit-workflow <target-dir>
 bundles-forge audit-workflow --focus-skills skill-a,skill-b <root>
 ```
 

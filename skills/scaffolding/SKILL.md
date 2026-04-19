@@ -161,7 +161,7 @@ Remove MCP servers, CLI executables, or LSP servers from an existing project. Re
 
 ## Post-Action Validation
 
-**Step 1 — Deterministic checks (script):** Run `bundles-forge audit-skill <project-root>` to verify structure, manifests, version sync, and frontmatter. Review any critical or warning findings before proceeding.
+**Step 1 — Deterministic checks (script):** Run `bundles-forge audit-skill <target-dir>` to verify structure, manifests, version sync, and frontmatter. Review any critical or warning findings before proceeding.
 
 **Step 2 — Semantic inspection (agent):** Dispatch the `inspector` agent (`agents/inspector.md`) for semantic validation that scripts cannot cover (template quality, hook logic coherence, design alignment). The inspector adjusts scope based on context:
 - **New project** → full inspection (template quality, optional components, hook semantics, design coherence)
@@ -194,7 +194,7 @@ Remove MCP servers, CLI executables, or LSP servers from an existing project. Re
 ## Outputs
 
 - `scaffold-output` — generated project structure or adapted platform files. Consumed by the orchestrating skill (blueprinting or optimizing) for subsequent phases
-- `inspector-report` (optional) — validation report in `.bundles-forge/`
+- `inspector-report` (optional) — validation report in `.bundles-forge/blueprints/`
 
 ## Integration
 

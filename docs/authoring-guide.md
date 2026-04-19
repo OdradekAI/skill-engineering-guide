@@ -57,7 +57,7 @@ Best for: writing skills or agent definitions from scratch, either as part of a 
 6. Evaluates token budget — extracts to `references/` if body exceeds 500 lines or heavy sections pass 100 lines
 7. Runs `bundles-forge audit-skill` validation
 
-**For agent definitions:** The same path applies, but the agent follows conventions from `references/agent-authoring-guide.md` instead — different frontmatter fields (`maxTurns`, `disallowedTools`), report-oriented body, and `.bundles-forge/` output format.
+**For agent definitions:** The same path applies, but the agent follows conventions from `references/agent-authoring-guide.md` instead — different frontmatter fields (`maxTurns`, `disallowedTools`), report-oriented body, and `.bundles-forge/<subdirectory>/` output format.
 
 ---
 
@@ -189,7 +189,7 @@ When authoring agent definitions (`agents/*.md`), the same four paths apply, but
 |--------|----------|-------------|
 | Frontmatter | `name`, `description`, optional fields | `name`, `description`, `model`, `maxTurns`, `disallowedTools`, + advanced: `effort`, `tools`, `skills`, `memory`, `background`, `isolation` |
 | Body | Execution flow for interactive use | Execution protocol for autonomous inspection |
-| Output | Direct file changes or guidance | Reports to `.bundles-forge/` |
+| Output | Direct file changes or guidance | Reports to `.bundles-forge/<subdirectory>/` |
 | Can chain | Yes (Calls other skills) | Default no; enable via `skills` frontmatter field for agent-to-skill delegation |
 
 ### Agent Types

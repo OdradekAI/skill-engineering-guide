@@ -203,8 +203,8 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" python hooks/session-start.py | python -m json.tool
 | T5 | Warning | Each skill has a test prompts file (`tests/prompts/<skill-name>.yml` or `skills/<name>/tests/prompts.yml`) | `audit_plugin.py` |
 | T6 | Info | Test prompts include both should-trigger and should-not-trigger samples | `agent-only` |
 | T7 | Info | Test prompts cover all major branch paths of the skill | `agent-only` |
-| T8 | Info | Most recent A/B eval result exists in `.bundles-forge/` | `audit_plugin.py` |
-| T9 | Info | Most recent chain eval result exists in `.bundles-forge/` | `audit_plugin.py` |
+| T8 | Info | Most recent A/B eval result exists in `.bundles-forge/evals/` | `audit_plugin.py` |
+| T9 | Info | Most recent chain eval result exists in `.bundles-forge/evals/` | `audit_plugin.py` |
 <!-- END:testing -->
 
 ---

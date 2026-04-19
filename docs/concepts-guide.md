@@ -102,7 +102,7 @@ Subagents support persistent memory (`memory` field with `user`/`project`/`local
 
 **Example file:** `agents/auditor.md`
 
-> **In bundles-forge:** Three non-editing subagents — `inspector`, `auditor`, `evaluator` — are dispatched by skills for isolated validation work. They have `disallowedTools: Edit` so they cannot modify existing project files, but they do write new report files to `.bundles-forge/`.
+> **In bundles-forge:** Three non-editing subagents — `inspector`, `auditor`, `evaluator` — are dispatched by skills for isolated validation work. They have `disallowedTools: Edit` so they cannot modify existing project files, but they do write new report files to `.bundles-forge/` subdirectories (`audits/`, `evals/`, `blueprints/`).
 >
 > **Design decision:** Users always interact through skills (slash commands), never by invoking agents directly. Skills orchestrate agent dispatch from the main conversation because they need pre/post logic (scope detection, report merging). Subagents cannot spawn other subagents — all orchestration stays in the skill layer.
 
@@ -265,7 +265,7 @@ This is not a limitation — it's the fundamental architecture of the plugin eco
 
 ### Why are subagents non-editing?
 
-The three bundles-forge subagents (`inspector`, `auditor`, `evaluator`) all have `disallowedTools: Edit`. They can write new report files to `.bundles-forge/`, but they cannot modify any existing project file. This is deliberate:
+The three bundles-forge subagents (`inspector`, `auditor`, `evaluator`) all have `disallowedTools: Edit`. They can write new report files to `.bundles-forge/` subdirectories (`audits/`, `evals/`, `blueprints/`), but they cannot modify any existing project file. This is deliberate:
 
 - **Separation of concerns** — agents assess, skills act. An auditor that can fix what it finds would conflate the roles.
 - **Trust boundary** — audit reports should be objective. If the auditor could modify project files, its findings could be questioned ("did it just pass because it silently fixed the issue?").
@@ -281,7 +281,7 @@ Subagents can't spawn other subagents. If users invoked agents directly:
 - There would be no pre-processing (scope detection, target path resolution)
 - There would be no post-processing (report merging, re-audit offers, workflow routing)
 
-Skills handle the interaction lifecycle: detect what the user wants → dispatch the right agent → collect results → present findings → offer next steps. Within skills, **orchestrators** (`blueprinting`, `optimizing`, `releasing`) manage multi-step pipelines, while **executors** (`scaffolding`, `authoring`, `auditing`, `testing`) perform focused tasks. Subagents are **diagnostic tools** — they do one non-editing job (writing reports to `.bundles-forge/`, never modifying existing files) and return a summary.
+Skills handle the interaction lifecycle: detect what the user wants → dispatch the right agent → collect results → present findings → offer next steps. Within skills, **orchestrators** (`blueprinting`, `optimizing`, `releasing`) manage multi-step pipelines, while **executors** (`scaffolding`, `authoring`, `auditing`, `testing`) perform focused tasks. Subagents are **diagnostic tools** — they do one non-editing job (writing reports to `.bundles-forge/` subdirectories, never modifying existing files) and return a summary.
 
 **Concrete example — two-phase workflow audit:** The `auditing` skill needs both the `auditor` (static checks W1-W9) and the `evaluator` (behavioral verification W10-W11). Since subagents cannot spawn other subagents, the `auditing` skill dispatches them sequentially from the main conversation: Phase 1 sends the `auditor`, waits for its report, then Phase 2 sends the `evaluator` with context from Phase 1. This two-phase orchestration is only possible because a skill — not a subagent — owns the workflow.
 
@@ -311,7 +311,7 @@ flowchart LR
     HK -->|"emits lightweight skill list"| SK
     CMD -->|"invokes via bundles-forge:name"| SK
     SK -->|"dispatches read-only tasks"| AG
-    AG -->|"writes reports to .bundles-forge/"| SK
+    AG -->|"writes reports to .bundles-forge/*/"|SK
     SK -->|"orchestrators dispatch executors via prose"| SK
 ```
 
@@ -319,7 +319,7 @@ flowchart LR
 2. **Hook** fires at session start — emits a lightweight skill list so the agent knows what's available
 3. **Commands** provide explicit entry points — `/bundles-audit` routes to the `auditing` skill
 4. **Skills** do the work — orchestrators manage pipelines and dispatch executors; executors perform focused tasks
-5. **Subagents** handle isolated tasks — auditing, inspection, A/B evaluation — and write reports to `.bundles-forge/`
+5. **Subagents** handle isolated tasks — auditing, inspection, A/B evaluation — and write reports to `.bundles-forge/` subdirectories (`audits/`, `evals/`, `blueprints/`)
 
 ---
 

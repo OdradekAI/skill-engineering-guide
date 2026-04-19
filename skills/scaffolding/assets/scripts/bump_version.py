@@ -6,9 +6,9 @@ Reads .version-bump.json and bumps version numbers across all declared
 files, detects drift, and audits for undeclared version strings.
 
 Usage:
-    python scripts/bump_version.py [project-root] <new-version>
-    python scripts/bump_version.py [project-root] --check
-    python scripts/bump_version.py [project-root] --audit
+    python scripts/bump_version.py [target-dir] <new-version>
+    python scripts/bump_version.py [target-dir] --check
+    python scripts/bump_version.py [target-dir] --audit
 
 Exit codes: 0 = in sync, 1 = drift or undeclared files found
 """
@@ -244,7 +244,7 @@ def cmd_bump(repo_root, new_version, dry_run=False):
 def main():
     parser = argparse.ArgumentParser(
         description="Version synchronization tool for bundle-plugins.")
-    parser.add_argument("project_root", nargs="?", default=".",
+    parser.add_argument("target_dir", nargs="?", default=".",
                         help="Bundle-plugin project root (default: current directory)")
     parser.add_argument("version", nargs="?", default=None,
                         help="New version (X.Y.Z or X.Y.Z-pre.N) for bump mode")
@@ -256,11 +256,11 @@ def main():
                         help="Preview version bump without writing files")
     args = parser.parse_args()
 
-    if SEMVER_RE.match(args.project_root) and args.version is None:
-        args.version = args.project_root
-        args.project_root = "."
+    if SEMVER_RE.match(args.target_dir) and args.version is None:
+        args.version = args.target_dir
+        args.target_dir = "."
 
-    repo_root = Path(args.project_root).resolve()
+    repo_root = Path(args.target_dir).resolve()
 
     if args.check:
         has_drift = cmd_check(repo_root)

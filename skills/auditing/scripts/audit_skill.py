@@ -70,7 +70,7 @@ CONDITIONAL_BLOCK_RE = re.compile(
 )
 
 
-def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None):
+def lint_skill(skill_dir, target_dir, project_name, project_abbreviation=None):
     findings = []
     skill_md = skill_dir / "SKILL.md"
     dir_name = skill_dir.name
@@ -143,7 +143,7 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
         findings.append(dict(check="Q11", severity="info", message="Missing Common Mistakes section"))
 
     # X1: Cross-reference resolution (supports both full name and abbreviation)
-    skills_root = project_root / "skills"
+    skills_root = target_dir / "skills"
     valid_prefixes = {project_name}
     if project_abbreviation:
         valid_prefixes.add(project_abbreviation)
@@ -161,7 +161,7 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
             continue
         clean_path = ref_path.split()[0] if " " in ref_path else ref_path
         resolved = skill_dir / clean_path
-        resolved_from_root = project_root / clean_path
+        resolved_from_root = target_dir / clean_path
         if not resolved.exists() and not resolved_from_root.exists():
             line_start = content.rfind("\n", 0, match.start()) + 1
             line_end = content.find("\n", match.end())
@@ -171,7 +171,7 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
             resolved_via_xref = False
             for xref in CROSS_REF_RE.finditer(line):
                 if xref.group(1) in valid_prefixes:
-                    target_skill_dir = project_root / "skills" / xref.group(2)
+                    target_skill_dir = target_dir / "skills" / xref.group(2)
                     if (target_skill_dir / clean_path).exists():
                         resolved_via_xref = True
                         break
@@ -205,8 +205,8 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
     if allowed_tools:
         for m in ALLOWED_TOOLS_PATH_RE.finditer(allowed_tools):
             tool_path = m.group(1)
-            resolved = project_root / tool_path
-            if not resolved.exists() and not any(project_root.glob(tool_path)):
+            resolved = target_dir / tool_path
+            if not resolved.exists() and not any(target_dir.glob(tool_path)):
                 findings.append(dict(check="Q14", severity="warning",
                                      message=f"allowed-tools references '{tool_path}' "
                                              "which does not exist"))
@@ -290,21 +290,21 @@ def lint_skill(skill_dir, project_root, project_name, project_abbreviation=None)
 # Project-level runner (C1, S10, S12)
 # ---------------------------------------------------------------------------
 
-def run_lint(project_root, parsed_skills=None):
+def run_lint(target_dir, parsed_skills=None):
     """Run project-level lint across all skills.
 
     Args:
-        project_root: Path to the bundle-plugin root.
+        target_dir: Path to the bundle-plugin root.
         parsed_skills: Optional pre-computed result from parse_all_skills().
             If not provided, parse_all_skills() is called internally.
 
     Returns a dict consumed by audit_plugin.py and audit_workflow.py:
     {"skills": [...], "summary": {...}, ...}
     """
-    project_root = Path(project_root).resolve()
+    target_dir = Path(target_dir).resolve()
 
     if parsed_skills is None:
-        parsed_skills = parse_all_skills(project_root)
+        parsed_skills = parse_all_skills(target_dir)
 
     skills_dir = parsed_skills["skills_dir"]
     project_name = parsed_skills["project_name"]
@@ -318,7 +318,7 @@ def run_lint(project_root, parsed_skills=None):
               file=sys.stderr)
 
     for skill_dir in skill_dirs:
-        findings = lint_skill(skill_dir, project_root, project_name,
+        findings = lint_skill(skill_dir, target_dir, project_name,
                               project_abbreviation)
         skill_result = {
             "skill": skill_dir.name,
@@ -439,7 +439,7 @@ def run_lint(project_root, parsed_skills=None):
     # -------------------------------------------------------------------
     # Agent architecture checks (S10, S12)
     # -------------------------------------------------------------------
-    agents_dir = project_root / "agents"
+    agents_dir = target_dir / "agents"
     if agents_dir.is_dir():
         agent_findings = []
 
@@ -517,7 +517,7 @@ SKILL_CATEGORY_WEIGHTS = {
 def resolve_skill_path(raw_path):
     """Resolve to a skill directory from a dir or SKILL.md path.
 
-    Returns (skill_dir, project_root) or raises SystemExit on error.
+    Returns (skill_dir, target_dir) or raises SystemExit on error.
     """
     p = Path(raw_path).resolve()
     if p.is_file() and p.name == "SKILL.md":
@@ -531,11 +531,11 @@ def resolve_skill_path(raw_path):
     if not (skill_dir / "SKILL.md").exists():
         raise BundlesForgeError(f"{skill_dir} does not contain SKILL.md")
 
-    project_root = _find_project_root(skill_dir)
-    return skill_dir, project_root
+    target_dir = _find_target_root(skill_dir)
+    return skill_dir, target_dir
 
 
-def _find_project_root(skill_dir):
+def _find_target_root(skill_dir):
     """Walk up to find the project root (directory with skills/)."""
     candidate = skill_dir.parent
     while candidate != candidate.parent:
@@ -571,12 +571,12 @@ def run_skill_audit(skill_path):
 
     Returns structured results dict.
     """
-    skill_dir, project_root = resolve_skill_path(skill_path)
+    skill_dir, target_dir = resolve_skill_path(skill_path)
 
-    project_name, project_abbreviation = detect_project_meta(project_root)
+    project_name, project_abbreviation = detect_project_meta(target_dir)
 
     lint_findings = lint_skill(
-        skill_dir, project_root, project_name, project_abbreviation)
+        skill_dir, target_dir, project_name, project_abbreviation)
 
     # Security checks via audit_security
     sec_findings_raw = []
@@ -587,7 +587,7 @@ def run_skill_audit(skill_path):
             continue
         rel = f.relative_to(skill_dir) if f.is_relative_to(skill_dir) else f
         file_type = audit_security.classify_file(
-            f.relative_to(project_root) if f.is_relative_to(project_root) else rel)
+            f.relative_to(target_dir) if f.is_relative_to(target_dir) else rel)
         if file_type is None:
             skill_md = skill_dir / "SKILL.md"
             if f.resolve() == skill_md.resolve():
@@ -785,7 +785,7 @@ def main():
                         help="Force project-level mode (audit all skills)")
     args = parser.parse_args()
 
-    mode, resolved = detect_mode(args.project_root, force_all=args.all)
+    mode, resolved = detect_mode(args.target_dir, force_all=args.all)
 
     if mode == "project":
         if not (resolved / "skills").is_dir():

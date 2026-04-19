@@ -204,7 +204,7 @@ Generate a test report summarizing all findings.
 - ...
 ```
 
-**Report location:** `.bundles-forge/<timestamp>-test-report.md`
+**Report location:** `.bundles-forge/audits/<timestamp>-test-report.md`
 
 ---
 
@@ -236,7 +236,7 @@ If testing reveals critical issues, the release pipeline is blocked until they a
 
 ## Outputs
 
-- `test-report` — comprehensive test results written to `.bundles-forge/`
+- `test-report` — comprehensive test results written to `.bundles-forge/audits/`
 - `dev-marketplace` (temporary) — local marketplace directory for installation testing
 
 ## Integration

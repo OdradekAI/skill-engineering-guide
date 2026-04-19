@@ -16,20 +16,7 @@ Systematically evaluate a bundle-plugin project or a single skill across applica
 
 **Announce at start:** "I'm using the auditing skill to audit [this project / this skill]."
 
-## Plugin Context — Target vs. Install Path
-
-When running as an installed plugin, your skill files live at `${CLAUDE_PLUGIN_ROOT}` (the cached plugin copy). The **target project** is at `$CLAUDE_PROJECT_DIR`.
-
-| Variable | Points to | Use for |
-|----------|-----------|---------|
-| `$CLAUDE_PROJECT_DIR` | User's project root | CLI `<project-root>` arg, file reads, report output |
-| `$CLAUDE_PLUGIN_ROOT` | Plugin cache directory | Reading skill references, running bundled CLI |
-
-Rules:
-1. **CLI commands:** always pass `"$CLAUDE_PROJECT_DIR"` as `<project-root>`
-2. **Inline audit:** read and analyze files from `$CLAUDE_PROJECT_DIR`, not `$CLAUDE_PLUGIN_ROOT`
-3. **Report output:** write `.bundles-forge/` under `$CLAUDE_PROJECT_DIR`
-4. **Scope detection:** check for `skills/` in `$CLAUDE_PROJECT_DIR`, not in the plugin's own tree
+**Plugin context:** When installed as a plugin, operate on the user's project (`$CLAUDE_PROJECT_DIR` / `<target-dir>`), not the plugin's own cache. Read files from and detect scope in the target; write all outputs (reports, JSON baselines) to the workspace's `.bundles-forge/audits/`. See `references/input-normalization.md` for workspace resolution and output directory structure.
 
 ## Resolve Input & Detect Scope
 
@@ -57,28 +44,18 @@ After normalization, determine the audit scope from the resolved local path:
 
 ## Full Project Audit
 
-### CLI Resolution
-
-Claude Code adds the plugin's `bin/` directory to PATH. Run CLI commands as bare commands with `$CLAUDE_PROJECT_DIR`:
-
-    bundles-forge audit-plugin "$CLAUDE_PROJECT_DIR"
-
-If the bare command fails (non-zero exit), retry with explicit Python invocation:
-
-    python "$CLAUDE_PLUGIN_ROOT/bin/bundles-forge" audit-plugin "$CLAUDE_PROJECT_DIR"
-
 ### Script Shortcut
 
 ```bash
-bundles-forge audit-plugin "$CLAUDE_PROJECT_DIR"        # full audit with status
-bundles-forge audit-plugin --json "$CLAUDE_PROJECT_DIR"  # machine-readable
+bundles-forge audit-plugin <target-dir>        # full audit with status
+bundles-forge audit-plugin --json <target-dir>  # machine-readable
 ```
 
 `audit-plugin` orchestrates `audit-security` (security), `audit-skill` (skill quality), `audit-workflow` (workflow integration), and `audit-docs` (documentation consistency D1-D9), then adds structure, manifest, version-sync, hook, and testing checks.
 
 ### Run Script Baseline
 
-Run `bundles-forge audit-plugin --json "$CLAUDE_PROJECT_DIR"` to collect the deterministic baseline. This ensures script-checkable items (structure, manifests, version sync, skill quality, cross-references, hooks, documentation, security patterns) are verified with reproducible results regardless of agent behavior.
+Run `bundles-forge audit-plugin --json <target-dir>` to collect the deterministic baseline. This ensures script-checkable items (structure, manifests, version sync, skill quality, cross-references, hooks, documentation, security patterns) are verified with reproducible results regardless of agent behavior.
 
 ### Dispatch Auditor
 
@@ -86,7 +63,7 @@ Pass the JSON script output to the `auditor` agent (`agents/auditor.md`) as inpu
 
 The auditor executes all 10 categories, scores each on a 0-10 scale, and compiles a layered report. Full execution details — category weights, scoring formula, report format, Go/No-Go logic — are defined in `agents/auditor.md` and supported by checklists in `references/`.
 
-When auditing a project created by `bundles-forge:blueprinting`, the auditor may reference the design document's "Success Criteria" section (if present in `.bundles-forge/` or project root) to evaluate whether the implementation aligns with the original project goals.
+When auditing a project created by `bundles-forge:blueprinting`, the auditor may reference the design document's "Success Criteria" section (if present in `.bundles-forge/blueprints/` or project root) to evaluate whether the implementation aligns with the original project goals.
 
 **Categories at a glance** (see `references/plugin-checklist.md` for 60+ individual checks):
 
@@ -149,9 +126,9 @@ When the target is a single skill directory or SKILL.md file, run only the 4 cat
 ### Script Shortcut
 
 ```bash
-bundles-forge audit-skill "$CLAUDE_PROJECT_DIR"/<skill-directory>          # combined 4-category skill audit
-bundles-forge audit-skill "$CLAUDE_PROJECT_DIR"/<path>/SKILL.md            # also accepts SKILL.md path
-bundles-forge audit-skill --json "$CLAUDE_PROJECT_DIR"/<skill-directory>   # JSON output
+bundles-forge audit-skill <target-dir>/<skill-directory>          # combined 4-category skill audit
+bundles-forge audit-skill <target-dir>/<path>/SKILL.md            # also accepts SKILL.md path
+bundles-forge audit-skill --json <target-dir>/<skill-directory>   # JSON output
 ```
 
 ### Process & Report
@@ -184,9 +161,9 @@ When the user explicitly requests a workflow audit, or when the Full audit's Cro
 ### Script Shortcut
 
 ```bash
-bundles-forge audit-workflow "$CLAUDE_PROJECT_DIR"                          # full workflow audit
-bundles-forge audit-workflow --focus-skills skill-a,skill-b "$CLAUDE_PROJECT_DIR"   # focused on specific skills
-bundles-forge audit-workflow --json "$CLAUDE_PROJECT_DIR"                   # machine-readable
+bundles-forge audit-workflow <target-dir>                          # full workflow audit
+bundles-forge audit-workflow --focus-skills skill-a,skill-b <target-dir>   # focused on specific skills
+bundles-forge audit-workflow --json <target-dir>                   # machine-readable
 ```
 
 Dispatch the `auditor` agent (`agents/auditor.md`) in Workflow Audit Mode for automated assessment if subagents are available. The auditor handles W1-W9 (Static Structure + Semantic Interface) across three layers defined in `references/workflow-checklist.md`. Full workflow audit protocol, focus mode, and report format are in `agents/auditor.md` (Workflow Audit Mode section).
@@ -228,9 +205,9 @@ When invoked via `bundles-scan` or when the user explicitly requests a security-
 
 ## Outputs
 
-- `audit-report` — scored report with findings across 10 categories (full project), written to `.bundles-forge/` by the auditor agent. Contains per-skill breakdowns
-- `skill-report` (skill mode) — 4-category scored report (Structure, Quality, Cross-Refs, Security) for a single skill, written to `.bundles-forge/`
-- `workflow-report` (workflow mode) — workflow-specific report with W1-W11 findings across static/semantic/behavioral layers, with focus/context partitioning
+- `audit-report` — scored report with findings across 10 categories (full project), written to `.bundles-forge/audits/` by the auditor agent. Contains per-skill breakdowns
+- `skill-report` (skill mode) — 4-category scored report (Structure, Quality, Cross-Refs, Security) for a single skill, written to `.bundles-forge/audits/`
+- `workflow-report` (workflow mode) — workflow-specific report with W1-W11 findings across static/semantic/behavioral layers, written to `.bundles-forge/audits/`
 
 ## Integration
 

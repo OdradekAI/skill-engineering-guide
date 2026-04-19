@@ -47,8 +47,8 @@ Definitive quality specification for SKILL.md files. `bundles-forge audit-skill`
 
 ```bash
 bundles-forge audit-skill <skill-directory>          # single skill
-bundles-forge audit-skill <project-root>             # all skills
-bundles-forge audit-skill --json <project-root>      # machine-readable
+bundles-forge audit-skill <target-dir>             # all skills
+bundles-forge audit-skill --json <target-dir>      # machine-readable
 ```
 
 ## Interpreting Results

@@ -88,15 +88,15 @@ def estimate_tokens(content):
 # Project-wide skill loading
 # ---------------------------------------------------------------------------
 
-def detect_project_meta(project_root):
+def detect_project_meta(target_dir):
     """Detect project name and abbreviation from package.json.
 
     Returns (project_name, project_abbreviation).
     """
-    project_root = Path(project_root).resolve()
-    project_name = project_root.name
+    target_dir = Path(target_dir).resolve()
+    project_name = target_dir.name
     project_abbreviation = None
-    pkg_path = project_root / "package.json"
+    pkg_path = target_dir / "package.json"
     if pkg_path.exists():
         try:
             pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
@@ -107,7 +107,7 @@ def detect_project_meta(project_root):
     return project_name, project_abbreviation
 
 
-def parse_all_skills(project_root):
+def parse_all_skills(target_dir):
     """Load and parse all skills in a project.
 
     Returns a dict consumed by run_lint(), run_graph_analysis(), and
@@ -117,7 +117,7 @@ def parse_all_skills(project_root):
     Structure::
 
         {
-            "project_root": Path,
+            "target_dir": Path,
             "project_name": str,
             "project_abbreviation": str | None,
             "valid_prefixes": set,
@@ -134,9 +134,9 @@ def parse_all_skills(project_root):
             }
         }
     """
-    project_root = Path(project_root).resolve()
-    skills_dir = project_root / "skills"
-    project_name, project_abbreviation = detect_project_meta(project_root)
+    target_dir = Path(target_dir).resolve()
+    skills_dir = target_dir / "skills"
+    project_name, project_abbreviation = detect_project_meta(target_dir)
 
     valid_prefixes = {project_name}
     if project_abbreviation:
@@ -168,7 +168,7 @@ def parse_all_skills(project_root):
             }
 
     return {
-        "project_root": project_root,
+        "target_dir": target_dir,
         "project_name": project_name,
         "project_abbreviation": project_abbreviation,
         "valid_prefixes": valid_prefixes,

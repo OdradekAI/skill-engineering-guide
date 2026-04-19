@@ -26,17 +26,17 @@ def run_main(fn):
 
 
 def make_parser(description):
-    """Create a standard argparse parser with project-root and --json options."""
+    """Create a standard argparse parser with target-dir and --json options."""
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument("project_root", nargs="?", default=".",
+    parser.add_argument("target_dir", nargs="?", default=".",
                         help="Bundle-plugin root (default: current directory)")
     parser.add_argument("--json", action="store_true",
                         help="Output JSON instead of markdown")
     return parser
 
 
-def resolve_root(path_str):
-    """Resolve project root and verify it contains a skills/ directory."""
+def resolve_target(path_str):
+    """Resolve target directory and verify it contains a skills/ directory."""
     root = Path(path_str).resolve()
     if not (root / "skills").is_dir():
         raise BundlesForgeError(f"{root} has no skills/ directory")

@@ -57,7 +57,7 @@
 6. 评估 token 预算 — 正文超过 500 行或重内容段超过 100 行时提取到 `references/`
 7. 运行 `bundles-forge audit-skill` 验证
 
-**代理定义：** 同样的路径适用，但 Agent 会遵循 `references/agent-authoring-guide.md` 中的规范 — 不同的 frontmatter 字段（`maxTurns`、`disallowedTools`）、面向报告的正文和 `.bundles-forge/` 输出格式。
+**代理定义：** 同样的路径适用，但 Agent 会遵循 `references/agent-authoring-guide.md` 中的规范 — 不同的 frontmatter 字段（`maxTurns`、`disallowedTools`）、面向报告的正文和 `.bundles-forge/<subdirectory>/` 输出格式。
 
 ---
 
@@ -189,7 +189,7 @@ Agent 按可预测的顺序阅读技能：description 匹配 → Overview 扫描
 |------|----------|-------------|
 | Frontmatter | `name`、`description`、可选字段 | `name`、`description`、`model`、`maxTurns`、`disallowedTools`，+ 高级：`effort`、`tools`、`skills`、`memory`、`background`、`isolation` |
 | 正文 | 交互式使用的执行流程 | 自主检查的执行协议 |
-| 输出 | 直接文件修改或指导 | 报告输出到 `.bundles-forge/` |
+| 输出 | 直接文件修改或指导 | 报告输出到 `.bundles-forge/<subdirectory>/` |
 | 可链接 | 是（调用其他技能） | 默认否；可通过 `skills` frontmatter 字段启用 agent-to-skill 委托 |
 
 ### 代理类型

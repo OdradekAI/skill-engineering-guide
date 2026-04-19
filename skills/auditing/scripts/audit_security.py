@@ -20,8 +20,8 @@ Each rule has a confidence level:
     decisions on whether to block on suspicious findings.
 
 Usage:
-    python audit_security.py [project-root]
-    python audit_security.py --json [project-root]
+    python audit_security.py [target-dir]
+    python audit_security.py --json [target-dir]
 
 Exit codes: 0 = clean, 1 = warnings only, 2 = critical findings
            (both deterministic and suspicious findings affect exit codes)
@@ -421,7 +421,7 @@ def scan_file(path, rel_path, file_type):
     return findings
 
 
-def collect_scannable_files(project_root):
+def collect_scannable_files(target_dir):
     """Collect all scannable files from known directories.
 
     Note: this includes scripts/, so sibling scripts are audited. The scanner
@@ -432,7 +432,7 @@ def collect_scannable_files(project_root):
     scan_dirs = ["skills", "hooks", "agents", "scripts", ".opencode"]
     files = []
     for d in scan_dirs:
-        target = project_root / d
+        target = target_dir / d
         if target.is_dir():
             for f in target.rglob("*"):
                 if f.is_file() and not f.name.startswith("."):
@@ -440,22 +440,22 @@ def collect_scannable_files(project_root):
                         continue
                     files.append(f)
 
-    mcp_json = project_root / ".mcp.json"
+    mcp_json = target_dir / ".mcp.json"
     if mcp_json.is_file():
         files.append(mcp_json)
 
     for manifest_dir in (".claude-plugin", ".cursor-plugin"):
-        pj = project_root / manifest_dir / "plugin.json"
+        pj = target_dir / manifest_dir / "plugin.json"
         if pj.is_file():
             files.append(pj)
 
     return sorted(files)
 
 
-def run_scan(project_root):
-    project_root = Path(project_root).resolve()
+def run_scan(target_dir):
+    target_dir = Path(target_dir).resolve()
     self_path = Path(__file__).resolve()
-    all_files = collect_scannable_files(project_root)
+    all_files = collect_scannable_files(target_dir)
     results = {"files": [], "summary": {
         "critical": 0, "warning": 0, "info": 0,
         "suspicious_critical": 0, "suspicious_warning": 0,
@@ -464,7 +464,7 @@ def run_scan(project_root):
     for f in all_files:
         if f.resolve() == self_path:
             continue
-        rel = f.relative_to(project_root)
+        rel = f.relative_to(target_dir)
         file_type = classify_file(rel)
         if file_type is None:
             continue
@@ -545,9 +545,9 @@ def format_markdown(results, project_name):
 # ---------------------------------------------------------------------------
 
 def main():
-    from _cli import make_parser, resolve_root, exit_by_severity
+    from _cli import make_parser, resolve_target, exit_by_severity
     args = make_parser("Scan bundle-plugins for security risks.").parse_args()
-    root = resolve_root(args.project_root)
+    root = resolve_target(args.target_dir)
 
     results = run_scan(root)
     if args.json:

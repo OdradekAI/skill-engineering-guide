@@ -3,8 +3,8 @@
 The registry lives at skills/auditing/references/audit-checks.json.
 
 Usage:
-    python generate_checklists.py [project-root]        # regenerate tables
-    python generate_checklists.py --check [project-root] # drift detection (exit 1 if stale)
+    python generate_checklists.py [target-dir]        # regenerate tables
+    python generate_checklists.py --check [target-dir] # drift detection (exit 1 if stale)
 """
 
 import json
@@ -14,10 +14,10 @@ from collections import OrderedDict
 from pathlib import Path
 
 try:
-    from _cli import resolve_root, BundlesForgeError
+    from _cli import resolve_target, BundlesForgeError
 except ImportError:
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _cli import resolve_root, BundlesForgeError
+    from _cli import resolve_target, BundlesForgeError
 
 BEGIN_RE = re.compile(r"^<!--\s*BEGIN:(.+?)\s*-->")
 END_RE = re.compile(r"^<!--\s*END:(.+?)\s*-->")
@@ -263,13 +263,13 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(
         description="Generate checklist tables from audit-checks.json registry")
-    parser.add_argument("project_root", nargs="?", default=".",
+    parser.add_argument("target_dir", nargs="?", default=".",
                         help="Bundle-plugin root (default: current directory)")
     parser.add_argument("--check", action="store_true",
                         help="Check for drift without writing (exit 1 if stale)")
     args = parser.parse_args()
 
-    root = resolve_root(args.project_root)
+    root = resolve_target(args.target_dir)
     registry = load_registry(root)
 
     stale_files = []

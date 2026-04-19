@@ -42,7 +42,7 @@ Automated checks — produced by `audit_skill.py` graph analysis (G1-G5) and con
 
 **How to run:**
 ```bash
-bundles-forge audit-skill --json <project-root>
+bundles-forge audit-skill --json <target-dir>
 ```
 Inspect the `graph` key in the JSON output for G1-G5 findings, which map directly to W1-W5.
 

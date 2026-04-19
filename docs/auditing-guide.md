@@ -51,11 +51,13 @@ The auditor agent may adjust the baseline by **±2 points** with rationale. Over
 
 ### Report Locations
 
-All audit reports are saved to `.bundles-forge/` with timestamped filenames:
+All audit reports are saved to `.bundles-forge/audits/` in the workspace root, with timestamped filenames:
 - Full audit: `<project>-v<version>-audit.YYYY-MM-DD[.<lang>].md`
 - Skill audit: `<skill-name>-v<version>-skill-audit.YYYY-MM-DD[.<lang>].md`
 - Workflow audit: `<project>-v<version>-workflow-audit.YYYY-MM-DD[.<lang>].md`
 - Security scan: `<project>-v<version>-security-scan.YYYY-MM-DD[.<lang>].md`
+
+Other artifact types use separate subdirectories: `.bundles-forge/evals/` (A/B and chain evaluations), `.bundles-forge/blueprints/` (design documents and inspection reports), `.bundles-forge/repos/` (cloned/extracted external targets).
 
 ### Exit Codes (All Scripts)
 
@@ -84,8 +86,8 @@ The agent detects the project root (has `skills/` directory) and runs all 10 cat
 ### Via Script
 
 ```bash
-bundles-forge audit-plugin <project-root>        # markdown report
-bundles-forge audit-plugin --json <project-root>  # JSON output
+bundles-forge audit-plugin <target-dir>        # markdown report
+bundles-forge audit-plugin --json <target-dir>  # JSON output
 ```
 
 `audit_plugin.py` orchestrates four sub-scripts:
@@ -204,9 +206,9 @@ Or the agent suggests it when the Full audit's Workflow category shows findings.
 ### Via Script
 
 ```bash
-bundles-forge audit-workflow <project-root>                          # full workflow audit
+bundles-forge audit-workflow <target-dir>                          # full workflow audit
 bundles-forge audit-workflow --focus-skills skill-a,skill-b <root>   # focused mode
-bundles-forge audit-workflow --json <project-root>                   # JSON output
+bundles-forge audit-workflow --json <target-dir>                   # JSON output
 ```
 
 ### 3 Layers (W1-W11)
@@ -264,9 +266,9 @@ Maps to the `bundles-forge:auditing` skill in security-only mode — runs only C
 ### Via Script
 
 ```bash
-bundles-forge audit-security <project-root>           # project-wide scan
+bundles-forge audit-security <target-dir>           # project-wide scan
 bundles-forge audit-security <skill-directory>         # single skill scan
-bundles-forge audit-security --json <project-root>     # JSON output
+bundles-forge audit-security --json <target-dir>     # JSON output
 ```
 
 ### 7 Attack Surfaces

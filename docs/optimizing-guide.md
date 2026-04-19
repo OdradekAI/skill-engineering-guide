@@ -162,7 +162,7 @@ These targets apply to both project optimization and single-skill optimization.
 Run the linter to catch mechanical issues:
 
 ```bash
-bundles-forge audit-skill <project-root>
+bundles-forge audit-skill <target-dir>
 ```
 
 Description-specific checks are **Q3-Q7**: missing description (Q3), "Use when..." prefix (Q5), workflow summary anti-pattern (Q6), and length >250 characters (Q7). The full lint suite covers Q1-Q15 and X1-X3 — see Quick Reference for the complete list.
@@ -216,7 +216,7 @@ Consumes workflow audit findings to identify and fix workflow issues. The workfl
 If no workflow report is available:
 
 ```bash
-bundles-forge audit-workflow <project-root>
+bundles-forge audit-workflow <target-dir>
 bundles-forge audit-workflow --focus-skills skill-a,skill-b <root>
 ```
 
