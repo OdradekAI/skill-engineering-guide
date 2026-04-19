@@ -50,7 +50,7 @@ bundles-forge bump-version <new-version>       # bump all files declared in .ver
 
 ### Directory Layout
 
-- `bin/` — CLI dispatcher (`bundles-forge`, `bundles-forge.cmd`) routing subcommands to scripts
+- `bin/` — CLI dispatcher: `bundles-forge` (shell/Python polyglot with `find_python()` probe), `bundles-forge.cmd` (Windows CMD wrapper)
 - `skills/` — 8 skill directories, each containing `SKILL.md` and optional `references/` subdirectory
 - `agents/` — 3 subagent definitions (inspector, auditor, evaluator) as `.md` files
 - `commands/` — slash command stubs (`bundles-*.md`) that redirect to skills via `bundles-forge:<skill-name>`

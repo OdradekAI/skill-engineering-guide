@@ -1,5 +1,27 @@
 #!/bin/sh
-'''exec' python3 "$0" "$@" 2>/dev/null; exec python "$0" "$@"; echo "bundles-forge: Python 3.9+ required" >&2; exit 1
+''':'
+# --- Shell preamble: find a working Python, then re-exec this file through it ---
+set -e
+find_python() {
+    for candidate in python3 python; do
+        cmd_path=$(command -v "$candidate" 2>/dev/null) || continue
+        if output=$("$candidate" --version 2>&1) && \
+           printf '%s' "$output" | grep -q '^Python'; then
+            printf '%s' "$candidate"
+            return 0
+        fi
+        printf 'bundles-forge: skipped %s (%s) — not a working interpreter\n' \
+            "$candidate" "$cmd_path" >&2
+    done
+    return 1
+}
+PYTHON=$(find_python) || {
+    printf 'bundles-forge: error: Python 3.9+ required but not found\n' >&2
+    printf '  Tried: python3, python\n' >&2
+    printf '  Install: https://www.python.org/downloads/\n' >&2
+    exit 1
+}
+exec "$PYTHON" "$0" "$@"
 '''
 """bundles-forge CLI - unified cross-skill script dispatcher.
 
@@ -8,9 +30,9 @@ Uses subprocess.call to preserve __file__ semantics, exit codes,
 and stdout/stderr pass-through.
 
 Shell/Python polyglot: when executed by a shell (Git Bash, bash, sh),
-the triple-quoted line tries python3 then python via exec.
-When loaded by Python directly (e.g. via bundles-forge.cmd), the
-triple-quoted string is a no-op and execution continues normally.
+the ''':', block probes python3/python via --version before exec,
+skipping Windows Store stubs. When loaded by Python directly
+(e.g. via bundles-forge.cmd), the triple-quoted string is a no-op.
 
 Usage:
     bundles-forge <command> [args...]

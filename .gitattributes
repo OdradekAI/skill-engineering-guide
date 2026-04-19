@@ -1,0 +1,9 @@
+# Polyglot script: force LF (CRLF breaks shebang and shell syntax)
+bin/bundles-forge       text eol=lf
+
+# Windows batch: CRLF is native
+bin/bundles-forge.cmd   text eol=crlf
+
+# Hook scripts: force LF
+hooks/*.py              text eol=lf
+hooks/**/*.js           text eol=lf

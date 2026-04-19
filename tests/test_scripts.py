@@ -677,15 +677,21 @@ class TestCLIDispatcher(unittest.TestCase):
         data = json.loads(result.stdout)
         self.assertIn("categories", data)
 
-    def test_polyglot_header_format(self):
+    def test_polyglot_format(self):
         content = CLI_DISPATCHER.read_text(encoding="utf-8")
         lines = content.splitlines()
         self.assertEqual(lines[0], "#!/bin/sh",
-                         "First line should be #!/bin/sh for polyglot")
-        self.assertTrue(lines[1].startswith("'''exec'"),
-                        "Second line should start with '''exec' for polyglot")
-        self.assertEqual(lines[2], "'''",
-                         "Third line should close the triple-quoted string")
+                         "First line should be #!/bin/sh shebang")
+        self.assertEqual(lines[1], "''':'",
+                         "Second line should open the shell preamble with ''':'")
+        self.assertIn("find_python", content,
+                       "Polyglot should contain find_python probe")
+        self.assertIn("exec \"$PYTHON\" \"$0\" \"$@\"", content,
+                       "Polyglot should exec Python with $0")
+        self.assertIn("'''", content.split("exec \"$PYTHON\" \"$0\" \"$@\"")[1],
+                       "Triple-quote should close after exec line")
+        self.assertIn("def main():", content,
+                       "Python section must define main()")
 
 
 if __name__ == "__main__":
