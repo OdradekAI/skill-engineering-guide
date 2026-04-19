@@ -92,7 +92,7 @@ Scan every `SKILL.md` and every markdown file in `references/` directories.
 
 ## Category 2: Hook Script Safety (Weight: High)
 
-Scan `hooks/session-start.py` and any other hook scripts or configs in `hooks/`.
+Scan `hooks/session-start`, `hooks/run-hook.cmd`, and any other hook scripts or configs in `hooks/`.
 
 <!-- BEGIN:security/hook_scripts -->
 
@@ -139,7 +139,7 @@ Scan `hooks/session-start.py` and any other hook scripts or configs in `hooks/`.
 
 ### Legitimate Hook Baseline
 
-A legitimate `session-start.py` hook should only:
+A legitimate `session-start` hook should only:
 1. Determine plugin root path
 2. Read a single SKILL.md file
 3. JSON-escape the content
@@ -313,7 +313,7 @@ Scan `plugin.json` manifests and hook commands for path and configuration issues
 ### Files Scanned
 | File | Type | Critical | Warning | Info |
 |------|------|----------|---------|------|
-| hooks/session-start.py | Hook script | 0 | 0 | 0 |
+| hooks/session-start | Hook script (Bash) | 0 | 0 | 0 |
 | .opencode/plugins/example.js | OpenCode plugin | 0 | 0 | 1 |
 | skills/my-skill/SKILL.md | Skill content | 0 | 0 | 0 |
 | agents/example-agent.md | Agent prompt | 0 | 0 | 0 |

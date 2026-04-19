@@ -10,7 +10,7 @@ All templates use `<project-name>` as a placeholder — replace with the actual 
 
 **Template files:** `assets/platforms/claude-code/plugin.json`, `assets/platforms/claude-code/hooks.json`
 
-**Additional shared files:** `hooks/session-start.py` (see `assets/hooks/session-start.py` template)
+**Additional shared files:** `hooks/session-start` + `hooks/run-hook.cmd` (see `assets/hooks/` templates)
 
 Claude Code discovers `skills/`, `commands/`, `agents/`, and `hooks/hooks.json` by convention — no path declarations needed in plugin.json. Optional components (`bin/`, `output-styles/`, `.mcp.json`, `.lsp.json`, `settings.json`) are also auto-discovered at their default locations.
 
@@ -35,7 +35,7 @@ Claude Code discovers `skills/`, `commands/`, `agents/`, and `hooks/hooks.json` 
 
 **Template files:** `assets/platforms/cursor/plugin.json`, `assets/platforms/cursor/hooks-cursor.json`
 
-**Additional shared files:** `hooks/session-start.py`
+**Additional shared files:** `hooks/session-start` + `hooks/run-hook.cmd`
 
 Unlike Claude Code, Cursor requires explicit `skills`, `agents`, `commands`, and `hooks` path declarations in plugin.json.
 
@@ -268,35 +268,35 @@ All hook events are supported. For subagents, `Stop` hooks are automatically con
 
 ## Windows Support: `shell: "powershell"` Alternative
 
-The `shell: "powershell"` field on command hooks runs the hook command in PowerShell on Windows. Scaffolded projects use a **Python** `session-start.py` invoked via `python .../hooks/session-start.py`, which avoids Git Bash and does not require a separate `.cmd` shim.
+The `shell: "powershell"` field on command hooks runs the hook command in PowerShell on Windows. Scaffolded projects use a **Bash** `session-start` script invoked via `run-hook.cmd` — a CMD+Bash polyglot wrapper that finds Git for Windows bash on Windows and runs bash directly on Unix.
 
 | Approach | Pros | Cons |
 |----------|------|------|
-| `python hooks/session-start.py` (current default) | Cross-platform; single script; standard library | Requires `python` on PATH |
+| `run-hook.cmd` + `session-start` (current default) | Cross-platform polyglot; no Python dependency; proven in superpowers | Requires bash (Git for Windows on Windows) |
 | `shell: "powershell"` + PowerShell script | Native Windows shell | Hook logic must be maintained in PowerShell; platform-specific |
 
-## Shared Hook: `session-start.py`
+## Shared Hook: `session-start` (Bash)
 
-The `session-start.py` script is shared across Claude Code and Cursor. It:
+The `session-start` script (extensionless Bash) is shared across Claude Code and Cursor. It:
 
 1. Determines the plugin root from its own location
-2. Reads the bootstrap SKILL.md
-3. JSON-escapes the content (backslashes, quotes, newlines, tabs)
-4. Wraps in `<EXTREMELY_IMPORTANT>` tags
+2. Dynamically discovers skills by scanning `skills/*/SKILL.md`
+3. Builds a lightweight prompt listing available skills
+4. JSON-escapes the content (backslashes, quotes, newlines, tabs)
 5. Detects platform via environment variables
-6. Emits the correct JSON shape
+6. Emits the correct JSON shape using `printf` (avoids bash 5.3+ heredoc hang)
 
-Implementation is Python for portability (Windows, macOS, Linux) without bash or polyglot wrappers.
+The `run-hook.cmd` polyglot wrapper handles cross-platform execution: on Windows, it searches for bash in Git for Windows standard locations and then PATH; on Unix, it runs bash directly.
 
 ## Platform Detection Summary
 
 | Environment Variable | Platform | JSON Output Format |
 |---------------------|----------|--------------------|
 | `CURSOR_PLUGIN_ROOT` | Cursor | `{"additional_context": "..."}` |
-| `CLAUDE_PLUGIN_ROOT` | Claude Code | `{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "..."}}` |
-| Neither set | Unknown/fallback | Plain text context on stdout |
+| `CLAUDE_PLUGIN_ROOT` (no `COPILOT_CLI`) | Claude Code | `{"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": "..."}}` |
+| `COPILOT_CLI` or neither set | Copilot CLI / fallback | `{"additionalContext": "..."}` (SDK standard) |
 
-The `session-start.py` script checks `CURSOR_PLUGIN_ROOT` first, then `CLAUDE_PLUGIN_ROOT`, with a plain-text fallback for unknown platforms.
+The `session-start` script checks `CURSOR_PLUGIN_ROOT` first, then `CLAUDE_PLUGIN_ROOT` (without `COPILOT_CLI`), with SDK-standard JSON fallback for unknown platforms.
 
 ## Claude vs Cursor Hook Format Comparison
 
@@ -409,7 +409,7 @@ Run `claude --debug` to see detailed plugin loading information:
 |-------|-------|----------|
 | Plugin not loading | Invalid `plugin.json` | Run `claude plugin validate` to identify syntax/schema errors |
 | Skills not appearing | Wrong directory structure | Components must be at plugin root, not inside `.claude-plugin/` |
-| Hooks not firing | `python` not on PATH or wrong `command` in hooks config | Ensure `python` runs `hooks/session-start.py` as in platform templates; on Unix, `chmod +x` is not required when using `python path/to/script` |
+| Hooks not firing | bash not available or wrong `command` in hooks config | Claude Code: `run-hook.cmd session-start` finds bash automatically; Cursor: `./hooks/session-start` needs bash on PATH; on Windows, Git for Windows provides bash |
 | MCP server fails | Missing `${CLAUDE_PLUGIN_ROOT}` | Use the variable for all plugin paths — hardcoded paths break after install |
 | Path errors after install | Absolute or `../` paths | All paths must be relative, starting with `./` |
 | LSP `Executable not found` | Language server not installed | Install the binary separately (e.g., `npm install -g typescript-language-server`) |

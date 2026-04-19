@@ -23,7 +23,8 @@ Replace all placeholders before writing to the target project.
 
 | Template File | Target Path | Purpose |
 |---------------|-------------|---------|
-| `assets/hooks/session-start.py` | `hooks/session-start.py` | Bootstrap injection script (Python; shared across Claude Code, Cursor) |
+| `assets/hooks/session-start` | `hooks/session-start` | Bootstrap injection script (Bash; shared across Claude Code, Cursor) |
+| `assets/hooks/run-hook.cmd` | `hooks/run-hook.cmd` | Cross-platform polyglot wrapper (CMD+Bash; finds bash on Windows) |
 | `assets/root/version-bump.json` | `.version-bump.json` | Version sync config (adapt `files` array to target platforms) |
 | `assets/root/gitignore` | `.gitignore` | Standard ignores |
 | `assets/root/package.json` | `package.json` | Project identity (omit `main` if OpenCode not targeted) |
@@ -61,7 +62,7 @@ Platform-specific manifest templates live in `assets/platforms/`. Use those when
 
 ## Generation Notes
 
-- **Hooks:** platform templates should invoke `python` with `hooks/session-start.py` (see `assets/platforms/*/hooks*.json`)
+- **Hooks:** Claude Code template uses `run-hook.cmd session-start`; Cursor runs `./hooks/session-start` directly (see `assets/platforms/*/hooks*.json`)
 - **`.version-bump.json`:** only include entries for platforms that have version-bearing manifest files
 - **`package.json`:** omit the `main` field if OpenCode is not a target platform
 - **Bootstrap skill:** keep under 200 lines — extract heavy content to `references/`

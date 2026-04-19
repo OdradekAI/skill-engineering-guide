@@ -2,16 +2,16 @@
 """
 Integration tests for bundles-forge — structure, platform integration, and hook behavior.
 
-Covers: hooks JSON schema, bootstrap injection (bash + pure-Python simulation),
+Covers: hooks JSON schema, bootstrap injection (bash subprocess),
 version sync, and skill discovery/frontmatter validation.
 
 Run: python tests/test_integration.py -v
 Or:  python -m pytest tests/test_integration.py -v
 """
 
-import importlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import unittest
@@ -21,11 +21,9 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT / "skills" / "auditing" / "scripts"))
 from _parsing import parse_frontmatter as _parse_frontmatter_full
 
-sys.path.insert(0, str(REPO_ROOT / "hooks"))
-_session_start = importlib.import_module("session-start")
-
 HOOKS_DIR = REPO_ROOT / "hooks"
-HOOK_PATH = HOOKS_DIR / "session-start.py"
+HOOK_PATH = HOOKS_DIR / "session-start"
+RUN_HOOK_PATH = HOOKS_DIR / "run-hook.cmd"
 SKILLS_DIR = REPO_ROOT / "skills"
 RELEASING_SCRIPTS = REPO_ROOT / "skills" / "releasing" / "scripts"
 VERSION_CONFIG = REPO_ROOT / ".version-bump.json"
@@ -41,34 +39,48 @@ EXPECTED_SKILLS = [
     "using-bundles-forge",
 ]
 
+def _find_bash():
+    """Find a usable bash binary, preferring Git Bash over WSL on Windows."""
+    import platform
+    if platform.system() == "Windows":
+        git_bash_paths = [
+            r"C:\Program Files\Git\bin\bash.exe",
+            r"C:\Program Files (x86)\Git\bin\bash.exe",
+        ]
+        for p in git_bash_paths:
+            if os.path.isfile(p):
+                return p
+    return shutil.which("bash")
+
+
+_BASH = _find_bash()
 
 
 def _run_hook(env_overrides=None):
-    """Run the session-start.py hook via Python and return (stdout, stderr, returncode)."""
-    env = os.environ.copy()
-    env.pop("CURSOR_PLUGIN_ROOT", None)
-    env.pop("CLAUDE_PLUGIN_ROOT", None)
+    """Run the session-start hook via bash and return (stdout, stderr, returncode).
+
+    Exports platform env vars inline (``bash -c 'export ...;  bash hooks/...'``)
+    so WSL bash on Windows picks them up — WSL strips env vars from the parent
+    Windows process by default.
+    """
+    exports = []
+    clean = {"CURSOR_PLUGIN_ROOT", "CLAUDE_PLUGIN_ROOT", "COPILOT_CLI"}
     if env_overrides:
-        env.update(env_overrides)
+        for k, v in env_overrides.items():
+            exports.append(f"export {k}='{v}'")
+            clean.discard(k)
+    for k in clean:
+        exports.append(f"unset {k}")
+
+    preamble = "; ".join(exports) + "; " if exports else ""
+    cmd = f"{preamble}bash hooks/session-start"
 
     result = subprocess.run(
-        [sys.executable, str(HOOK_PATH)],
-        capture_output=True, text=True, env=env, timeout=15,
+        [_BASH, "-c", cmd],
+        capture_output=True, text=True, timeout=15,
+        cwd=str(REPO_ROOT),
     )
     return result.stdout, result.stderr, result.returncode
-
-
-def _simulate_hook(platform=None):
-    """Pure-Python simulation of hooks/session-start logic (lightweight mode)."""
-    prompt = _session_start.PROMPT
-    if platform == "cursor":
-        return json.dumps({"additional_context": prompt})
-    elif platform == "claude":
-        return json.dumps({"hookSpecificOutput": {
-            "hookEventName": "SessionStart",
-            "additionalContext": prompt}})
-    else:
-        return prompt
 
 
 def _parse_frontmatter(content):
@@ -78,15 +90,27 @@ def _parse_frontmatter(content):
 
 
 class TestBootstrapInjection(unittest.TestCase):
-    """Bootstrap injection tests — pure-Python simulation always runs;
-    bash subprocess tests run as additional validation when bash is available."""
+    """Bootstrap injection tests — static content checks always run;
+    bash subprocess tests are skipped when bash is not available."""
+
+    # -- Static file checks (no bash needed) --
 
     def test_hook_script_exists(self):
         self.assertTrue(HOOK_PATH.exists(), "hooks/session-start missing")
 
+    def test_run_hook_cmd_exists(self):
+        self.assertTrue(RUN_HOOK_PATH.exists(), "hooks/run-hook.cmd missing")
+
     def test_hook_emits_lightweight_prompt(self):
         content = HOOK_PATH.read_text(encoding="utf-8")
         self.assertIn("bundles-forge loaded", content)
+
+    def test_hook_is_bash_script(self):
+        content = HOOK_PATH.read_text(encoding="utf-8")
+        self.assertTrue(content.startswith("#!/usr/bin/env bash"),
+                        "session-start should be a bash script")
+        self.assertNotIn("import ", content,
+                         "session-start should not contain Python imports")
 
     def test_hook_detects_cursor_platform(self):
         content = HOOK_PATH.read_text(encoding="utf-8")
@@ -100,66 +124,56 @@ class TestBootstrapInjection(unittest.TestCase):
         self.assertIn("hookSpecificOutput", content,
                        "Hook should emit hookSpecificOutput for Claude Code")
 
-    # -- Pure-Python simulation (always runs, no bash dependency) --
+    def test_hook_detects_copilot_platform(self):
+        content = HOOK_PATH.read_text(encoding="utf-8")
+        self.assertIn("COPILOT_CLI", content,
+                       "Hook should check COPILOT_CLI for SDK standard format")
 
-    def test_sim_claude_output_is_valid_json(self):
-        output = _simulate_hook(platform="claude")
-        data = json.loads(output)
-        self.assertIn("hookSpecificOutput", data)
+    def test_run_hook_cmd_is_polyglot(self):
+        content = RUN_HOOK_PATH.read_text(encoding="utf-8")
+        self.assertIn("CMDBLOCK", content, "run-hook.cmd should be a CMD+Bash polyglot")
+        self.assertIn("@echo off", content)
+        self.assertIn("exec bash", content)
 
-    def test_sim_cursor_output_is_valid_json(self):
-        output = _simulate_hook(platform="cursor")
-        data = json.loads(output)
-        self.assertIn("additional_context", data)
+    # -- Subprocess tests (require bash) --
 
-    def test_sim_fallback_is_plain_text(self):
-        output = _simulate_hook()
-        self.assertIn("bundles-forge loaded", output)
-        self.assertNotIn("hookSpecificOutput", output)
-        self.assertNotIn("additional_context", output)
-
-    def test_sim_claude_output_contains_bootstrap_content(self):
-        output = _simulate_hook(platform="claude")
-        self.assertIn("bundles-forge", output)
-
-    def test_sim_platform_appropriate_json_structure(self):
-        cursor_output = _simulate_hook(platform="cursor")
-        self.assertIn("additional_context", cursor_output)
-        claude_output = _simulate_hook(platform="claude")
-        self.assertIn("hookSpecificOutput", claude_output)
-
-    # -- Subprocess tests (run the actual hook script via Python) --
-
+    @unittest.skipUnless(_BASH, "bash not available")
     def test_subprocess_claude_output_is_valid_json(self):
         stdout, _, rc = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
         self.assertEqual(rc, 0, f"Hook exited {rc}")
         data = json.loads(stdout)
         self.assertIn("hookSpecificOutput", data)
 
+    @unittest.skipUnless(_BASH, "bash not available")
     def test_subprocess_cursor_output_is_valid_json(self):
         stdout, _, rc = _run_hook({"CURSOR_PLUGIN_ROOT": str(REPO_ROOT)})
         self.assertEqual(rc, 0, f"Hook exited {rc}")
         data = json.loads(stdout)
         self.assertIn("additional_context", data)
 
-    def test_subprocess_fallback_is_plain_text(self):
+    @unittest.skipUnless(_BASH, "bash not available")
+    def test_subprocess_fallback_is_sdk_json(self):
         stdout, _, rc = _run_hook()
         self.assertEqual(rc, 0, f"Hook exited {rc}")
-        self.assertIn("bundles-forge loaded", stdout)
+        data = json.loads(stdout)
+        self.assertIn("additionalContext", data,
+                       "Fallback should emit SDK-standard additionalContext")
         self.assertNotIn("hookSpecificOutput", stdout)
         self.assertNotIn("additional_context", stdout)
 
+    @unittest.skipUnless(_BASH, "bash not available")
     def test_subprocess_output_contains_skill_list(self):
         stdout, _, _ = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
         self.assertIn("bundles-forge loaded", stdout)
         self.assertIn("testing", stdout)
 
+    @unittest.skipUnless(_BASH, "bash not available")
     def test_prompt_contains_all_expected_skills(self):
+        stdout, _, _ = _run_hook({"CLAUDE_PLUGIN_ROOT": str(REPO_ROOT)})
         for skill in EXPECTED_SKILLS:
             if skill == "using-bundles-forge":
                 continue
-            self.assertIn(skill, _session_start.PROMPT,
-                          f"PROMPT missing skill: {skill}")
+            self.assertIn(skill, stdout, f"Output missing skill: {skill}")
 
 
 class TestHooksJsonSchema(unittest.TestCase):

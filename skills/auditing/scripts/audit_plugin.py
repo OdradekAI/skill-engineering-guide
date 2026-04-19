@@ -180,15 +180,20 @@ def check_hooks(root):
         findings.append(dict(check="H1", severity="warning", message="Missing hooks/ directory"))
         return findings
 
-    session_start = hooks_dir / "session-start.py"
+    session_start = hooks_dir / "session-start"
     if not session_start.exists():
         findings.append(dict(check="H2", severity="warning",
-                             message="Missing hooks/session-start.py"))
+                             message="Missing hooks/session-start"))
     else:
         content = session_start.read_text(encoding="utf-8", errors="replace")
-        if "SKILL.md" not in content:
+        if "SKILL.md" not in content and "skill" not in content.lower():
             findings.append(dict(check="H3", severity="warning",
-                                 message="session-start.py doesn't reference any SKILL.md"))
+                                 message="session-start doesn't reference SKILL.md or emit skill list"))
+
+    run_hook_cmd = hooks_dir / "run-hook.cmd"
+    if not run_hook_cmd.exists():
+        findings.append(dict(check="H2b", severity="warning",
+                             message="Missing hooks/run-hook.cmd (polyglot wrapper)"))
 
     hooks_json = hooks_dir / "hooks.json"
     if hooks_json.exists():

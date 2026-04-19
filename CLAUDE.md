@@ -54,7 +54,7 @@ bundles-forge bump-version <new-version>       # bump all files declared in .ver
 - `skills/` — 8 skill directories, each containing `SKILL.md` and optional `references/` subdirectory
 - `agents/` — 3 subagent definitions (inspector, auditor, evaluator) as `.md` files
 - `commands/` — slash command stubs (`bundles-*.md`) that redirect to skills via `bundles-forge:<skill-name>`
-- `hooks/` — session bootstrap (`session-start.py` emits lightweight skill-list prompt); `openclaw-bootstrap/` contains the OpenClaw hook-pack (HOOK.md + handler.js)
+- `hooks/` — session bootstrap (`session-start` Bash script + `run-hook.cmd` polyglot wrapper emit lightweight skill-list prompt); `openclaw-bootstrap/` contains the OpenClaw hook-pack (HOOK.md + handler.js)
 - `docs/` — guides (concepts, blueprinting, scaffolding, authoring, auditing, optimizing, releasing) with `*.zh.md` Chinese translations; checked by D7
 - `skills/auditing/scripts/` — audit, security scan, documentation checks, and checklist generation (shares `_cli.py` for argparse/exit-code patterns)
 - `skills/releasing/scripts/` — version bump tooling (`bump_version.py`)
@@ -68,7 +68,7 @@ Hub-and-spoke model: 3 orchestrators (`blueprinting`, `optimizing`, `releasing`)
 
 ### Session Bootstrap
 
-`hooks/session-start.py` runs on SessionStart, emitting a skill-list prompt. Platform detection: `CURSOR_PLUGIN_ROOT` → Cursor, `CLAUDE_PLUGIN_ROOT` → Claude Code, fallback → plain text. Hook configs: `hooks/hooks.json` (Claude Code), `hooks/hooks-cursor.json` (Cursor), `hooks/openclaw-bootstrap/` (OpenClaw).
+`hooks/session-start` (Bash) runs on SessionStart via `hooks/run-hook.cmd` (CMD+Bash polyglot), emitting a skill-list prompt with dynamic skill discovery. Platform detection: `CURSOR_PLUGIN_ROOT` → Cursor, `CLAUDE_PLUGIN_ROOT` → Claude Code, `COPILOT_CLI`/fallback → SDK standard. Hook configs: `hooks/hooks.json` (Claude Code), `hooks/hooks-cursor.json` (Cursor), `hooks/openclaw-bootstrap/` (OpenClaw).
 
 ### Agent Dispatch
 

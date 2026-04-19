@@ -2,7 +2,7 @@
 
 [English](troubleshooting-guide.md)
 
-> **Canonical source:** 退出码语义定义在 `skills/auditing/scripts/_cli.py`。平台 hook 行为定义在 `hooks/session-start.py`。本指南汇总了项目各处的故障排除信息。
+> **Canonical source:** 退出码语义定义在 `skills/auditing/scripts/_cli.py`。平台 hook 行为定义在 `hooks/session-start`（Bash）+ `hooks/run-hook.cmd`（跨平台包装器）。本指南汇总了项目各处的故障排除信息。
 
 使用 Bundles Forge 时的常见问题及解决方案。退出码和审计相关行为请参见[审计指南](auditing-guide.zh.md)。发布流程问题请参见[发布指南](releasing-guide.zh.md)。
 

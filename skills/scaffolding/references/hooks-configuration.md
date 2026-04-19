@@ -120,7 +120,7 @@ Cursor uses a simpler schema. Key differences from Claude Code:
   "hooks": {
     "sessionStart": [
       {
-        "command": "python ./hooks/session-start.py"
+        "command": "./hooks/session-start"
       }
     ]
   }
@@ -148,7 +148,7 @@ Injects context when a session begins. Most plugins use this for bootstrap promp
         "hooks": [
           {
             "type": "command",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
             "timeout": 10
           }
         ]
@@ -346,7 +346,7 @@ Script reads `tool_input.file_path` from stdin, runs the appropriate formatter, 
         "hooks": [
           {
             "type": "command",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
             "timeout": 10
           }
         ]

@@ -18,7 +18,7 @@ bundles-forge/
 │   └── scaffolding/   #   assets/ (6 platform templates + root/hooks/scripts)
 ├── agents/            # 3 read-only subagents: inspector, auditor, evaluator
 ├── commands/          # Slash command stubs (bundles-*.md) → bundles-forge:<skill>
-├── hooks/             # session-start.py (3 platform formats) + openclaw-bootstrap/
+├── hooks/             # session-start (Bash) + run-hook.cmd (polyglot) + openclaw-bootstrap/
 ├── docs/              # 10 guide pairs (EN + .zh.md), checked by audit-docs D7-D9
 ├── tests/             # 6 suites via run_all.py; fixtures/ + prompts/ per skill
 ├── examples/          # Worked audit report examples
@@ -34,7 +34,7 @@ bundles-forge/
 | Fix audit script | `skills/auditing/scripts/` | Shared `_cli.py` for argparse/exit codes; `_graph.py` for workflow DAG |
 | Add platform support | `skills/scaffolding/assets/platforms/<name>/` | Template files per platform (plugin.json, hooks.json, AGENTS.md, etc.) |
 | Version management | `skills/releasing/scripts/bump_version.py` | Driven by `.version-bump.json`; never edit versions manually |
-| Session bootstrap | `hooks/session-start.py` | 3-way platform detection (CURSOR_PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT, fallback) |
+| Session bootstrap | `hooks/session-start` + `hooks/run-hook.cmd` | 3-way platform detection (CURSOR_PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT, COPILOT_CLI/fallback) |
 | Security patterns | `skills/auditing/references/security-checklist.md` | 7 surfaces: skill content, hook scripts, HTTP hooks, OpenCode, agents, bundled scripts, MCP |
 | Test a skill | `tests/prompts/<skill-name>.yml` | YAML prompt samples for should-trigger/should-not-trigger |
 | Add a test fixture | `tests/fixtures/<scenario>/` | Simulate plugin states (artifact-mismatch, circular-deps, etc.) |

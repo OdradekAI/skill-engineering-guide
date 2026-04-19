@@ -65,8 +65,8 @@ Generated for all intelligent-mode projects regardless of platform selection:
 
 | Platform | Files |
 |----------|-------|
-| Claude Code | `.claude-plugin/plugin.json`, `hooks/hooks.json`, `hooks/session-start.py` |
-| Cursor | `.cursor-plugin/plugin.json`, `hooks/hooks-cursor.json`, `hooks/session-start.py` |
+| Claude Code | `.claude-plugin/plugin.json`, `hooks/hooks.json`, `hooks/run-hook.cmd`, `hooks/session-start` |
+| Cursor | `.cursor-plugin/plugin.json`, `hooks/hooks-cursor.json`, `hooks/session-start` |
 | Codex | `.codex/INSTALL.md`, `AGENTS.md` |
 | OpenCode | `.opencode/plugins/<name>.js`, `.opencode/INSTALL.md` |
 | Gemini CLI | `gemini-extension.json`, `GEMINI.md` |
@@ -127,7 +127,7 @@ For platform-specific wiring details, read `references/platform-adapters.md`.
 2. **Identify target** — read `references/platform-adapters.md` for wiring details
 3. **Generate adapter files** — from `assets/platforms/<platform>/`, replace `<project-name>` placeholders
 4. **Update version sync** — add version-bearing manifests to `.version-bump.json`
-5. **Update hooks** — if platform uses session hooks, ensure `session-start.py` handles its JSON format. For custom hooks beyond SessionStart, read `references/hooks-configuration.md`
+5. **Update hooks** — if platform uses session hooks, ensure `session-start` (Bash) handles its JSON format via `run-hook.cmd`. For custom hooks beyond SessionStart, read `references/hooks-configuration.md`
 6. **Update documentation** — add install section to README; create platform-specific docs if needed
 7. **Verify** — validate manifests, `bundles-forge bump-version --check`, test hooks
 
@@ -135,7 +135,7 @@ For platform-specific wiring details, read `references/platform-adapters.md`.
 
 1. **Delete manifest files** — remove the platform's manifest directory or file
 2. **Update `.version-bump.json`** — remove entries for deleted manifests
-3. **Clean hooks** — delete platform-specific hook files; simplify `session-start.py` if branches removed
+3. **Clean hooks** — delete platform-specific hook files; simplify `session-start` if branches removed
 4. **Update documentation** — remove install section from README and platform-specific docs
 5. **Verify** — `bundles-forge bump-version --check`; run inspector validation
 
@@ -176,7 +176,7 @@ Remove MCP servers, CLI executables, or LSP servers from an existing project. Re
 | Generating all platforms regardless of design | Only create files for selected platforms |
 | Forgetting `.version-bump.json` entries | Every version-bearing manifest needs an entry |
 | Hardcoding author in templates | Pull from git config or ask |
-| Missing `session-start.py` or wrong `python` path in hook config | Both Claude Code and Cursor templates invoke `python` with `hooks/session-start.py`; ensure PATH includes `python` |
+| Missing `session-start` or `run-hook.cmd` in hook config | Claude Code uses `run-hook.cmd session-start`; Cursor runs `./hooks/session-start` directly; both require bash |
 | Bootstrap skill > 200 lines | Keep lean — extract to `references/` |
 | Wrong hook format (PascalCase vs camelCase) | Claude Code: `SessionStart`, Cursor: `sessionStart` |
 | Copying template without customizing | Replace every `<project-name>` placeholder |

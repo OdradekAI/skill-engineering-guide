@@ -173,20 +173,21 @@ Functional correctness checks for session bootstrap hooks. Security-related hook
 | Check | Severity | Criteria | Automation |
 |-------|----------|----------|------------|
 | H1 | Warning | `hooks/` directory exists | `audit_plugin.py` |
-| H2 | Warning | `hooks/session-start.py` exists | `audit_plugin.py` |
-| H3 | Warning | `session-start.py` references SKILL.md | `audit_plugin.py` |
-| H6 | Warning | `session-start.py` handles all target platforms (three-way: CURSOR_PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT, fallback) | `agent-only` |
+| H2 | Warning | `hooks/session-start` (Bash) exists | `audit_plugin.py` |
+| H2b | Warning | `hooks/run-hook.cmd` (polyglot wrapper) exists | `audit_plugin.py` |
+| H3 | Warning | `session-start` references SKILL.md or emits skill list | `audit_plugin.py` |
+| H6 | Warning | `session-start` handles all target platforms (three-way: CURSOR_PLUGIN_ROOT, CLAUDE_PLUGIN_ROOT, COPILOT_CLI/fallback) | `agent-only` |
 | H7 | Warning | JSON escaping is correct (backslashes, quotes, newlines, tabs) | `agent-only` |
-| H8 | Info | Hook configs invoke `python` with `hooks/session-start.py` (cross-platform; no Git Bash or `.cmd` shim) | `agent-only` |
+| H8 | Info | Claude Code hook config uses `run-hook.cmd session-start`; Cursor uses `./hooks/session-start` directly | `agent-only` |
 | H9 | Info | `hooks.json` includes top-level `description` field and per-handler `timeout` | `audit_plugin.py` |
 | H10 | Info | OpenClaw hook-pack exists (`hooks/*/HOOK.md` + `handler.js`) with valid YAML frontmatter and `events` declaration | `agent-only` |
 | H11 | Info | OpenClaw hook-pack `handler.js` uses ESM `export default` and filters events early | `agent-only` |
-| H12 | Info | `session-start.py` exits 0 on read failure (no-op, does not block session) | `agent-only` |
+| H12 | Info | `session-start` exits 0 on failure (no-op, does not block session) | `agent-only` |
 <!-- END:hooks -->
 
 **Quick hook test:**
 ```bash
-CLAUDE_PLUGIN_ROOT="$(pwd)" python hooks/session-start.py | python -m json.tool
+CLAUDE_PLUGIN_ROOT="$(pwd)" bash hooks/session-start | python -m json.tool
 ```
 
 ---
@@ -199,7 +200,7 @@ CLAUDE_PLUGIN_ROOT="$(pwd)" python hooks/session-start.py | python -m json.tool
 | T1 | Warning | `tests/` directory exists | `audit_plugin.py` |
 | T2 | Info | At least one test per target platform | `agent-only` |
 | T3 | Info | Tests verify skill discovery (skills appear in available list) | `agent-only` |
-| T4 | Info | Tests verify bootstrap injection (`session-start.py` output / content loads) | `agent-only` |
+| T4 | Info | Tests verify bootstrap injection (`session-start` output / content loads) | `agent-only` |
 | T5 | Warning | Each skill has a test prompts file (`tests/prompts/<skill-name>.yml` or `skills/<name>/tests/prompts.yml`) | `audit_plugin.py` |
 | T6 | Info | Test prompts include both should-trigger and should-not-trigger samples | `agent-only` |
 | T7 | Info | Test prompts cover all major branch paths of the skill | `agent-only` |

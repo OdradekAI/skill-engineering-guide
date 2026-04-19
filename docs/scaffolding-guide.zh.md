@@ -216,7 +216,7 @@
 | OpenCode | `.opencode/plugins/<name>.js` | —（JS 插件处理引导） | `.opencode/INSTALL.md` | 否 |
 | Gemini CLI | `gemini-extension.json` | — | `GEMINI.md` | 是 |
 
-**共享钩子：** `hooks/session-start.py` 在 Claude Code 和 Cursor 之间共享。当任一平台被选为目标时都会创建。使用 Python 实现以确保跨平台兼容性。
+**共享钩子：** `hooks/session-start`（Bash）+ `hooks/run-hook.cmd`（CMD+Bash 跨平台包装器）在 Claude Code 和 Cursor 之间共享。当任一平台被选为目标时都会创建。`run-hook.cmd` 在 Windows 上自动查找 Git for Windows 的 bash，在 Unix 上直接运行脚本。
 
 **`marketplace.json`：** 仅在插件目标为市场发布时生成。它声明市场索引的插件元数据，并通过 `.version-bump.json` 进行版本追踪。
 
@@ -275,7 +275,7 @@
 | 钩子大小写错误 | 从一个平台复制到另一个 | Claude Code: `SessionStart`，Cursor: `sessionStart` |
 | 引导技能超过 200 行 | 路由表塞了太多内容 | 保持精简 — 重内容提取到 `references/` |
 | 对简单打包使用 intelligent 模式 | 想为 1-2 个技能搭建完整基础设施 | Minimal 模式就是为了避免过度工程化 |
-| PATH 中缺少 `python` | 钩子无法运行 | 确保 `session-start.py` 可被 `python` 调用 — 记录前置要求 |
+| Windows 上缺少 bash | 钩子无法运行 | `run-hook.cmd` 自动搜索 Git for Windows 路径 — 记录前置要求 |
 | CLI 就够时使用 MCP | 想为简单工具搭建丰富集成 | 参考 `references/external-integration.md` 决策树 — 无状态单次工具优先用 CLI |
 | 使用 `../` 路径引用插件外的文件 | 想跨项目共享文件 | 市场安装后插件被缓存 — `../` 路径会失效。所有文件保持在插件根目录内 |
 | 向 `${CLAUDE_PLUGIN_ROOT}` 写入持久化数据 | 把插件根目录当作稳定存储 | `PLUGIN_ROOT` 每次更新会变。使用 `${CLAUDE_PLUGIN_DATA}` 存放缓存和生成状态 |

@@ -124,7 +124,7 @@ Four handler types are available: `command` (shell), `http` (POST to URL), `prom
       "matcher": "startup|clear|compact",
       "hooks": [{
         "type": "command",
-        "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
+        "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
         "timeout": 10
       }]
     }]
@@ -132,7 +132,7 @@ Four handler types are available: `command` (shell), `http` (POST to URL), `prom
 }
 ```
 
-> **In bundles-forge:** The `session-start.py` hook emits a lightweight prompt listing all available skills. The full routing context (`using-bundles-forge/SKILL.md`) is loaded on demand via the platform's Skill tool. Written in Python for cross-platform compatibility.
+> **In bundles-forge:** The `session-start` hook (Bash, via `run-hook.cmd` polyglot wrapper) emits a lightweight prompt listing all available skills. The full routing context (`using-bundles-forge/SKILL.md`) is loaded on demand via the platform's Skill tool.
 
 ### MCP (Model Context Protocol)
 
@@ -285,9 +285,9 @@ Skills handle the interaction lifecycle: detect what the user wants → dispatch
 
 **Concrete example — two-phase workflow audit:** The `auditing` skill needs both the `auditor` (static checks W1-W9) and the `evaluator` (behavioral verification W10-W11). Since subagents cannot spawn other subagents, the `auditing` skill dispatches them sequentially from the main conversation: Phase 1 sends the `auditor`, waits for its report, then Phase 2 sends the `evaluator` with context from Phase 1. This two-phase orchestration is only possible because a skill — not a subagent — owns the workflow.
 
-### Why does session-start.py emit a lightweight prompt instead of injecting the full skill context?
+### Why does session-start emit a lightweight prompt instead of injecting the full skill context?
 
-The `session-start.py` hook emits a one-line prompt (~120 bytes) listing available skill names, rather than injecting the full `using-bundles-forge/SKILL.md` (~6KB). The full routing context is loaded on demand when a skill is first invoked. This design was chosen for three reasons:
+The `session-start` hook emits a one-line prompt (~120 bytes) listing available skill names, rather than injecting the full `using-bundles-forge/SKILL.md` (~6KB). The full routing context is loaded on demand when a skill is first invoked. This design was chosen for three reasons:
 
 - **Context window economy** — ~120 bytes vs ~6KB per session. The lightweight prompt reserves context budget for user work while still providing enough information for routing.
 - **Routing accuracy** — the prompt lists all skill names, so the agent can match user intent to the correct orchestrator or executor. Detailed routing tables are loaded only when needed.
@@ -302,7 +302,7 @@ flowchart LR
     MP["Official Marketplace"] -->|distributes| BF
 
     subgraph BF ["bundles-forge Plugin"]
-        HK["session-start.py Hook"]
+        HK["session-start Hook"]
         CMD["8 /bundles-* Commands"]
         SK["8 Skills: 3 Orchestrators + 4 Executors + 1 Meta"]
         AG["3 Subagents"]

@@ -97,7 +97,7 @@ Verify hooks execute without errors by running them directly.
 ### SessionStart Hook
 
 ```bash
-python hooks/session-start.py
+bash hooks/session-start
 ```
 
 **Expected:** Exits 0, prints a one-line prompt containing the project name and available skills. No stderr output.

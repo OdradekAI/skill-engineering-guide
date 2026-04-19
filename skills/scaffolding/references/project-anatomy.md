@@ -181,9 +181,9 @@ The plugin uses OpenCode's hook API: `config` for path registration, `experiment
 
 ## `hooks/` — Session Bootstrap
 
-### `session-start.py`
+### `session-start` (Bash) + `run-hook.cmd` (polyglot)
 
-Python script for cross-platform bootstrap injection. Reads the bootstrap SKILL.md, wraps it, and emits platform-appropriate JSON. Shared between Claude Code and Cursor. For the full pipeline (6 steps), platform detection table, and hook format comparison, see `references/platform-adapters.md` § "Shared Hook: session-start.py".
+`session-start` is an extensionless Bash script for cross-platform bootstrap injection. Dynamically discovers skills, builds a lightweight prompt, and emits platform-appropriate JSON. `run-hook.cmd` is a CMD+Bash polyglot wrapper that finds bash on Windows (Git for Windows) and runs the script. Shared between Claude Code and Cursor. For the full pipeline, platform detection table, and hook format comparison, see `references/platform-adapters.md` § "Shared Hook: session-start".
 
 ### `hooks.json`
 
@@ -199,7 +199,7 @@ Claude Code hook descriptor. The top-level `description` is shown in the `/hooks
         "hooks": [
           {
             "type": "command",
-            "command": "python \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.py\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.cmd\" session-start",
             "timeout": 10,
             "async": false
           }
@@ -220,7 +220,7 @@ Cursor hook descriptor (simpler format):
   "hooks": {
     "sessionStart": [
       {
-        "command": "python ./hooks/session-start.py"
+        "command": "./hooks/session-start"
       }
     ]
   }

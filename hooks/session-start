@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# SessionStart hook for bundles-forge plugin
+#
+# Emits a lightweight one-line prompt informing the agent that bundles-forge
+# skills are available. The full routing context (using-bundles-forge/SKILL.md)
+# is loaded on demand via the platform's Skill tool when any bundles-forge
+# command is first invoked.
+#
+# Platform detection:
+#   CURSOR_PLUGIN_ROOT  → Cursor format  (additional_context)
+#   CLAUDE_PLUGIN_ROOT  → Claude Code    (hookSpecificOutput)
+#   COPILOT_CLI / other → SDK standard   (additionalContext)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Dynamic skill discovery — scan skills/*/SKILL.md
+skill_list=""
+for d in "${PLUGIN_ROOT}"/skills/*/; do
+  [ -f "${d}SKILL.md" ] && skill_list="${skill_list:+${skill_list}, }$(basename "$d")"
+done
+
+prompt="bundles-forge loaded. Available skills: ${skill_list:-(none)}. Use bundles-forge:<skill-name> to invoke."
+
+# Escape string for JSON embedding using bash parameter substitution.
+# Each ${s//old/new} is a single C-level pass — orders of magnitude
+# faster than a character-by-character loop.
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+escaped=$(escape_for_json "$prompt")
+
+# Output context injection as JSON.
+# Cursor hooks expect additional_context (snake_case).
+# Claude Code hooks expect hookSpecificOutput.additionalContext (nested).
+# Copilot CLI (v1.0.11+) and others expect additionalContext (top-level, SDK standard).
+# Claude Code reads BOTH additional_context and hookSpecificOutput without
+# deduplication, so we must emit only the field the current platform consumes.
+#
+# Uses printf instead of heredoc to work around bash 5.3+ heredoc hang.
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+  printf '{"additional_context":"%s"}\n' "$escaped"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$escaped"
+else
+  printf '{"additionalContext":"%s"}\n' "$escaped"
+fi
+
+exit 0

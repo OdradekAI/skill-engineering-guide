@@ -2,7 +2,7 @@
 
 [中文](troubleshooting-guide.zh.md)
 
-> **Canonical source:** Exit code semantics are defined in `skills/auditing/scripts/_cli.py`. Platform hook behavior is defined in `hooks/session-start.py`. This guide consolidates troubleshooting information from across the project.
+> **Canonical source:** Exit code semantics are defined in `skills/auditing/scripts/_cli.py`. Platform hook behavior is defined in `hooks/session-start` (Bash) + `hooks/run-hook.cmd` (polyglot wrapper). This guide consolidates troubleshooting information from across the project.
 
 Common issues and their solutions when using Bundles Forge. For exit codes and audit-specific behavior, see the [Auditing Guide](auditing-guide.md). For release pipeline issues, see the [Releasing Guide](releasing-guide.md).
 
