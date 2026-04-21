@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [1.8.5] - 2026-04-21
+
+### Changed
+
+- **Audit scoring formula updated** — warning penalty now capped per check ID (`capped_warning_penalty = sum(min(count_per_check_id, 3))`), preventing a single noisy check from overwhelming the score
+- **`audit_docs.py` D2 enhanced** — cross-reference validation now resolves `<project>:<name>` against both `skills/` directories and `agents/*.md` files, not just skills
+- **Optimizing guide expanded** — added Target 7 (Deprecation and Migration) covering skill deprecation, renaming, splitting, merging, and platform cleanup; all "6 targets" references updated to "7 targets"
+- **Releasing guide restructured** — inserted Step 4 (Local Testing) between Change Review and Version Bump; steps renumbered 4→5 through 7→8
+- **Prerequisites clarified** — README now documents `python` or `python3` with `find_python()` auto-detection instead of requiring only `python`
+
+### Fixed
+
+- **Auditing guide check list corrected** — `audit_skill.py` description updated from `Q1-Q15, S9, X1-X4, C1, G1-G5` to accurate `Q1-Q15, S9, X1-X4`
+- **Troubleshooting guide D3/D6 descriptions fixed** — D3 now correctly describes platform manifest sync; D6 correctly describes README sync (previously swapped)
+- **Session-start prompt size** — concepts guide updated from ~120 bytes to accurate ~180 bytes
+
 ## [1.8.4] - 2026-04-21
 
 ### Removed
