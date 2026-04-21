@@ -2,7 +2,7 @@
 
 [中文](optimizing-guide.zh.md)
 
-A user-oriented guide to optimizing bundle-plugins and individual skills with Bundles Forge. Covers quick start, scope detection, the diagnose → delegate → verify pipeline, 6 optimization targets, A/B evaluation, and feedback iteration.
+A user-oriented guide to optimizing bundle-plugins and individual skills with Bundles Forge. Covers quick start, scope detection, the diagnose → delegate → verify pipeline, 7 optimization targets, A/B evaluation, and feedback iteration.
 
 ## Overview
 
@@ -36,14 +36,14 @@ Optimizing auto-detects your scope from the path you provide:
 
 | Scope | Detection | Mode | Applicable Targets |
 |-------|----------|------|--------------------|
-| Project root | Has `skills/` + `package.json` | **Project optimization** | All 6 targets + feedback |
+| Project root | Has `skills/` + `package.json` | **Project optimization** | All 7 targets + feedback |
 | Single skill directory | Has `SKILL.md`, no `skills/` subdirectory | **Skill optimization** | Core targets (1-3) + feedback |
 
 ### Decision Flowchart
 
 ```
 Are you optimizing an entire project or a single skill?
-  ├─ Entire project → Project optimization (all 6 targets)
+  ├─ Entire project → Project optimization (all 7 targets)
   │    ├─ Have an audit report? → Feed it as input for prioritized optimization
   │    └─ No audit report? → Optimizing runs its own diagnosis
   └─ Single skill → Skill optimization (targets 1-3 + feedback)
@@ -70,7 +70,7 @@ Optimizing can consume reports from prior audits. A common pattern is **audit fi
 
 | Input | Source | Use |
 |-------|--------|-----|
-| `audit-report` | `bundles-forge:auditing` (full project) | Per-skill breakdowns for all 6 targets |
+| `audit-report` | `bundles-forge:auditing` (full project) | Per-skill breakdowns for all 7 targets |
 | `skill-report` | `bundles-forge:auditing` (skill mode) | Focused 4-category report for skill optimization |
 | `workflow-report` | `bundles-forge:auditing` (workflow mode) | W1-W9 findings for Target 3 |
 | `user-feedback` | Direct from user | Behavioral feedback for the iteration process |
@@ -96,7 +96,7 @@ optimizing diagnoses → delegates content edits to authoring → verifies via a
 
 ### Target Routing
 
-Select targets based on audit findings or user request — don't run all 6 sequentially:
+Select targets based on audit findings or user request — don't run all 7 sequentially:
 
 | Finding / Signal | Target |
 |------------------|--------|
@@ -106,6 +106,7 @@ Select targets based on audit findings or user request — don't run all 6 seque
 | Security findings (SC/AG checks) | Target 4 |
 | User requests adding/replacing/reorganizing skills | Target 5 |
 | Component signals (userConfig, MCP, LSP needs) | Target 6 |
+| Deprecated skills, renamed skills, platform removal | Target 7 |
 | User behavioral feedback about skill quality | Feedback Iteration |
 
 ### Optimization Action Classification
@@ -235,7 +236,7 @@ In single-skill mode, only W9 (placeholder sections) and W10 (asymmetric integra
 
 ---
 
-## Project-Only Targets (4-6)
+## Project-Only Targets (4-7)
 
 These targets are skipped in single-skill mode. They require project-wide context.
 
@@ -323,6 +324,48 @@ Add, adjust, or migrate optional plugin components based on evolving project nee
 2. **Decide** — consult `skills/scaffolding/references/external-integration.md` for the full decision tree (CLI vs MCP, userConfig schema, PLUGIN_DATA patterns, LSP fields, output-styles format)
 3. **Execute** — invoke `bundles-forge:scaffolding` using its "Adding Optional Components" flow
 4. **Verify** — run `bundles-forge:auditing` to confirm structural integrity and security compliance (especially for new MCP servers and userConfig sensitive values)
+
+### Target 7: Deprecation and Migration
+
+Coordinate the deprecation, renaming, splitting, or merging of skills. This target ensures all references remain consistent across the project during structural changes.
+
+**Deprecation** — mark a skill as deprecated without removing it:
+
+1. Add `deprecated: true` and `superseded-by: <project>:<replacement>` to the skill's frontmatter
+2. Prepend the description with a deprecation notice: `"Use when... (deprecated — use <replacement> instead)"`
+3. Update the bootstrap routing table to note the deprecation
+4. Update cross-references in other skills' `## Integration` sections
+
+**Renaming** — change a skill's name while preserving all connections:
+
+1. Rename the directory: `skills/old-name/` → `skills/new-name/`
+2. Update frontmatter `name` field
+3. Update all cross-references (`<project>:old-name` → `<project>:new-name`) across all SKILL.md, Integration sections, and documentation
+4. Update bootstrap routing table
+5. Run `bundles-forge audit-docs` to catch any missed references
+
+**Splitting** — divide a skill into multiple focused skills:
+
+1. Design the new skill boundaries (reuse `bundles-forge:blueprinting` scenario B)
+2. Invoke `bundles-forge:scaffolding` for new skill directories
+3. Invoke `bundles-forge:authoring` to write each new skill's content
+4. Update all references to the original skill
+5. Deprecate the original (or remove if all functionality is covered)
+6. Run `bundles-forge:auditing` in workflow mode to verify chain integrity
+
+**Merging** — combine multiple skills into one:
+
+1. Design the merged skill (reuse `bundles-forge:blueprinting` scenario C)
+2. Invoke `bundles-forge:authoring` to write the merged content
+3. Deprecate the source skills
+4. Update all cross-references and routing
+5. Run `bundles-forge:auditing` in workflow mode
+
+**Platform cleanup** — after any structural change:
+
+1. Remove deprecated skill references from platform manifests
+2. Update `.version-bump.json` if manifest paths changed
+3. Run `bundles-forge:testing` to verify component discovery
 
 ---
 
@@ -440,7 +483,7 @@ Receive feedback
 | Ignoring the bootstrap skill's token budget | The bootstrap skill loads every session, so bloat costs context everywhere | Keep `using-*` under 200 lines — this is the highest-ROI token optimization |
 | Applying user feedback without validation | Style preferences masquerade as defect reports, leading to unnecessary churn | Run every feedback item through the 3-question validation framework before accepting |
 | Expanding a skill's scope during any optimization | A skill slowly drifts from its original responsibility | Optimization should improve *how well* a skill fulfills its goal, not shift *what* the goal is. Verify after every change: does this skill still do the same thing? |
-| Running all 6 targets on a single skill | Targets 4-6 require project context and produce no useful results at skill scope | Let scope auto-detection handle it — single skills only get targets 1-3 |
+| Running all 7 targets on a single skill | Targets 4-7 require project context and produce no useful results at skill scope | Let scope auto-detection handle it — single skills only get targets 1-3 |
 | Rewriting entire SKILL.md instead of surgical edits | Large diffs increase regression risk and make review harder | Specify section-level changes. A FIX to one heading should not trigger a full rewrite — minimize diff surface |
 | Adding third-party skills without security audit | Imported content may contain encoded prompts, excessive tool access, or network calls | Always run `bundles-forge:auditing` on imported skills — see `references/third-party-integration.md` |
 | Adding skills without updating Integration sections | The workflow graph becomes inconsistent, causing W10 (asymmetric integration) findings | Every new skill connection needs symmetric `**Calls:**` and `**Called by:**` declarations |
@@ -464,7 +507,7 @@ No, but it's recommended. Optimizing can run its own diagnosis, but feeding it a
 
 **Q: Which targets apply when optimizing a single skill?**
 
-Targets 1-3 (description triggering, content optimization, workflow chain integrity) plus feedback iteration. Targets 4-6 are skipped because they require project-wide context. Within Target 3, only W9 (placeholder sections) and W10 (asymmetric integration) apply at skill scope.
+Targets 1-3 (description triggering, content optimization, workflow chain integrity) plus feedback iteration. Targets 4-7 are skipped because they require project-wide context. Within Target 3, only W9 (placeholder sections) and W10 (asymmetric integration) apply at skill scope.
 
 **Q: What if the verification audit still shows issues after optimization?**
 
@@ -500,4 +543,5 @@ W10-W11 (chain evaluation and behavioral verification) require `evaluator` agent
 | 4. Security Remediation | Full | Partial |
 | 5. Skill & Workflow Restructuring | Full | Skip |
 | 6. Optional Component Management | Full | Skip |
+| 7. Deprecation and Migration | Full | Skip |
 | Feedback Iteration | Full | Full |

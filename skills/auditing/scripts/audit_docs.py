@@ -8,7 +8,7 @@ README translations, docs/) stays in sync with the actual project state
 
 Nine checks:
   D1 — Skill list sync across docs vs skills/ directory
-  D2 — Cross-reference validity (<project>:<name> → skills/<name>/)
+  D2 — Cross-reference validity (<project>:<name> → skills/<name>/ or agents/<name>.md)
   D3 — Platform manifest sync (CLAUDE.md table vs .version-bump.json)
   D4 — Command/script accuracy (CLAUDE.md scripts vs actual file paths)
   D5 — Agent list sync (CLAUDE.md agents vs agents/ directory)
@@ -201,9 +201,16 @@ def check_skill_list_sync(root, findings):
 # ---------------------------------------------------------------------------
 
 def check_cross_references(root, findings):
-    """Verify all <project>:<name> cross-references point to existing skills."""
+    """Verify all <project>:<name> cross-references point to existing skills or agents."""
     skills_dir = root / "skills"
     actual_skills = {d.name for d in skills_dir.iterdir() if d.is_dir()}
+
+    agents_dir = root / "agents"
+    actual_agents = ({f.stem for f in agents_dir.iterdir()
+                      if f.is_file() and f.suffix == ".md"}
+                     if agents_dir.is_dir() else set())
+
+    valid_names = actual_skills | actual_agents
 
     project_name, project_abbreviation = detect_project_meta(root)
 
@@ -230,7 +237,7 @@ def check_cross_references(root, findings):
         for pattern in [_CROSS_REF_BACKTICK_RE, _CROSS_REF_BOLD_RE]:
             for m in pattern.finditer(content):
                 prefix, skill_name = m.group(1), m.group(2)
-                if prefix in valid_prefixes and skill_name not in actual_skills:
+                if prefix in valid_prefixes and skill_name not in valid_names:
                     key = f"{prefix}:{skill_name}"
                     if key not in broken_refs:
                         broken_refs[key] = []
@@ -703,6 +710,13 @@ def check_docs_content(root, findings):
     skills_dir = root / "skills"
     actual_skills = {d.name for d in skills_dir.iterdir() if d.is_dir()}
 
+    agents_dir = root / "agents"
+    actual_agents = ({f.stem for f in agents_dir.iterdir()
+                      if f.is_file() and f.suffix == ".md"}
+                     if agents_dir.is_dir() else set())
+
+    valid_names = actual_skills | actual_agents
+
     project_name, _ = detect_project_meta(root)
 
     for doc_file in docs_dir.rglob("*.md"):
@@ -711,7 +725,7 @@ def check_docs_content(root, findings):
 
         for m in _CROSS_REF_BACKTICK_RE.finditer(content):
             prefix, skill_name = m.group(1), m.group(2)
-            if prefix == project_name and skill_name not in actual_skills:
+            if prefix == project_name and skill_name not in valid_names:
                 findings.append(dict(
                     check="D2", severity="critical",
                     message=f"Broken cross-reference '{prefix}:{skill_name}' in {rel_path}"))

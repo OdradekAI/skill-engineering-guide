@@ -351,7 +351,7 @@ Skills, audit reports, and script output accumulate in the conversation context 
 ## Prerequisites
 
 - **Python 3.9+** — required for auditing scripts and version management tools
-- **`python` in PATH** — hook scripts invoke `python` directly. On systems where only `python3` is available, create an alias or symlink:
+- **`python` or `python3` in PATH** — the `bundles-forge` CLI dispatcher probes both via `find_python()`. On systems where only `python3` is available, create an alias or symlink:
   - **macOS/Linux:** `sudo ln -s $(which python3) /usr/local/bin/python`
   - **Windows:** Python installer includes `python` by default; verify with `python --version`
 

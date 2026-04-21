@@ -351,7 +351,7 @@ openclaw plugins install ./bundles-forge
 ## 前置要求
 
 - **Python 3.9+** — 审计脚本和版本管理工具所需
-- **`python` 需在 PATH 中** — 钩子脚本直接调用 `python` 命令。如系统仅有 `python3`，请创建别名或符号链接：
+- **`python` 或 `python3` 需在 PATH 中** — `bundles-forge` CLI 调度器通过 `find_python()` 自动探测。如系统仅有 `python3`，请创建别名或符号链接：
   - **macOS/Linux:** `sudo ln -s $(which python3) /usr/local/bin/python`
   - **Windows:** Python 安装程序默认包含 `python`；可用 `python --version` 验证
 

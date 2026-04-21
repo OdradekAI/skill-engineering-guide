@@ -87,7 +87,8 @@ Scripts that validate configuration (e.g., `checklists --check`, `bump-version -
 
 **Common causes:**
 - **D1 (CLAUDE.md):** Skill list in CLAUDE.md doesn't match actual `skills/` directories
-- **D3 (README):** README skill table is stale after adding/removing a skill
+- **D3 (Platform manifests):** CLAUDE.md Platform Manifests table doesn't match `.version-bump.json`
+- **D6 (README sync):** README skill table is stale after adding/removing a skill
 - **D7 (Bilingual symmetry):** A guide was updated in one language but not the other
 
 **Fix:** Update the referenced documents to match the current state of `skills/` and manifests.

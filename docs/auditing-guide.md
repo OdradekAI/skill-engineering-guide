@@ -36,8 +36,10 @@ All scopes share the same scoring formula, severity levels, and report conventio
 Each category is scored 0-10:
 
 ```
-baseline = max(0, 10 - (critical_count × 3 + warning_count × 1))
+baseline = max(0, 10 - (critical_count × 3 + capped_warning_penalty))
 ```
+
+Where `capped_warning_penalty = sum(min(count_per_check_id, 3))` — each distinct check ID contributes at most 3 points of penalty, preventing a single noisy check from overwhelming the score.
 
 The auditor agent may adjust the baseline by **±2 points** with rationale. Overall score = weighted average across categories.
 
@@ -91,7 +93,7 @@ bundles-forge audit-plugin --json <target-dir>  # JSON output
 ```
 
 `audit_plugin.py` orchestrates four sub-scripts:
-- `audit_skill.py` — skill quality linting (Q1-Q15, S9, X1-X4, C1, G1-G5)
+- `audit_skill.py` — skill quality linting (Q1-Q15, S9, X1-X4)
 - `audit_security.py` — pattern-based security smell detection (7 file categories)
 - `audit_workflow.py` — workflow integration analysis (W1-W9)
 - `audit_docs.py` — documentation consistency (D1-D9)

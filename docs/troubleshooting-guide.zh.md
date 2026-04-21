@@ -87,7 +87,8 @@
 
 **常见原因：**
 - **D1 (CLAUDE.md)：** CLAUDE.md 中的 skill 列表与实际 `skills/` 目录不匹配
-- **D3 (README)：** 添加/删除 skill 后 README 的 skill 表格过时
+- **D3（平台清单）：** CLAUDE.md 平台清单表与 `.version-bump.json` 不匹配
+- **D6（README 同步）：** 添加/删除 skill 后 README 的 skill 表格过时
 - **D7 (双语对称)：** 某个指南只更新了一种语言版本
 
 **解决：** 更新引用的文档使其与 `skills/` 和清单的当前状态匹配。

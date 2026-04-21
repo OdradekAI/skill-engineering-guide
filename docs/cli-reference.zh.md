@@ -23,6 +23,7 @@ bundles-forge -h | --help
 |------|------|
 | `project_root` | 位置参数，可选。Bundle-plugin 根目录（默认：`.`） |
 | `--json` | 输出 JSON 而非 Markdown |
+| `--output-dir` | 将输出写入此目录（自动创建） |
 
 ## 命令
 
@@ -42,8 +43,9 @@ bundles-forge audit-skill --json [target-dir]
 | `project_root` | 项目根目录、skill 目录或 SKILL.md 文件路径 |
 | `--all` | 强制项目级模式（审计所有 skills） |
 | `--json` | 输出 JSON |
+| `--output-dir` | 将输出写入此目录（自动创建） |
 
-**范围检测：** 接受项目根目录（包含 `skills/` 目录）、单个 skill 目录（包含 `SKILL.md`）或直接的 `SKILL.md` 文件路径。项目模式对所有 skills 运行全部 10 个审计类别；skill 模式对单个 skill 运行 4 个适用类别。
+**范围检测：** 接受项目根目录（包含 `skills/` 目录）、单个 skill 目录（包含 `SKILL.md`）或直接的 `SKILL.md` 文件路径。项目模式对所有 skills 运行质量 lint（Q1-Q15、S9、X1-X4）；skill 模式对单个 skill 运行 4 个适用类别。
 
 **交叉引用检查：** 包含 X1（skill 引用）、X2（相对路径）、X3（目录引用）和 X4（孤儿检测 — 查找 `references/` 中未被 `SKILL.md` 或兄弟 reference 文件链接的文件）。项目模式下，C1 包含跨 skill 的段落哈希冗余检测。
 

@@ -36,8 +36,10 @@ Bundles Forge 提供四种审计范围，各自针对不同粒度：
 每个类别评分 0-10：
 
 ```
-baseline = max(0, 10 - (critical_count × 3 + warning_count × 1))
+baseline = max(0, 10 - (critical_count × 3 + capped_warning_penalty))
 ```
+
+其中 `capped_warning_penalty = sum(min(count_per_check_id, 3))` — 每个不同检查 ID 最多贡献 3 分惩罚，防止单个噪点检查淹没整体评分。
 
 审计 agent 可在基线上 **±2 分** 微调并附理由。总分 = 各类别加权平均。
 
@@ -91,7 +93,7 @@ bundles-forge audit-plugin --json <target-dir>  # JSON 输出
 ```
 
 `audit_plugin.py` 编排四个子脚本：
-- `audit_skill.py` — 技能质量 lint（Q1-Q15、S9、X1-X4、C1、G1-G5）
+- `audit_skill.py` — 技能质量 lint（Q1-Q15、S9、X1-X4）
 - `audit_security.py` — 基于模式的安全异味检测（7 类文件）
 - `audit_workflow.py` — 工作流集成分析（W1-W9）
 - `audit_docs.py` — 文档一致性检查（D1-D9）

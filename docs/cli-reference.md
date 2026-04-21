@@ -23,6 +23,7 @@ Most audit commands share these options (provided by `_cli.make_parser()`):
 |--------|-------------|
 | `project_root` | Positional, optional. Bundle-plugin root directory (default: `.`) |
 | `--json` | Output JSON instead of Markdown |
+| `--output-dir` | Write output to this directory (auto-created) |
 
 ## Commands
 
@@ -42,8 +43,9 @@ bundles-forge audit-skill --json [target-dir]
 | `project_root` | Project root, skill directory, or path to a SKILL.md file |
 | `--all` | Force project-level mode (audit all skills) |
 | `--json` | Output JSON |
+| `--output-dir` | Write output to this directory (auto-created) |
 
-**Scope detection:** Accepts a project root (has `skills/` directory), a single skill directory (contains `SKILL.md`), or a direct path to a `SKILL.md` file. Project mode runs all 10 audit categories across all skills; skill mode runs 4 applicable categories on one skill.
+**Scope detection:** Accepts a project root (has `skills/` directory), a single skill directory (contains `SKILL.md`), or a direct path to a `SKILL.md` file. Project mode runs quality lint (Q1-Q15, S9, X1-X4) across all skills; skill mode runs 4 applicable categories on one skill.
 
 **Cross-reference checks:** Includes X1 (skill references), X2 (relative paths), X3 (directory references), and X4 (orphan detection — finds `references/` files not linked from `SKILL.md` or sibling references). In project mode, C1 includes paragraph-hash redundancy detection across skills.
 

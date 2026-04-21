@@ -16,6 +16,7 @@
 | 预检 | 版本漂移、完整审计、文档一致性 | `bundles-forge bump-version`、`bundles-forge audit-plugin`、`bundles-forge audit-docs` | 是（严重发现阻塞） |
 | 处理发现 | 审查并修复 critical/warning 问题 | 手动 + `bundles-forge:optimizing` | 是（critical 必须解决） |
 | 变更审查与文档同步 | 变更一致性审查、文档更新 | AI 审查 + `bundles-forge audit-docs` | 是（矛盾阻塞） |
+| 本地测试 | 开发 marketplace、hook 冒烟测试、组件发现 | `bundles-forge:testing` | 是（严重问题阻塞） |
 | 版本升级 | 更新所有清单 | `bundles-forge bump-version` | — |
 | 发布说明 | CHANGELOG、README | 手动 | — |
 | 最终验证 | 重新运行所有检查 | `bundles-forge bump-version`、`bundles-forge audit-docs` | 是（必须通过） |
@@ -151,7 +152,20 @@ git diff $(git describe --tags --abbrev=0)..HEAD
 
 更改后重新运行 `bundles-forge audit-docs` 确认一致性。
 
-### 步骤 4：版本升级
+### 步骤 4：本地测试
+
+在升级版本之前，调用 `bundles-forge:testing` 验证插件在真实安装场景下工作正常：
+
+1. 生成开发 marketplace 并在本地安装插件
+2. 验证 hook 冒烟测试通过（SessionStart + 任何自定义 hook）
+3. 确认所有组件（技能、agent）可被发现
+4. 对所有目标平台运行跨平台就绪检查
+
+如果测试发现严重问题，在继续版本升级前解决。
+
+对于精简的热修复发布，此步骤可缩减为仅 hook 冒烟测试。
+
+### 步骤 5：版本升级
 
 ```bash
 bundles-forge bump-version <target-dir> <new-version>
@@ -159,7 +173,7 @@ bundles-forge bump-version <target-dir> <new-version>
 
 这会更新 `.version-bump.json` 中声明的所有文件，并运行升级后审计以捕获遗漏。
 
-### 步骤 5：发布说明
+### 步骤 6：发布说明
 
 **CHANGELOG.md** — 使用 [Keep a Changelog](https://keepachangelog.com/) 格式：
 
@@ -183,7 +197,7 @@ bundles-forge bump-version <target-dir> <new-version>
 - [ ] 无重复版本条目
 - [ ] 类别有效（Added、Changed、Deprecated、Removed、Fixed、Security）
 
-### 步骤 6：最终验证
+### 步骤 7：最终验证
 
 ```bash
 bundles-forge bump-version <target-dir> --check   # 无版本漂移
@@ -193,7 +207,7 @@ bundles-forge audit-docs <target-dir>             # 文档一致
 
 三者必须全部以退出码 0（干净）退出后才能发布。
 
-### 步骤 7：发布
+### 步骤 8：发布
 
 **Git + GitHub Release：**
 
@@ -283,8 +297,8 @@ Marketplace 分发需确保 `.claude-plugin/marketplace.json` 存在且包含插
 | 未运行审计就发布 | 跳过流水线步骤 — "只是个小改动" | 始终运行完整流水线；漂移往往发生在小改动中 |
 | 推送了标签但未创建 GitHub Release | 只执行了 `git push --tags` | 使用 `gh release create` — 标签出现在 `/tags` 但不出现在 `/releases` |
 | 修复问题前就升级版本 | 流水线顺序错误 | 先修复再升级 — 避免发布已知有问题的版本 |
-| CHANGELOG 未更新 | 跳过了步骤 5 | 用户需要知道发生了什么变更，尤其是破坏性变更 |
-| 修复后出现新漂移 | 修复引入了新的不一致 | 在步骤 6 发布前重新运行所有检查 |
+| CHANGELOG 未更新 | 跳过了步骤 6 | 用户需要知道发生了什么变更，尤其是破坏性变更 |
+| 修复后出现新漂移 | 修复引入了新的不一致 | 在步骤 7 发布前重新运行所有检查 |
 | `marketplace.json` 版本过期 | 未在 `.version-bump.json` 中跟踪 | 添加 `plugins.0.version` 字段路径的条目 |
 | 手动编辑清单中的版本号 | 直接编辑 JSON 而未使用 CLI | 始终使用 `bundles-forge bump-version` — 它会运行升级后审计 |
 | 意外从非 main 分支发布 | 误选了功能分支 | 先合并到 main，或确认分支发布是有意的 |

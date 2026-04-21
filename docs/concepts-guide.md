@@ -266,9 +266,9 @@ Skills handle the interaction lifecycle: detect what the user wants → dispatch
 
 ### Why does session-start emit a lightweight prompt instead of injecting the full skill context?
 
-The `session-start` hook emits a one-line prompt (~120 bytes) listing available skill names, rather than injecting the full `using-bundles-forge/SKILL.md` (~6KB). The full routing context is loaded on demand when a skill is first invoked. This design was chosen for three reasons:
+The `session-start` hook emits a one-line prompt (~180 bytes) listing available skill names, rather than injecting the full `using-bundles-forge/SKILL.md` (~6KB). The full routing context is loaded on demand when a skill is first invoked. This design was chosen for three reasons:
 
-- **Context window economy** — ~120 bytes vs ~6KB per session. The lightweight prompt reserves context budget for user work while still providing enough information for routing.
+- **Context window economy** — ~180 bytes vs ~6KB per session. The lightweight prompt reserves context budget for user work while still providing enough information for routing.
 - **Routing accuracy** — the prompt lists all skill names, so the agent can match user intent to the correct orchestrator or executor. Detailed routing tables are loaded only when needed.
 - **Fail-safe** — if the hook fails, the agent still works (users can invoke skills manually via `bundles-forge:<skill-name>`).
 

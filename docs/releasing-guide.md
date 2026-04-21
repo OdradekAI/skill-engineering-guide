@@ -16,6 +16,7 @@ The release pipeline is designed as a quality gate — not a formality. It ensur
 | Pre-flight | Version drift, full audit, documentation consistency | `bundles-forge bump-version`, `bundles-forge audit-plugin`, `bundles-forge audit-docs` | Yes (critical findings block) |
 | Address findings | Review and fix critical/warning issues | Manual + `bundles-forge:optimizing` | Yes (critical must resolve) |
 | Change Review & Doc Sync | Change coherence review, doc updates | AI review + `bundles-forge audit-docs` | Yes (contradictions block) |
+| Local Testing | Dev-marketplace, hook smoke tests, component discovery | `bundles-forge:testing` | Yes (critical issues block) |
 | Version bump | Update all manifests | `bundles-forge bump-version` | — |
 | Release Notes | CHANGELOG, README | Manual | — |
 | Final verification | Re-run all checks | `bundles-forge bump-version`, `bundles-forge audit-docs` | Yes (must pass) |
@@ -151,7 +152,20 @@ After resolving coherence issues, sync all project documentation:
 
 Re-run `bundles-forge audit-docs` after making changes to confirm consistency.
 
-### Step 4: Version Bump
+### Step 4: Local Testing
+
+Before bumping the version, invoke `bundles-forge:testing` to verify the plugin works correctly in a real installation scenario:
+
+1. Generate a dev-marketplace and install the plugin locally
+2. Verify hook smoke tests pass (SessionStart + any custom hooks)
+3. Confirm all components (skills, agents) are discoverable
+4. Run cross-platform readiness checks for all target platforms
+
+If testing reveals critical issues, resolve them before proceeding to version bump.
+
+For abbreviated hotfix releases, this step may be reduced to hook smoke tests only.
+
+### Step 5: Version Bump
 
 ```bash
 bundles-forge bump-version <target-dir> <new-version>
@@ -159,7 +173,7 @@ bundles-forge bump-version <target-dir> <new-version>
 
 This updates all files declared in `.version-bump.json` and runs a post-bump audit to catch any missed files.
 
-### Step 5: Release Notes
+### Step 6: Release Notes
 
 **CHANGELOG.md** — Use [Keep a Changelog](https://keepachangelog.com/) format:
 
@@ -183,7 +197,7 @@ This updates all files declared in `.version-bump.json` and runs a post-bump aud
 - [ ] No duplicate version entries
 - [ ] Categories are valid (Added, Changed, Deprecated, Removed, Fixed, Security)
 
-### Step 6: Final Verification
+### Step 7: Final Verification
 
 ```bash
 bundles-forge bump-version <target-dir> --check   # No version drift
@@ -193,7 +207,7 @@ bundles-forge audit-docs <target-dir>             # Documentation consistent
 
 All three must exit with code 0 (clean) before publishing.
 
-### Step 7: Publish
+### Step 8: Publish
 
 **Git + GitHub Release:**
 
@@ -283,8 +297,8 @@ See `bundles-forge:scaffolding` for full project setup including version infrast
 | Released without running audit | Skipped pipeline step — "it's just a small change" | Always run the full pipeline; drift happens in small changes too |
 | Tag pushed but no GitHub Release | Only ran `git push --tags` | Use `gh release create` — tags appear on `/tags` but not `/releases` |
 | Version bumped before fixing issues | Wrong pipeline order | Fix first, bump second — avoid releasing a known-broken version |
-| CHANGELOG not updated | Skipped Step 5 | Users need to know what changed, especially for breaking changes |
-| New drift after fixes | Fix introduced new inconsistency | Re-run all checks in Step 6 before publishing |
+| CHANGELOG not updated | Skipped Step 6 | Users need to know what changed, especially for breaking changes |
+| New drift after fixes | Fix introduced new inconsistency | Re-run all checks in Step 7 before publishing |
 | `marketplace.json` version stale | Not tracked in `.version-bump.json` | Add entry with `plugins.0.version` field path |
 | Manual version edit in manifests | Edited JSON directly instead of using CLI | Always use `bundles-forge bump-version` — it runs a post-bump audit |
 | Release from non-main branch unintentionally | Feature branch selected by mistake | Merge to main first, or confirm that branch release is intentional |
