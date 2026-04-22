@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [1.8.6] - 2026-04-22
+
+### Added
+
+- **GitHub issue templates** — bug report, feature request, and platform support request templates with structured triage fields; `config.yml` disables blank issues
+- **Pull request template** — contribution checklist covering validation commands, rigor evidence, and human review gate
+
+### Changed
+
+- **Input normalization inlined** — critical normalization steps (workspace resolution, common input types, failure handling) moved from `references/input-normalization.md` into auditing and optimizing SKILL.md; reference file demoted to supplementary edge-case documentation
+- **CLAUDE.md expanded** — `.bundles-forge/` runtime output directory added to Directory Layout section
+- **Audit report examples consolidated** — replaced dated audit pair (`superpowers-v5.0.7-audit.2026-04-20.md/.zh.md`) with revised GLM 5.1 reports; improved per-skill analysis formatting and scoring transparency
+
 ## [1.8.5] - 2026-04-21
 
 ### Changed
