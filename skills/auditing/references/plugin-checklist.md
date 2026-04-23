@@ -124,6 +124,7 @@ Run for every SKILL.md in the project.
 | Q13 | Warning/Info | Token budget: bootstrap skill body ≤ 200 lines (warning); regular skill reports estimated token count when high (info) | `audit_skill.py` |
 | Q14 | Warning | `allowed-tools` frontmatter references scripts/paths that actually exist | `audit_skill.py` |
 | Q15 | Info | Conditional blocks (`If ... unavailable` etc.) over 30 lines should be in `references/` | `audit_skill.py` |
+| Q16 | Warning | `allowed-tools` declares external CLI tools (not git/python/node/npm/npx/bash or bin/scripts paths) but SKILL.md body has no `## Prerequisites` section | `audit_skill.py` |
 <!-- END:skill_quality -->
 
 **Description anti-patterns (Q6):**

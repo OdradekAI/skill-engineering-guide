@@ -41,6 +41,7 @@
   {"id": "Q13", "category": "skill_quality", "severity": "warning/info", "criteria": "Token budget: bootstrap skill body \u2264 200 lines (warning); regular skill reports estimated token count when high (info)", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
   {"id": "Q14", "category": "skill_quality", "severity": "warning",      "criteria": "`allowed-tools` frontmatter references scripts/paths that actually exist", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
   {"id": "Q15", "category": "skill_quality", "severity": "info",         "criteria": "Conditional blocks (`If ... unavailable` etc.) over 30 lines should be in `references/`", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
+  {"id": "Q16", "category": "skill_quality", "severity": "warning",      "criteria": "`allowed-tools` declares external CLI tools (not git/python/node/npm/npx/bash or bin/scripts paths) but SKILL.md body has no `## Prerequisites` section", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
 
   {"id": "X1",  "category": "cross_references", "severity": "warning", "criteria": "All `<project>:<skill-name>` references resolve to existing skills", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},
   {"id": "X2",  "category": "cross_references", "severity": "warning", "criteria": "No broken relative-path references to supporting files", "automation": "`audit_skill.py`", "scopes": ["plugin", "skill"]},

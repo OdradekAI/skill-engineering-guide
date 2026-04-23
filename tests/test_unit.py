@@ -25,6 +25,7 @@ from _parsing import parse_frontmatter, estimate_tokens, FRONTMATTER_RE
 from _scoring import compute_baseline_score, compute_weighted_average
 from _graph import generate_mermaid
 from bump_version import _resolve_field_path, _set_field_path
+from audit_skill import lint_skill
 
 
 # ---------------------------------------------------------------------------
@@ -299,6 +300,106 @@ class TestFieldPathResolution(unittest.TestCase):
         data = {"plugins": [{"version": "1.0.0"}]}
         _set_field_path(data, "plugins.0.version", "2.0.0")
         self.assertEqual(data["plugins"][0]["version"], "2.0.0")
+
+
+# ---------------------------------------------------------------------------
+# audit_skill.lint_skill — Q16 external CLI prerequisites
+# ---------------------------------------------------------------------------
+
+class TestQ16ExternalCLIPrerequisites(unittest.TestCase):
+    """Q16: allowed-tools with external CLI but no Prerequisites section."""
+
+    def setUp(self):
+        import tempfile
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.skills_dir = self.tmpdir / "skills"
+        self.skill_dir = self.skills_dir / "test-skill"
+        self.skill_dir.mkdir(parents=True)
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmpdir, ignore_errors=True)
+
+    def _write_skill(self, frontmatter, body):
+        content = f"---\n{frontmatter}\n---\n{body}\n"
+        (self.skill_dir / "SKILL.md").write_text(content, encoding="utf-8")
+
+    def _lint(self):
+        return lint_skill(self.skill_dir, self.tmpdir, "test-project")
+
+    def _q16_findings(self):
+        return [f for f in self._lint() if f["check"] == "Q16"]
+
+    def test_external_cli_without_prerequisites_triggers_q16(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"\n'
+            'allowed-tools: Bash(yt-dlp *)',
+            "## Overview\nDoes things.\n\n## Process\n1. Run yt-dlp\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0]["severity"], "warning")
+        self.assertIn("yt-dlp", findings[0]["message"])
+
+    def test_external_cli_with_prerequisites_passes(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"\n'
+            'allowed-tools: Bash(yt-dlp *)',
+            "## Overview\nDoes things.\n\n"
+            "## Prerequisites\n\n"
+            "| Tool | Check | Install |\n"
+            "|------|-------|---------|\n"
+            "| yt-dlp | `command -v yt-dlp` | `pip install yt-dlp` |\n\n"
+            "## Process\n1. Run yt-dlp\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 0)
+
+    def test_standard_tools_excluded(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"\n'
+            'allowed-tools: Bash(git *) Bash(npm *)',
+            "## Overview\nDoes things.\n\n## Process\n1. Run git\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 0)
+
+    def test_bin_paths_excluded(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"\n'
+            'allowed-tools: Bash(bin/my-tool *)',
+            "## Overview\nDoes things.\n\n## Process\n1. Run my-tool\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 0)
+
+    def test_scripts_paths_excluded(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"\n'
+            'allowed-tools: Bash(scripts/check.sh *)',
+            "## Overview\nDoes things.\n\n## Process\n1. Run check\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 0)
+
+    def test_mixed_standard_and_external(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"\n'
+            'allowed-tools: Bash(git *) Bash(ffmpeg *) Bash(yt-dlp *)',
+            "## Overview\nDoes things.\n\n## Process\n1. Run stuff\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 1)
+        self.assertIn("ffmpeg", findings[0]["message"])
+        self.assertIn("yt-dlp", findings[0]["message"])
+
+    def test_no_allowed_tools_no_finding(self):
+        self._write_skill(
+            'name: test-skill\ndescription: "Use when testing"',
+            "## Overview\nDoes things.\n\n## Process\n1. Do stuff\n",
+        )
+        findings = self._q16_findings()
+        self.assertEqual(len(findings), 0)
 
 
 # ---------------------------------------------------------------------------

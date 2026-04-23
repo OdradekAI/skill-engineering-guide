@@ -42,7 +42,7 @@ from _cli import BundlesForgeError
 from _graph import CROSS_REF_RE, extract_all_refs
 
 # ---------------------------------------------------------------------------
-# Per-skill linting rules (Q1-Q15, S9, X1-X3)
+# Per-skill linting rules (Q1-Q16, S9, X1-X4)
 # ---------------------------------------------------------------------------
 
 WORKFLOW_SUMMARY_PHRASES = re.compile(
@@ -70,6 +70,11 @@ CONDITIONAL_BLOCK_RE = re.compile(
     r"^(?:If|When)\s+.*(?:unavailable|not available|fails?|missing|skip)",
     re.IGNORECASE,
 )
+EXTERNAL_CLI_RE = re.compile(r"Bash\(([^\s*)]+)")
+_STANDARD_CLI_TOOLS = frozenset({
+    "git", "python", "python3", "node", "npm", "npx", "bash",
+})
+_PREREQUISITES_HEADING_RE = re.compile(r"^##\s+prerequisites\b", re.IGNORECASE | re.MULTILINE)
 
 
 def lint_skill(skill_dir, target_dir, project_name, project_abbreviation=None):
@@ -284,6 +289,24 @@ def lint_skill(skill_dir, target_dir, project_name, project_abbreviation=None):
                                              "to references/"))
         else:
             i += 1
+
+    # Q16: External CLI tools declared but no Prerequisites section
+    if allowed_tools:
+        external_tools = []
+        for m in EXTERNAL_CLI_RE.finditer(allowed_tools):
+            tool_token = m.group(1)
+            tool_name = tool_token.split("/")[-1] if "/" in tool_token else tool_token
+            if tool_token.startswith(("bin/", "scripts/", "skills/")):
+                continue
+            if tool_name in _STANDARD_CLI_TOOLS:
+                continue
+            external_tools.append(tool_name)
+        if external_tools and not _PREREQUISITES_HEADING_RE.search(body):
+            tools_str = ", ".join(sorted(set(external_tools)))
+            findings.append(dict(check="Q16", severity="warning",
+                                 message=f"allowed-tools declares external CLI "
+                                         f"tools ({tools_str}) but body has no "
+                                         "## Prerequisites section"))
 
     return findings
 

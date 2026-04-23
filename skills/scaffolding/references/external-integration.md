@@ -33,6 +33,30 @@ Use CLI when the tool interaction is **stateless and single-shot**: run a comman
 - Declare in frontmatter: `allowed-tools: Bash(bin/my-tool *)` or `Python(scripts/my-tool.py *)`
 - No process management, no connection lifecycle, no authentication state
 
+### Handling Missing Dependencies
+
+When a skill depends on external CLI tools that may not be installed, the skill must detect missing tools and provide actionable feedback — not raw shell errors.
+
+```
+CLI tool not in PATH?
+├─ required → Stop. Print install command. Do not continue.
+└─ optional → Warn. Skip dependent feature. Continue execution.
+```
+
+**Required tool missing — stop with install guidance:**
+
+```
+{tool} is not installed. Install with: {command}. Then retry.
+```
+
+**Optional tool missing — warn and degrade gracefully:**
+
+```
+{tool} not found — {feature} will be skipped. Install with: {command} for full functionality.
+```
+
+Each skill that declares external CLI tools in `allowed-tools` should include a `## Prerequisites` section with a check/install table. See `bundles-forge:authoring` — `references/skill-writing-guide.md` "Prerequisites Writing" for the standard format.
+
 ### Level 2: MCP Server — When CLI Falls Short
 
 Use MCP when the integration needs **stateful connections, rich discovery, or authenticated external services**.

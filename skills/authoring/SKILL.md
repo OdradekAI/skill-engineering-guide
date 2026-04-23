@@ -57,7 +57,9 @@ Write skill or agent content from scratch.
 5. **Write the process** — step-by-step execution flow. Use imperative form. Explain why, not just what. Include at least one concrete example per key instruction
 6. **Write Common Mistakes** — table of pitfalls and fixes (at least 3 entries)
 7. **Write Inputs / Outputs / Integration** — declare artifact IDs, calling relationships, and pairing skills
-8. **Check external dependencies** — if the skill references MCP tools or CLI commands, read `references/skill-writing-guide.md` "External Tool References" section for declaration syntax, fallback patterns, and CLI vs MCP guidance
+8. **Check external dependencies:**
+   - **Declaration syntax** — if the skill references MCP tools or CLI commands, read `references/skill-writing-guide.md` "External Tool References" section for `allowed-tools` declaration, fallback patterns, and CLI vs MCP guidance
+   - **Prerequisites section** — if `allowed-tools` declares external CLI tools (not `git`, `python`, `node`, `npm`, `npx`, `bash`, or paths under `bin/`/`scripts/`), confirm the body includes a `## Prerequisites` section with a Tool/Check/Install table. Read `references/skill-writing-guide.md` "Prerequisites Writing" for the standard format
 9. **Evaluate token budget** — if body exceeds 300 lines, extract heavy sections to `references/`. Front-load critical instructions in the first ~5,000 tokens — after context compaction, only this portion survives
 10. **Run validation** (see Post-Action Validation below)
 

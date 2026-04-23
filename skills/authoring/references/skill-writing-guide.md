@@ -306,11 +306,64 @@ Agents process skills in a predictable sequence — optimize your content for th
 A well-structured SKILL.md typically includes:
 
 1. **Overview** — What the skill does, core principle, skill type (1-3 sentences)
-2. **Entry Detection** (if multiple paths) — Table mapping context to execution path
-3. **The Process / Instructions** — Step-by-step guidance in imperative form
-4. **Common Mistakes** — Table of pitfalls and fixes (at least 3 entries)
-5. **Inputs / Outputs** — Artifact IDs consumed and produced (backtick-wrapped)
-6. **Integration** — Called by, Calls, Pairs with — using `project:skill-name` cross-reference format
+2. **Prerequisites** (optional) — External tool availability checks, only for skills that depend on non-standard CLI tools
+3. **Entry Detection** (if multiple paths) — Table mapping context to execution path
+4. **The Process / Instructions** — Step-by-step guidance in imperative form
+5. **Common Mistakes** — Table of pitfalls and fixes (at least 3 entries)
+6. **Inputs / Outputs** — Artifact IDs consumed and produced (backtick-wrapped)
+7. **Integration** — Called by, Calls, Pairs with — using `project:skill-name` cross-reference format
+
+### Prerequisites Writing
+
+Add a `## Prerequisites` section when the skill declares non-standard CLI tools in `allowed-tools` — tools that require separate installation beyond the baseline development environment (`git`, `python`, `python3`, `node`, `npm`, `npx`, `bash`).
+
+**Position:** Immediately after Overview, before Entry Detection or Process. This ensures the agent checks tool availability before executing any steps — prerequisites are a precondition for the process, not a step within it.
+
+**Table format:**
+
+```markdown
+## Prerequisites
+
+| Tool | Check | Install |
+|------|-------|---------|
+| yt-dlp | `command -v yt-dlp` | `pip install yt-dlp` |
+| ffmpeg (optional) | `command -v ffmpeg` | See https://ffmpeg.org/download.html |
+```
+
+Mark optional tools with `(optional)` in the Tool column. All other entries are required.
+
+**Agent behavior:** Before starting the process, run each Check command. For failures:
+- **Required tool missing** — stop and report: `{Tool} is not installed. Install with: {Install}. Then retry.`
+- **Optional tool missing** — warn and continue: `{Tool} not found — {feature} will be skipped. Install with: {Install} for full functionality.`
+
+Fallback or degraded behavior for optional tools belongs in the Process section, not in the Prerequisites table — the table declares availability; the process handles logic.
+
+### Overview Writing
+
+The Overview is the agent's first scan point after loading a skill — it confirms relevance and sets expectations for how to read the rest of the body (see "How Agents Read Skills" above).
+
+Include three elements in 1-3 sentences:
+
+1. **What the skill does** — one sentence summarizing the skill's purpose
+2. **Core principle** — the guiding idea behind the skill's design (e.g., "Measure and report" for auditing)
+3. **Skill type declaration** — rigid, flexible, or hybrid (see "Skill Types" above for definitions). Optionally add the content category axis (technique / pattern / reference) when it helps the agent understand how to interpret the instructions
+
+```markdown
+# Good — all three elements, concise
+## Overview
+Guide the authoring of effective SKILL.md files and agent definitions within a bundle-plugin.
+
+**Core principle:** Write for the agent's experience. Every instruction should be
+discoverable, loadable, and followable.
+
+**Skill type:** Hybrid — follow the execution flow rigidly, but apply writing
+guidance flexibly based on context.
+
+# Bad — repeats the description, no core principle, no skill type
+## Overview
+Use this skill when writing skills. It helps you write better SKILL.md files
+by checking frontmatter, validating descriptions, and ensuring proper structure.
+```
 
 ### Visualizing Decision Points
 
@@ -439,6 +492,8 @@ Use `allowed-tools` in frontmatter to pre-approve CLI tool access:
 ```yaml
 allowed-tools: Bash(bin/my-tool *) Python(scripts/validate.py *)
 ```
+
+When declaring external CLI tools (not bundled in `bin/` or `scripts/`), also add a `## Prerequisites` section so the agent can verify availability before execution — see "Prerequisites Writing" above for the standard format.
 
 ### Declaring MCP Tools
 
